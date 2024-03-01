@@ -1,0 +1,6 @@
+@SlothfulCrud.Api_HostAddress = http://localhost:5144
+
+GET {{SlothfulCrud.Api_HostAddress}}/
+Accept: application/json
+
+###
