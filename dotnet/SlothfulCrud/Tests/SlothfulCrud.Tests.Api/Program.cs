@@ -1,3 +1,5 @@
+using SlothfulCrud.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -19,5 +21,7 @@ app.UseHttpsRedirection();
 app.MapGet("/", () => "SlothfulCrud.Tests.Api")
     .WithName("GetApiName")
     .WithOpenApi();
+
+app.RegisterSlothfulEndpoints();
 
 app.Run();
