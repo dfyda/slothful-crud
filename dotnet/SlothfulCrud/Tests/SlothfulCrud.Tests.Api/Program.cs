@@ -1,3 +1,4 @@
+using System.Reflection;
 using SlothfulCrud.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,6 @@ app.MapGet("/", () => "SlothfulCrud.Tests.Api")
     .WithName("GetApiName")
     .WithOpenApi();
 
-app.RegisterSlothfulEndpoints();
+app.RegisterSlothfulEndpoints(Assembly.GetExecutingAssembly());
 
 app.Run();
