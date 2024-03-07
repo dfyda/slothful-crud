@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Extensions
@@ -13,6 +14,7 @@ namespace SlothfulCrud.Extensions
         
         public static WebApplication RegisterSlothfulEndpoints(
             this WebApplication webApplication,
+            Type dbContextType,
             Assembly executingAssembly)
         {
             var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(executingAssembly);
@@ -20,8 +22,8 @@ namespace SlothfulCrud.Extensions
             {
                 webApplication.MapGet($"/{entityType.Name}s", () =>
                     {
-                        var service = webApplication.Services.GetService(
-                            SlothfulTypesProvider.GetConcreteOperationService(executingAssembly, entityType)) as dynamic;
+                        var service = webApplication.Services.GetRequiredService(
+                            SlothfulTypesProvider.GetConcreteOperationService(executingAssembly, entityType, dbContextType)) as dynamic;
                         return service.Get();
                     })
                     .WithName($"Get{entityType.Name}");

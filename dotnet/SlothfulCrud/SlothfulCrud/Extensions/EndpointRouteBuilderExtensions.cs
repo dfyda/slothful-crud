@@ -9,6 +9,7 @@ namespace SlothfulCrud.Extensions
     {
         public static IEndpointRouteBuilder RegisterSlothfulEndpointsOld(
             this IEndpointRouteBuilder endpointRouteBuilder,
+            Type dbContextType,
             WebApplication app,
             Assembly executingAssembly)
         {
@@ -18,7 +19,7 @@ namespace SlothfulCrud.Extensions
                 endpointRouteBuilder.MapGet($"/{entityType.Name}s", () =>
                     {
                         var service = app.Services.GetService(
-                            SlothfulTypesProvider.GetConcreteOperationService(executingAssembly, entityType)) as dynamic;
+                            SlothfulTypesProvider.GetConcreteOperationService(executingAssembly, entityType, dbContextType)) as dynamic;
                         return service.Get();
                     })
                     .WithName($"Get{entityType.Name}");

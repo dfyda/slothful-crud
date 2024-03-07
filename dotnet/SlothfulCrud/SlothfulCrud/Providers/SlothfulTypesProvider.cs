@@ -13,9 +13,10 @@ namespace SlothfulCrud.Providers
             return types.Where(t => t.GetInterfaces().Contains(typeof(ISlothfulEntity)));
         }
         
-        public static Type GetConcreteOperationService(Assembly executingAssembly, Type entityType)
+        public static Type GetConcreteOperationService(Assembly executingAssembly, Type entityType, Type dbContextType)
         {
-            return typeof(IOperationService<>).MakeGenericType(entityType);
+            var type = executingAssembly.GetTypes();
+            return typeof(IOperationService<,>).MakeGenericType(entityType, dbContextType);
         }
     }
 }

@@ -7,13 +7,14 @@ namespace SlothfulCrud.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSlothfulServices(this IServiceCollection serviceCollection, Assembly executingAssembly)
+        public static IServiceCollection AddSlothfulServices(this IServiceCollection serviceCollection, Type dbContextType, Assembly executingAssembly)
         {
             var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(executingAssembly);
             foreach (var entityType in entityTypes)
             {
-                var closedGenericType = typeof(OperationService<>).MakeGenericType(entityType);
-                serviceCollection.AddTransient(typeof(IOperationService<>).MakeGenericType(entityType), closedGenericType);
+                var closedGenericType = typeof(OperationService<,>).MakeGenericType(entityType, dbContextType);
+                serviceCollection.AddScoped(typeof(IOperationService<,>).MakeGenericType(entityType, dbContextType), closedGenericType);
+                // serviceCollection.AddScoped(closedGenericType);
             }
             return serviceCollection;
         }
