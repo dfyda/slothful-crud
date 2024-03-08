@@ -20,15 +20,24 @@ namespace SlothfulCrud.Extensions
             var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(executingAssembly);
             foreach (var entityType in entityTypes)
             {
-                webApplication.MapGet($"/{entityType.Name}s", () =>
+                webApplication.MapGet($"/{entityType.Name}s/" + "{id}", (Guid id) =>
                     {
-                        var service = webApplication.Services.GetRequiredService(
-                            SlothfulTypesProvider.GetConcreteOperationService(executingAssembly, entityType, dbContextType)) as dynamic;
-                        return service.Get();
+                        var serviceType = GetScope(webApplication, dbContextType, executingAssembly, entityType, out var scope);
+                        var service = scope.ServiceProvider.GetService(serviceType) as dynamic;
+                        return service.Get(id);
                     })
-                    .WithName($"Get{entityType.Name}");
+                    .WithName($"Get{entityType.Name}Details");
             }
             return webApplication;
+        }
+
+        private static Type GetScope(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
+            Type entityType, out IServiceScope scope)
+        {
+            var serviceType = SlothfulTypesProvider.GetConcreteOperationService(executingAssembly, entityType,
+                dbContextType);
+            scope = webApplication.Services.CreateScope();
+            return serviceType;
         }
     }
 }

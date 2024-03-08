@@ -1,8 +1,6 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Extensions;
-using SlothfulCrud.Services;
-using SlothfulCrud.Tests.Api.Domain;
 using SlothfulCrud.Tests.Api.EF;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,10 +31,6 @@ app.MapGet("/", () => "SlothfulCrud.Tests.Api")
 
 app.MapGet("/db/test", (SlothfulDbContext context) => context.Sloths.ToList())
     .WithName("GetSloths")
-    .WithOpenApi();
-
-app.MapGet("/di/test", (IOperationService<Sloth, SlothfulDbContext> service) => service.Get())
-    .WithName("GetDiSloths")
     .WithOpenApi();
 
 app.RegisterSlothfulEndpoints(typeof(SlothfulDbContext), Assembly.GetExecutingAssembly());

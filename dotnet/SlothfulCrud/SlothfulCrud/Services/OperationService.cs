@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
+using SlothfulCrud.Exceptions;
 
 namespace SlothfulCrud.Services
 {
@@ -14,9 +15,20 @@ namespace SlothfulCrud.Services
             DbContext = dbContext;
         }
         
-        public T Get()
+        public T Get(Guid id)
         {
-            return DbContext.Set<T>().First();
+            CheckEntityKey(typeof(T));
+            
+            return DbContext.Set<T>()
+                .FirstOrDefault(x => EF.Property<Guid>(x, "Id") == id);
+        }
+
+        private void CheckEntityKey(Type type)
+        {
+            if (type.GetProperty("Id") is null)
+            {
+                throw new ConfigurationException("Entity must have a property named 'Id'");
+            };
         }
     }
 }

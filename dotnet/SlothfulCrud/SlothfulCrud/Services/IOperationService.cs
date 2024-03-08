@@ -7,7 +7,7 @@ namespace SlothfulCrud.Services
         where T : class, ISlothfulEntity, new() 
         where TDbContext : DbContext
     {
-        T Get();
+        T Get(Guid id);
     }
 }
 

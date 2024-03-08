@@ -13,8 +13,8 @@ namespace SlothfulCrud.Extensions
             foreach (var entityType in entityTypes)
             {
                 var closedGenericType = typeof(OperationService<,>).MakeGenericType(entityType, dbContextType);
-                serviceCollection.AddScoped(typeof(IOperationService<,>).MakeGenericType(entityType, dbContextType), closedGenericType);
-                // serviceCollection.AddScoped(closedGenericType);
+                var interfaceType = typeof(IOperationService<,>).MakeGenericType(entityType, dbContextType);
+                serviceCollection.AddScoped(interfaceType, closedGenericType);
             }
             return serviceCollection;
         }
