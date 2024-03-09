@@ -8,6 +8,7 @@ namespace SlothfulCrud.Services
         where TDbContext : DbContext
     {
         T Get(Guid id);
+        Guid Create(Guid id);
     }
 }
 

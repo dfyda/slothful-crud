@@ -23,6 +23,11 @@ namespace SlothfulCrud.Services
                 .FirstOrDefault(x => EF.Property<Guid>(x, "Id") == id);
         }
 
+        public Guid Create(Guid id)
+        {
+            return id;
+        }
+
         private void CheckEntityKey(Type type)
         {
             if (type.GetProperty("Id") is null)
