@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using SlothfulCrud.DynamicTypes;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Providers;
@@ -43,12 +44,14 @@ namespace SlothfulCrud.Extensions
                 
                 ParameterInfo[] parameters = constructor.GetParameters();
                 Type dynamicType = DynamicTypeBuilder.BuildType(parameters, entityType);
-                webApplication.MapPost($"/{entityType.Name}s", () =>
+                // var lambda = DynamicLambdaBuilder.CreateLambdaForDynamicType(dynamicType, entityType);
+                webApplication.MapPost($"/{entityType.Name}s", async (HttpContext context) =>
                     {
+                        var data = await context.Request.ReadFromJsonAsync(dynamicType);
                         var service = GetService(webApplication, dbContextType, executingAssembly, entityType);
                         var id = Guid.NewGuid();
                         service.Create(id);
-                        return new CreatedResult($"/{entityType.Name}s/{id}", id);
+                        return Results.Created($"/{entityType.Name}s/{id}", id);
                     })
                     .WithName($"Create{entityType.Name}")
                     .Produces<Guid>(201)
