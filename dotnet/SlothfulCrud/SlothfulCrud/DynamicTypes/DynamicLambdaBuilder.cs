@@ -1,5 +1,9 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.DynamicTypes
 {
@@ -7,28 +11,54 @@ namespace SlothfulCrud.DynamicTypes
     {
         public static LambdaExpression CreateLambdaForDynamicType(
             Type dynamicType,
-            dynamic service)
+            WebApplication webApplication,
+            Type dbContextType,
+            Assembly executingAssembly,
+            Type entityType)
         {
+            var service = GetService(webApplication, dbContextType, executingAssembly, entityType);
+            var createMethod = service.GetType().GetMethod("Create", new[] { typeof(Guid) });
+            
+            if (createMethod is null)
+            {
+                throw new InvalidOperationException("Method 'Create' not found on the provided service.");
+            }
+            
+            var commandParam = Expression.Parameter(dynamicType, "command");
+            var idVariable = Expression.Variable(typeof(Guid), "id");
+
             var body = Expression.Block(
-                Expression.Variable(dynamicType, "command"),
+                new[] { idVariable },
                 
-                // var id = Guid.NewGuid();
-                Expression.Assign(Expression.Variable(typeof(Guid), "id"),
-                    Expression.Call(typeof(Guid).GetMethod("NewGuid"))),
-            
-                // service.Create(id);
-                Expression.Call(service.GetMethod("Create", new[] { typeof(Guid) }),
-                    Expression.Variable(typeof(Guid), "id")),
-            
-                // return Results.Created($"/{entityType.Name}s/{id}", id);
-                Expression.Return(Expression.Label(),
-                    Expression.Call(
-                        typeof(Results).GetMethod("Created", new[] { typeof(string), typeof(object) }),
-                        Expression.Constant($"/{dynamicType.Name}s/"),
-                        Expression.Variable(typeof(Guid), "id")))
+                Expression.Assign(idVariable, Expression.Call(typeof(Guid).GetMethod("NewGuid"))),
+                
+                Expression.Call(Expression.Constant(service), createMethod, idVariable),
+                
+                Expression.Call(
+                    typeof(Results).GetMethod("Created", new[] { typeof(string), typeof(object) }),
+                    Expression.Constant($"/{dynamicType.Name}s/"),
+                    Expression.Convert(idVariable, typeof(object)))
             );
 
-            return Expression.Lambda(body, service, Expression.Parameter(dynamicType, "command"));
+            return Expression.Lambda(body, "test", new List<ParameterExpression>() { commandParam });
+        }
+        
+        private static dynamic GetService(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
+            Type entityType)
+        {
+            var serviceType = GetScope(webApplication, dbContextType, executingAssembly, entityType,
+                out var scope);
+            var service = scope.ServiceProvider.GetService(serviceType) as dynamic;
+            return service;
+        }
+        
+        private static Type GetScope(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
+            Type entityType, out IServiceScope scope)
+        {
+            var serviceType = SlothfulTypesProvider.GetConcreteOperationService(executingAssembly, entityType,
+                dbContextType);
+            scope = webApplication.Services.CreateScope();
+            return serviceType;
         }
     }
 }

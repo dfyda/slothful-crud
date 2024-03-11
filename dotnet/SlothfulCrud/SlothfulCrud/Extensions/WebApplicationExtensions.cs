@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
-using SlothfulCrud.DynamicTypes;
-using SlothfulCrud.Exceptions;
 using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Extensions
@@ -33,28 +30,6 @@ namespace SlothfulCrud.Extensions
                     .WithName($"Get{entityType.Name}Details")
                     .Produces(200, entityType)
                     .Produces<NotFoundResult>(404)
-                    .Produces<BadRequestResult>(400);
-                
-                ConstructorInfo constructor = entityType.GetConstructors()
-                    .FirstOrDefault(x => x.GetParameters().Length > 0);
-                if (constructor is null)
-                {
-                    throw new ConfigurationException($"Entity '{entityType.Name}' must have a constructor.");
-                }
-                
-                ParameterInfo[] parameters = constructor.GetParameters();
-                Type dynamicType = DynamicTypeBuilder.BuildType(parameters, entityType);
-                // var lambda = DynamicLambdaBuilder.CreateLambdaForDynamicType(dynamicType, entityType);
-                webApplication.MapPost($"/{entityType.Name}s", async (HttpContext context) =>
-                    {
-                        var data = await context.Request.ReadFromJsonAsync(dynamicType);
-                        var service = GetService(webApplication, dbContextType, executingAssembly, entityType);
-                        var id = Guid.NewGuid();
-                        service.Create(id);
-                        return Results.Created($"/{entityType.Name}s/{id}", id);
-                    })
-                    .WithName($"Create{entityType.Name}")
-                    .Produces<Guid>(201)
                     .Produces<BadRequestResult>(400);
             }
             return webApplication;
