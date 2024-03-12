@@ -6,6 +6,7 @@ namespace SlothfulCrud.Tests.Api.Domain
     {
         public Guid Id { get; private set; }
         public string Name { get; private set; }
+        public int Age { get; }
         public Sloth Cuisine { get; private set; }
 
         public Koala()
@@ -14,10 +15,11 @@ namespace SlothfulCrud.Tests.Api.Domain
             Name = "SpeedyKoala";
         }
         
-        public Koala(string name)
+        public Koala(Guid id, string name, int age)
         {
-            Id = Guid.NewGuid();
+            Id = id;
             Name = name;
+            Age = age;
         }
     }
 }

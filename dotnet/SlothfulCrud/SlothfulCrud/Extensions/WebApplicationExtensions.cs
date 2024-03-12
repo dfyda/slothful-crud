@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.DynamicTypes;
+using SlothfulCrud.Exceptions;
 using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Extensions
@@ -13,7 +15,7 @@ namespace SlothfulCrud.Extensions
         {
             return webApplication;
         }
-        
+
         public static WebApplication RegisterSlothfulEndpoints(
             this WebApplication webApplication,
             Type dbContextType,
@@ -31,7 +33,26 @@ namespace SlothfulCrud.Extensions
                     .Produces(200, entityType)
                     .Produces<NotFoundResult>(404)
                     .Produces<BadRequestResult>(400);
+
+                ConstructorInfo constructor = entityType.GetConstructors()
+                    .FirstOrDefault(x => x.GetParameters().Length > 0);
+                if (constructor is null)
+                {
+                    throw new ConfigurationException($"Entity '{entityType.Name}' must have a constructor.");
+                }
+
+                ParameterInfo[] parameters = constructor.GetParameters();
+                Type dynamicType = DynamicTypeBuilder.BuildType(parameters, entityType);
+
+                var mapMethod = typeof(WebApplicationExtensions).GetMethod(nameof(MapTypedPost));
+                mapMethod.MakeGenericMethod(dynamicType).Invoke(null, [
+                    webApplication,
+                    entityType,
+                    dbContextType,
+                    executingAssembly
+                ]);
             }
+
             return webApplication;
         }
 
@@ -52,5 +73,23 @@ namespace SlothfulCrud.Extensions
             scope = webApplication.Services.CreateScope();
             return serviceType;
         }
+        
+        public static void MapTypedPost<T>(
+            WebApplication app,
+            Type entityType,
+            Type dbContextType,
+            Assembly executingAssembly)
+        {
+            app.MapPost($"/{entityType.Name}s/", ([FromBody] T command) =>
+                {
+                    var id = Guid.NewGuid();
+                    var service = GetService(app, dbContextType, executingAssembly, entityType);
+                    service.Create(id, command);
+                    return Results.Created($"/{entityType.Name}s/", id);
+                })
+                .WithName($"Create{entityType.Name}")
+                .Produces<Guid>(201)
+                .Produces<BadRequestResult>(400);
+        } 
     }
 }
