@@ -3,6 +3,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
+using SlothfulCrud.Extensions;
 
 namespace SlothfulCrud.Services
 {
@@ -22,7 +23,16 @@ namespace SlothfulCrud.Services
             CheckEntityKey(typeof(T));
             
             return DbContext.Set<T>()
-                .FirstOrDefault(x => EF.Property<Guid>(x, "Id") == id);
+                .FirstOrDefault(x => EF.Property<Guid>(x, "Id") == id)
+                .OrFail($"{typeof(T)}NotFound", $"{typeof(T)} with id '{id}' not found.");  
+        }
+        
+        public void Delete(Guid id)
+        {
+            var item = Get(id);
+            
+            DbContext.Set<T>().Remove(item);
+            DbContext.SaveChanges();
         }
 
         public Guid Create(Guid id, dynamic command)
