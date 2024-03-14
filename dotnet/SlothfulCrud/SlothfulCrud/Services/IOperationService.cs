@@ -10,6 +10,7 @@ namespace SlothfulCrud.Services
         T Get(Guid id);
         void Delete(Guid id);
         Guid Create(Guid id, dynamic command);
+        void Update(Guid id, dynamic command);
     }
 }
 

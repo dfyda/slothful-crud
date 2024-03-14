@@ -20,5 +20,11 @@ namespace SlothfulCrud.Tests.Api.Domain
             Name = name;
             Age = age;
         }
+        
+        public void Update(string name, int age)
+        {
+            Name = name;
+            Age = age;
+        }
     }
 }

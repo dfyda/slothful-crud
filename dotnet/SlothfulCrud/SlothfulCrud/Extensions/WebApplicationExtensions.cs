@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.DynamicTypes;
-using SlothfulCrud.Exceptions;
 using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Extensions
@@ -26,6 +25,7 @@ namespace SlothfulCrud.Extensions
             {
                 MapGetEndpoint(webApplication, dbContextType, executingAssembly, entityType);
                 MapCreateEndpoint(webApplication, dbContextType, executingAssembly, entityType);
+                MapUpdateEndpoint(webApplication, dbContextType, executingAssembly, entityType);
                 MapDeleteEndpoint(webApplication, dbContextType, executingAssembly, entityType);
             }
 
@@ -39,13 +39,34 @@ namespace SlothfulCrud.Extensions
                 .FirstOrDefault(x => x.GetParameters().Length > 0);
             if (constructor is null)
             {
-                throw new ConfigurationException($"Entity '{entityType.Name}' must have a constructor.");
+                return;
             }
 
             ParameterInfo[] parameters = constructor.GetParameters();
-            Type dynamicType = DynamicTypeBuilder.BuildType(parameters, entityType);
+            Type dynamicType = DynamicTypeBuilder.BuildType(parameters, entityType, "Create");
 
             var mapMethod = typeof(WebApplicationExtensions).GetMethod(nameof(MapTypedPost));
+            mapMethod.MakeGenericMethod(dynamicType).Invoke(null, [
+                webApplication,
+                entityType,
+                dbContextType,
+                executingAssembly
+            ]);
+        }
+
+        private static void MapUpdateEndpoint(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
+            Type entityType)
+        {
+            var updateMethod = entityType.GetMethod("Update");
+            if (updateMethod is null)
+            {
+                return;
+            }
+            
+            ParameterInfo[] parameters = updateMethod.GetParameters();
+            Type dynamicType = DynamicTypeBuilder.BuildType(parameters, entityType, "Update");
+
+            var mapMethod = typeof(WebApplicationExtensions).GetMethod(nameof(MapTypedPut));
             mapMethod.MakeGenericMethod(dynamicType).Invoke(null, [
                 webApplication,
                 entityType,
@@ -116,6 +137,24 @@ namespace SlothfulCrud.Extensions
                 })
                 .WithName($"Create{entityType.Name}")
                 .Produces<Guid>(201)
+                .Produces<BadRequestResult>(400);
+        } 
+        
+        public static void MapTypedPut<T>(
+            WebApplication app,
+            Type entityType,
+            Type dbContextType,
+            Assembly executingAssembly)
+        {
+            app.MapPut($"/{entityType.Name}s/" + "{id}", ([FromRoute] Guid id, [FromBody] T command) =>
+                {
+                    var service = GetService(app, dbContextType, executingAssembly, entityType);
+                    service.Update(id, command);
+                    return Results.NoContent();
+                })
+                .WithName($"Update{entityType.Name}")
+                .Produces(204)
+                .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
         } 
     }

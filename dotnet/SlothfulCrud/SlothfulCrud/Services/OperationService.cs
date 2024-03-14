@@ -58,6 +58,24 @@ namespace SlothfulCrud.Services
             return id;
         }
 
+        public void Update(Guid id, dynamic command)
+        {
+            var updateMethod = typeof(T).GetMethod("Update");
+            if (updateMethod is null)
+            {
+                throw new ConfigurationException($"Entity '{typeof(T).Name}' must have a method named 'Update'.");
+            }
+            
+            var item = Get(id);
+            
+            object[] methodArgs = updateMethod.GetParameters()
+                .Select(param => GetProperties(command)[param.Name])
+                .ToArray();
+            
+            updateMethod.Invoke(item, methodArgs);
+            DbContext.SaveChanges();
+        }
+
         private void CheckEntityKey(Type type)
         {
             if (type.GetProperty("Id") is null)

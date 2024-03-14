@@ -4,9 +4,9 @@ namespace SlothfulCrud.DynamicTypes
 {
     public class DynamicTypeBuilder
     {
-        public static Type BuildType(ParameterInfo[] parameters, Type entityType)
+        public static Type BuildType(ParameterInfo[] parameters, Type entityType, string methodName)
         {
-            var typeBuilder = DynamicAssemblyBuilder.DefineType($"Create{entityType.Name}" );
+            var typeBuilder = DynamicAssemblyBuilder.DefineType($"{methodName}{entityType.Name}" );
 
             foreach (var parameter in parameters)
             {
