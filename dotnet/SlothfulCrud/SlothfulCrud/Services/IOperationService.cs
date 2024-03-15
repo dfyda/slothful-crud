@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
+using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services
 {
@@ -11,6 +12,7 @@ namespace SlothfulCrud.Services
         void Delete(Guid id);
         Guid Create(Guid id, dynamic command);
         void Update(Guid id, dynamic command);
+        PagedResults<T> Browse(ushort page, dynamic query);
     }
 }
 

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
+using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services
 {
@@ -74,6 +75,11 @@ namespace SlothfulCrud.Services
             
             updateMethod.Invoke(item, methodArgs);
             DbContext.SaveChanges();
+        }
+
+        public PagedResults<T> Browse(ushort page, dynamic query)
+        {
+            return new PagedResults<T>(30, 0, 0, new List<T>());
         }
 
         private void CheckEntityKey(Type type)

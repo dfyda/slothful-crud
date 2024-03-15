@@ -7,7 +7,7 @@ namespace SlothfulCrud.Tests.Api.Domain
         public Guid Id { get; private set; }
         public string Name { get; private set; }
         public int Age { get; private set; }
-        public Sloth Cuisine { get; private set; }
+        // public Sloth Cuisine { get; private set; }
 
         public Koala()
         {

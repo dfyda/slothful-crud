@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.DynamicTypes;
 using SlothfulCrud.Providers;
+using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Extensions
 {
@@ -24,6 +25,7 @@ namespace SlothfulCrud.Extensions
             foreach (var entityType in entityTypes)
             {
                 MapGetEndpoint(webApplication, dbContextType, executingAssembly, entityType);
+                MapBrowseEndpoint(webApplication, dbContextType, executingAssembly, entityType);
                 MapCreateEndpoint(webApplication, dbContextType, executingAssembly, entityType);
                 MapUpdateEndpoint(webApplication, dbContextType, executingAssembly, entityType);
                 MapDeleteEndpoint(webApplication, dbContextType, executingAssembly, entityType);
@@ -104,6 +106,23 @@ namespace SlothfulCrud.Extensions
                 .Produces<BadRequestResult>(400);
         }
 
+        private static void MapBrowseEndpoint(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
+            Type entityType)
+        {
+            PropertyInfo[] parameters = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            Type dynamicType = DynamicTypeBuilder.BuildType(parameters, entityType, "Browse");
+            
+            var resultType = typeof(PagedResults<>).MakeGenericType(entityType);
+            var mapMethod = typeof(WebApplicationExtensions).GetMethod(nameof(MapTypedGet));
+            mapMethod.MakeGenericMethod(dynamicType).Invoke(null, [
+                webApplication,
+                entityType,
+                dbContextType,
+                resultType,
+                executingAssembly
+            ]);
+        }
+
         private static dynamic GetService(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
             Type entityType)
         {
@@ -138,7 +157,7 @@ namespace SlothfulCrud.Extensions
                 .WithName($"Create{entityType.Name}")
                 .Produces<Guid>(201)
                 .Produces<BadRequestResult>(400);
-        } 
+        }
         
         public static void MapTypedPut<T>(
             WebApplication app,
@@ -156,6 +175,25 @@ namespace SlothfulCrud.Extensions
                 .Produces(204)
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
-        } 
+        }
+        
+        public static void MapTypedGet<T>(
+            WebApplication app,
+            Type entityType,
+            Type dbContextType,
+            Type returnType,
+            Assembly executingAssembly) where T : new()
+        {
+            app.MapGet($"/{entityType.Name}s/list/" + "{page}", (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
+                {
+                    query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
+                    var service = GetService(app, dbContextType, executingAssembly, entityType);
+                    return service.Browse(page, query);
+                })
+                .WithName($"Browse{entityType.Name}s")
+                .Produces(200, returnType)
+                .Produces<NotFoundResult>(404)
+                .Produces<BadRequestResult>(400);
+        }
     }
 }
