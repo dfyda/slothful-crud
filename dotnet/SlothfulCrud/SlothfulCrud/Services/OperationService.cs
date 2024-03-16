@@ -79,7 +79,34 @@ namespace SlothfulCrud.Services
 
         public PagedResults<T> Browse(ushort page, dynamic query)
         {
-            return new PagedResults<T>(30, 0, 0, new List<T>());
+            var queryObject = DbContext.Set<T>().AsQueryable();
+            var properties = query.GetType().GetProperties();
+            foreach (var propertyInfo in properties)
+            {
+                string propertyName = propertyInfo.Name;
+                var propertyValue = (object)propertyInfo.GetValue(query);
+                if (propertyValue is null || propertyName == "Rows" 
+                                          || propertyName == "Skip" || propertyName == "OrderBy" || propertyName == "OrderDirection")
+                {
+                    continue;
+                }
+                
+                var propertyType = propertyInfo.PropertyType;
+                if (propertyType == typeof(string))
+                {
+                    queryObject = queryObject.Where(x => EF.Property<string>(x, propertyName).Contains((string)propertyValue));
+                }
+            }
+
+            var totalQuery = queryObject;
+            queryObject = queryObject
+                .Take((int)query.Rows)
+                .Skip((int)query.Skip);
+
+            var data = queryObject.ToList();
+            var total = totalQuery.Count();
+            
+            return new PagedResults<T>(query.Skip, total, page, data);
         }
 
         private void CheckEntityKey(Type type)

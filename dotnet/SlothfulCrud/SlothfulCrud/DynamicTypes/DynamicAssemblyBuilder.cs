@@ -15,14 +15,24 @@ public class DynamicAssemblyBuilder
         return ModuleBuilder.DefineType(typeName, TypeAttributes.Public);
     }
 
-    public static void AddAutoProperty(TypeBuilder typeBuilder, string propertyName, Type propertyType)
+    public static void AddAutoProperty(
+        TypeBuilder typeBuilder,
+        string propertyName,
+        Type propertyType,
+        bool isNullable = false)
     {
-        var fieldBuilder = typeBuilder.DefineField($"_{propertyName}", propertyType, FieldAttributes.Private);
+        var actualPropertyType = propertyType;
+        if (isNullable && propertyType.IsValueType)
+        {
+            actualPropertyType = typeof(Nullable<>).MakeGenericType(propertyType);
+        }
+        
+        var fieldBuilder = typeBuilder.DefineField($"_{propertyName}", actualPropertyType, FieldAttributes.Private);
         var propertyBuilder =
-            typeBuilder.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
+            typeBuilder.DefineProperty(propertyName, PropertyAttributes.HasDefault, actualPropertyType, null);
 
         var getMethodBuilder = typeBuilder.DefineMethod($"get_{propertyName}",
-            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, propertyType,
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, actualPropertyType,
             Type.EmptyTypes);
         var getIlGenerator = getMethodBuilder.GetILGenerator();
         getIlGenerator.Emit(OpCodes.Ldarg_0);
@@ -31,7 +41,7 @@ public class DynamicAssemblyBuilder
 
         var setMethodBuilder = typeBuilder.DefineMethod($"set_{propertyName}",
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, null,
-            new[] { propertyType });
+            new[] { actualPropertyType });
         var setIlGenerator = setMethodBuilder.GetILGenerator();
         setIlGenerator.Emit(OpCodes.Ldarg_0);
         setIlGenerator.Emit(OpCodes.Ldarg_1);
