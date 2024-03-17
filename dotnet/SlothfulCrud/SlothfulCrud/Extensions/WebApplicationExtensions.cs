@@ -110,19 +110,12 @@ namespace SlothfulCrud.Extensions
             Type entityType)
         {
             PropertyInfo[] parameters = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            var additionalProperties = new Dictionary<string, Type>()
-            {
-                { "Skip", typeof(ushort) },
-                { "Rows", typeof(ushort) },
-                { "OrderBy", typeof(string) },
-                { "OrderDirection", typeof(string) }
-            };
             Type dynamicType = DynamicTypeBuilder.BuildType(
                 parameters,
                 entityType,
                 "Browse",
                 true,
-                additionalProperties);
+                BrowseFields.Fields);
             
             var resultType = typeof(PagedResults<>).MakeGenericType(entityType);
             var mapMethod = typeof(WebApplicationExtensions).GetMethod(nameof(MapTypedGet));
