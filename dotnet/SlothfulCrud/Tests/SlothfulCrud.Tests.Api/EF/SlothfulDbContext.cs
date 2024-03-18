@@ -7,7 +7,7 @@ namespace SlothfulCrud.Tests.Api.EF
     public class SlothfulDbContext : DbContext
     {
         public DbSet<Sloth> Sloths { get; set; }
-        public DbSet<Koala> Koalas { get; set; }
+        public DbSet<WildKoala> Koalas { get; set; }
         
         public SlothfulDbContext(DbContextOptions<SlothfulDbContext> options) : base(options)
         {
@@ -26,16 +26,16 @@ namespace SlothfulCrud.Tests.Api.EF
 
         private static void InitializeDatabase(SlothfulDbContext dbContext)
         {
-            if (!dbContext.Set<Sloth>().Any() && !dbContext.Set<Koala>().Any())
+            if (!dbContext.Set<Sloth>().Any() && !dbContext.Set<WildKoala>().Any())
             {
                 dbContext.Set<Sloth>()
                     .AddRange(
                         new Sloth(Guid.NewGuid(), "DapperSloth", 10),
                         new Sloth(Guid.NewGuid(), "EnergySloth", 1));
-                dbContext.Set<Koala>()
+                dbContext.Set<WildKoala>()
                     .AddRange(
-                        new Koala(Guid.NewGuid(), "SpeedyKoala", 11),
-                        new Koala(Guid.NewGuid(), "DevKoala", 5));
+                        new WildKoala(Guid.NewGuid(), "SpeedyKoala", 11),
+                        new WildKoala(Guid.NewGuid(), "DevKoala", 5));
 
                 dbContext.SaveChanges();
             }

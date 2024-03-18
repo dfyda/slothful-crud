@@ -80,7 +80,7 @@ namespace SlothfulCrud.Extensions
         private static void MapDeleteEndpoint(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
             Type entityType)
         {
-            webApplication.MapDelete($"/{entityType.Name}s/" + "{id}", (Guid id) =>
+            webApplication.MapDelete(ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
                 {
                     var service = GetService(webApplication, dbContextType, executingAssembly, entityType);
                     service.Delete(id);
@@ -95,7 +95,7 @@ namespace SlothfulCrud.Extensions
         private static void MapGetEndpoint(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
             Type entityType)
         {
-            webApplication.MapGet($"/{entityType.Name}s/" + "{id}", (Guid id) =>
+            webApplication.MapGet(ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
                 {
                     var service = GetService(webApplication, dbContextType, executingAssembly, entityType);
                     return service.Get(id);
@@ -152,7 +152,7 @@ namespace SlothfulCrud.Extensions
             Type dbContextType,
             Assembly executingAssembly)
         {
-            app.MapPost($"/{entityType.Name}s/", ([FromBody] T command) =>
+            app.MapPost(ApiSegmentProvider.GetApiSegment(entityType.Name), ([FromBody] T command) =>
                 {
                     var id = Guid.NewGuid();
                     var service = GetService(app, dbContextType, executingAssembly, entityType);
@@ -170,7 +170,7 @@ namespace SlothfulCrud.Extensions
             Type dbContextType,
             Assembly executingAssembly)
         {
-            app.MapPut($"/{entityType.Name}s/" + "{id}", ([FromRoute] Guid id, [FromBody] T command) =>
+            app.MapPut(ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", ([FromRoute] Guid id, [FromBody] T command) =>
                 {
                     var service = GetService(app, dbContextType, executingAssembly, entityType);
                     service.Update(id, command);
@@ -189,7 +189,7 @@ namespace SlothfulCrud.Extensions
             Type returnType,
             Assembly executingAssembly) where T : new()
         {
-            app.MapGet($"/{entityType.Name}s/list/" + "{page}", (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
+            app.MapGet(ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
                 {
                     query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
                     var service = GetService(app, dbContextType, executingAssembly, entityType);

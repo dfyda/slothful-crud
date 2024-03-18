@@ -132,9 +132,18 @@ namespace SlothfulCrud.Services
                 {
                     queryObject = queryObject.Where(x => EF.Property<string>(x, propertyName).Contains((string)propertyValue));
                 }
+                else
+                {
+                    queryObject = FilterField(propertyName, propertyValue, queryObject);
+                }
             }
 
             return queryObject;
+        }
+        
+        private static IQueryable<TDbSet> FilterField<TDbSet, TField>(string propertyName, TField propertyValue, IQueryable<TDbSet> queryObject)
+        {
+            return queryObject.Where(x => EF.Property<TField>(x, propertyName).Equals(propertyValue));
         }
 
         private void CheckEntityKey(Type type)

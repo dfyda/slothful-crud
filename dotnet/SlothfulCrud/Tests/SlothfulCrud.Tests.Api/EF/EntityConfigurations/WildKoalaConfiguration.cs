@@ -4,9 +4,9 @@ using SlothfulCrud.Tests.Api.Domain;
 
 namespace SlothfulCrud.Tests.Api.EF.EntityConfigurations
 {
-    public class KoalaConfiguration : IEntityTypeConfiguration<Koala>
+    public class WildKoalaConfiguration : IEntityTypeConfiguration<WildKoala>
     {
-        public void Configure(EntityTypeBuilder<Koala> builder)
+        public void Configure(EntityTypeBuilder<WildKoala> builder)
         {
             // builder.HasNoKey();
         }
