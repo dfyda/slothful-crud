@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,10 +12,9 @@ namespace SlothfulCrud.DynamicTypes
             Type dynamicType,
             WebApplication webApplication,
             Type dbContextType,
-            Assembly executingAssembly,
             Type entityType)
         {
-            var service = GetService(webApplication, dbContextType, executingAssembly, entityType);
+            var service = GetService(webApplication, dbContextType, entityType);
             var createMethod = service.GetType().GetMethod("Create", new[] { typeof(Guid) });
             
             if (createMethod is null)
@@ -43,20 +41,19 @@ namespace SlothfulCrud.DynamicTypes
             return Expression.Lambda(body, "test", new List<ParameterExpression>() { commandParam });
         }
         
-        private static dynamic GetService(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
+        private static dynamic GetService(WebApplication webApplication, Type dbContextType,
             Type entityType)
         {
-            var serviceType = GetScope(webApplication, dbContextType, executingAssembly, entityType,
+            var serviceType = GetScope(webApplication, dbContextType, entityType,
                 out var scope);
             var service = scope.ServiceProvider.GetService(serviceType) as dynamic;
             return service;
         }
         
-        private static Type GetScope(WebApplication webApplication, Type dbContextType, Assembly executingAssembly,
+        private static Type GetScope(WebApplication webApplication, Type dbContextType,
             Type entityType, out IServiceScope scope)
         {
-            var serviceType = SlothfulTypesProvider.GetConcreteOperationService(executingAssembly, entityType,
-                dbContextType);
+            var serviceType = SlothfulTypesProvider.GetConcreteOperationService(entityType, dbContextType);
             scope = webApplication.Services.CreateScope();
             return serviceType;
         }

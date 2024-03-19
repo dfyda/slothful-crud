@@ -6,16 +6,15 @@ namespace SlothfulCrud.Providers
 {
     public static class SlothfulTypesProvider
     {
-        public static IEnumerable<Type> GetSlothfulEntityTypes(Assembly executingAssembly)
+        public static IEnumerable<Type> GetSlothfulEntityTypes(Assembly assembly)
         {
-            var types = executingAssembly.GetTypes();
+            var types = assembly.GetTypes();
                 
             return types.Where(t => t.GetInterfaces().Contains(typeof(ISlothfulEntity)));
         }
         
-        public static Type GetConcreteOperationService(Assembly executingAssembly, Type entityType, Type dbContextType)
+        public static Type GetConcreteOperationService(Type entityType, Type dbContextType)
         {
-            var type = executingAssembly.GetTypes();
             return typeof(IOperationService<,>).MakeGenericType(entityType, dbContextType);
         }
     }

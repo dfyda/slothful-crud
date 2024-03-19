@@ -13,7 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<SlothfulDbContext>(options =>
     options.UseInMemoryDatabase(databaseName: "InMemoryDatabase"));
 
-builder.Services.AddSlothfulServices(typeof(SlothfulDbContext), Assembly.GetExecutingAssembly());
+builder.Services.AddSlothfulCrud<SlothfulDbContext>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -33,6 +33,6 @@ app.MapGet("/db/test", (SlothfulDbContext context) => context.Sloths.ToList())
     .WithName("GetSloths")
     .WithOpenApi();
 
-app.RegisterSlothfulEndpoints(typeof(SlothfulDbContext), Assembly.GetExecutingAssembly());
+app.UseSlothfulCrud<SlothfulDbContext>();
 
 app.Run();
