@@ -2,9 +2,9 @@
 
 namespace SlothfulCrud.Providers
 {
-    public static class ApiSegmentProvider
+    public class ApiSegmentProvider : IApiSegmentProvider
     {
-        public static string GetApiSegment(string entityName)
+        public string GetApiSegment(string entityName)
         {
             return entityName.ToPlural().CamelToHyphen();
         }

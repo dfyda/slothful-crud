@@ -25,6 +25,7 @@ namespace SlothfulCrud.Extensions
         private static IServiceCollection AddScoped(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<ISlothfulCrudManager, SlothfulCrudManager>();
+            serviceCollection.AddScoped<IApiSegmentProvider, ApiSegmentProvider>();
 
             return serviceCollection;
         }
