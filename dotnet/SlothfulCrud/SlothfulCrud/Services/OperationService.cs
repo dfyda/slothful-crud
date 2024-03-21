@@ -19,6 +19,7 @@ namespace SlothfulCrud.Services
             DbContext = dbContext;
         }
         
+        // TO DO: Add configuration for entity id parameter type
         public T Get(Guid id)
         {
             CheckEntityKey(typeof(T));
@@ -38,6 +39,7 @@ namespace SlothfulCrud.Services
 
         public Guid Create(Guid id, dynamic command)
         {
+            // TO DO: Add configuration for custom constructor selection
             ConstructorInfo constructor = typeof(T).GetConstructors()
                 .FirstOrDefault(x => x.GetParameters().Length > 0);
             if (constructor is null)
@@ -61,6 +63,7 @@ namespace SlothfulCrud.Services
 
         public void Update(Guid id, dynamic command)
         {
+            // TO DO: Add configuration for custom update method name
             var updateMethod = typeof(T).GetMethod("Update");
             if (updateMethod is null)
             {
@@ -82,6 +85,7 @@ namespace SlothfulCrud.Services
             var queryObject = DbContext.Set<T>().AsQueryable();
             var properties = query.GetType().GetProperties();
 
+            // TO DO: Add configuration for custom filtering and sorting
             queryObject = FilterQuery(query, properties, queryObject);
             queryObject = SortQuery(query, queryObject);
 
@@ -154,6 +158,7 @@ namespace SlothfulCrud.Services
             };
         }
         
+        // TO DO: Move to an extension method
         static IDictionary<string, object> GetProperties(object obj)
         {
             if (obj is ExpandoObject expandoObject)

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders;
 using SlothfulCrud.Managers;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services;
@@ -26,6 +27,7 @@ namespace SlothfulCrud.Extensions
         {
             serviceCollection.AddScoped<ISlothfulCrudManager, SlothfulCrudManager>();
             serviceCollection.AddScoped<IApiSegmentProvider, ApiSegmentProvider>();
+            serviceCollection.AddScoped<ISlothfulEndpointRouteBuilder, SlothfulEndpointRouteBuilder>();
 
             return serviceCollection;
         }
