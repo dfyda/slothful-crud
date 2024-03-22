@@ -1,6 +1,8 @@
 ﻿using System.Dynamic;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
+using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
@@ -12,10 +14,17 @@ namespace SlothfulCrud.Services
         where T : class, ISlothfulEntity, new() 
         where TDbContext : DbContext
     {
+        private readonly ICreateConstructorBehavior _createConstructorBehavior;
+        private readonly IModifyMethodBehavior _modifyMethodBehavior;
         private TDbContext DbContext { get; }
         
-        public OperationService(TDbContext dbContext)
+        public OperationService(
+            TDbContext dbContext,
+            ICreateConstructorBehavior createConstructorBehavior,
+            IModifyMethodBehavior modifyMethodBehavior)
         {
+            _createConstructorBehavior = createConstructorBehavior;
+            _modifyMethodBehavior = modifyMethodBehavior;
             DbContext = dbContext;
         }
         
@@ -39,9 +48,7 @@ namespace SlothfulCrud.Services
 
         public Guid Create(Guid id, dynamic command)
         {
-            // TO DO: Add configuration for custom constructor selection
-            ConstructorInfo constructor = typeof(T).GetConstructors()
-                .FirstOrDefault(x => x.GetParameters().Length > 0);
+            var constructor = _createConstructorBehavior.GetConstructorInfo(typeof(T));
             if (constructor is null)
             {
                 throw new ConfigurationException($"Entity '{typeof(T).Name}' must have a constructor.");
@@ -63,8 +70,7 @@ namespace SlothfulCrud.Services
 
         public void Update(Guid id, dynamic command)
         {
-            // TO DO: Add configuration for custom update method name
-            var updateMethod = typeof(T).GetMethod("Update");
+            var updateMethod = _modifyMethodBehavior.GetModifyMethod(typeof(T));
             if (updateMethod is null)
             {
                 throw new ConfigurationException($"Entity '{typeof(T).Name}' must have a method named 'Update'.");

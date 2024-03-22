@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SlothfulCrud.Builders;
+using SlothfulCrud.Builders.Endpoints;
+using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
+using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
 using SlothfulCrud.Managers;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services;
@@ -20,7 +22,9 @@ namespace SlothfulCrud.Extensions
                 var interfaceType = typeof(IOperationService<,>).MakeGenericType(entityType, typeof(T));
                 serviceCollection.AddScoped(interfaceType, closedGenericType);
             }
-            return serviceCollection.AddScoped();
+            return serviceCollection
+                .AddScoped()
+                .AddBehaviors();
         }
         
         private static IServiceCollection AddScoped(this IServiceCollection serviceCollection)
@@ -28,6 +32,14 @@ namespace SlothfulCrud.Extensions
             serviceCollection.AddScoped<ISlothfulCrudManager, SlothfulCrudManager>();
             serviceCollection.AddScoped<IApiSegmentProvider, ApiSegmentProvider>();
             serviceCollection.AddScoped<ISlothfulEndpointRouteBuilder, SlothfulEndpointRouteBuilder>();
+
+            return serviceCollection;
+        }
+        
+        private static IServiceCollection AddBehaviors(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddScoped<ICreateConstructorBehavior, BaseCreateConstructorBehavior>();
+            serviceCollection.AddScoped<IModifyMethodBehavior, BaseModifyMethodBehavior>();
 
             return serviceCollection;
         }

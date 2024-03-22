@@ -3,19 +3,28 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
+using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
 using SlothfulCrud.DynamicTypes;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
 
-namespace SlothfulCrud.Builders
+namespace SlothfulCrud.Builders.Endpoints
 {
     public class SlothfulEndpointRouteBuilder : ISlothfulEndpointRouteBuilder
     {
         private readonly IApiSegmentProvider _apiSegmentProvider;
+        private readonly ICreateConstructorBehavior _createConstructorBehavior;
+        private readonly IModifyMethodBehavior _modifyMethodBehavior;
 
-        public SlothfulEndpointRouteBuilder(IApiSegmentProvider apiSegmentProvider)
+        public SlothfulEndpointRouteBuilder(
+            IApiSegmentProvider apiSegmentProvider,
+            ICreateConstructorBehavior createConstructorBehavior,
+            IModifyMethodBehavior modifyMethodBehavior)
         {
             _apiSegmentProvider = apiSegmentProvider;
+            _createConstructorBehavior = createConstructorBehavior;
+            _modifyMethodBehavior = modifyMethodBehavior;
         }
         
         public void MapEndpoints(WebApplication webApplication, Type dbContextType, Type entityType)
@@ -41,9 +50,7 @@ namespace SlothfulCrud.Builders
 
         private bool BuildCreateCommandType(Type entityType, out Type inputType)
         {
-            // TO DO: Add configuration for custom constructor selection
-            var constructor = entityType.GetConstructors()
-                .FirstOrDefault(x => x.GetParameters().Length > 0);
+            var constructor = _createConstructorBehavior.GetConstructorInfo(entityType);
             if (constructor is null)
             {
                 inputType = null;
@@ -57,7 +64,7 @@ namespace SlothfulCrud.Builders
 
         public void MapUpdateEndpoint(WebApplication webApplication, Type dbContextType, Type entityType)
         {
-            if (!BuildUpdateMethodType(entityType, out var inputType)) return;
+            if (!BuildModifyMethodType(entityType, out var inputType)) return;
 
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedPut));
             mapMethod.MakeGenericMethod(inputType).Invoke(this, [
@@ -67,17 +74,16 @@ namespace SlothfulCrud.Builders
             ]);
         }
 
-        private bool BuildUpdateMethodType(Type entityType, out Type inputType)
+        private bool BuildModifyMethodType(Type entityType, out Type inputType)
         {
-            // TO DO: Add configuration for custom update method name
-            var updateMethod = entityType.GetMethod("Update");
-            if (updateMethod is null)
+            var modifyMethod = _modifyMethodBehavior.GetModifyMethod(entityType);
+            if (modifyMethod is null)
             {
                 inputType = null;
                 return false;
             }
             
-            ParameterInfo[] parameters = updateMethod.GetParameters();
+            ParameterInfo[] parameters = modifyMethod.GetParameters();
             inputType = DynamicTypeBuilder.BuildType(parameters, entityType, "Update");
             return true;
         }

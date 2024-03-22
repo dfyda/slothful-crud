@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Builder;
-using SlothfulCrud.Builders;
+using SlothfulCrud.Builders.Endpoints;
 using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Managers

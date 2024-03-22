@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace SlothfulCrud.Builders
+namespace SlothfulCrud.Builders.Endpoints
 {
     public interface ISlothfulEndpointRouteBuilder
     {
