@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
 using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
-using SlothfulCrud.DynamicTypes;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
 
@@ -58,7 +57,7 @@ namespace SlothfulCrud.Builders.Endpoints
             }
 
             var parameters = constructor.GetParameters();
-            inputType = DynamicTypeBuilder.BuildType(parameters, entityType, "Create");
+            inputType = DynamicType.NewDynamicType(parameters, entityType, "Create");
             return true;
         }
 
@@ -84,7 +83,7 @@ namespace SlothfulCrud.Builders.Endpoints
             }
             
             ParameterInfo[] parameters = modifyMethod.GetParameters();
-            inputType = DynamicTypeBuilder.BuildType(parameters, entityType, "Update");
+            inputType = DynamicType.NewDynamicType(parameters, entityType, "Update");
             return true;
         }
 
@@ -142,7 +141,7 @@ namespace SlothfulCrud.Builders.Endpoints
                 return false;
             }
             
-            inputType = DynamicTypeBuilder.BuildType(
+            inputType = DynamicType.NewDynamicType(
                 parameters,
                 entityType,
                 "Browse",
