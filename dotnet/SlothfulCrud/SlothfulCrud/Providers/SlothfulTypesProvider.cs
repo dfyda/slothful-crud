@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Services;
 
@@ -13,7 +14,13 @@ namespace SlothfulCrud.Providers
             return types.Where(t => t.GetInterfaces().Contains(typeof(ISlothfulEntity)));
         }
         
-        public static Type GetConcreteOperationService(Type entityType, Type dbContextType)
+        public static dynamic GetConcreteOperationService(Type dbContextType, Type entityType, IServiceScope serviceScope)
+        {
+            var serviceType = GetConcreteOperationServiceType(entityType, dbContextType);
+            return serviceScope.ServiceProvider.GetService(serviceType);
+        }
+
+        private static Type GetConcreteOperationServiceType(Type entityType, Type dbContextType)
         {
             return typeof(IOperationService<,>).MakeGenericType(entityType, dbContextType);
         }

@@ -12,7 +12,7 @@ namespace SlothfulCrud.Builders.Dynamic.Extensions.Properties
             Type propertyType,
             bool isNullable)
         {
-            dynamicTypeBuilder.Do(builder =>
+            return dynamicTypeBuilder.Do(builder =>
             {
                 AddAutoProperty(
                     builder,
@@ -20,7 +20,6 @@ namespace SlothfulCrud.Builders.Dynamic.Extensions.Properties
                     propertyType,
                     isNullable);
             });
-            return dynamicTypeBuilder;
         }
         
         public static DynamicTypeBuilder AddProperties(
@@ -28,17 +27,17 @@ namespace SlothfulCrud.Builders.Dynamic.Extensions.Properties
             TypeProperty[] properties,
             bool isNullable)
         {
-            dynamicTypeBuilder.Do(builder =>
+            return dynamicTypeBuilder.Do(builder =>
             {
                 foreach (var property in properties)
                 {
-                    dynamicTypeBuilder.AddProperty(
+                    AddAutoProperty(
+                        builder,
                         property.Name,
                         property.Type,
                         isNullable);
                 }
             });
-            return dynamicTypeBuilder;
         }
         
         public static DynamicTypeBuilder AddAdditionalProperties(
@@ -46,7 +45,7 @@ namespace SlothfulCrud.Builders.Dynamic.Extensions.Properties
             IDictionary<string, Type> additionalProperties,
             bool isNullable)
         {
-            dynamicTypeBuilder.Do(builder =>
+            return dynamicTypeBuilder.Do(builder =>
             {
                 if (additionalProperties is null)
                 {
@@ -55,13 +54,13 @@ namespace SlothfulCrud.Builders.Dynamic.Extensions.Properties
             
                 foreach (var (propertyName, propertyType) in additionalProperties)
                 {
-                    dynamicTypeBuilder.AddProperty(
+                    AddAutoProperty(
+                        builder,
                         propertyName,
                         propertyType,
                         isNullable);
                 }
             });
-            return dynamicTypeBuilder;
         }
         
         private static void AddAutoProperty(

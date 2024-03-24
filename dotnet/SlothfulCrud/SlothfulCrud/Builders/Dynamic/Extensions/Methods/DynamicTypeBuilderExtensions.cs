@@ -7,11 +7,10 @@ namespace SlothfulCrud.Builders.Dynamic.Extensions.Methods
     {
         public static DynamicTypeBuilder AddFakeTryParse(this DynamicTypeBuilder dynamicTypeBuilder)
         {
-            dynamicTypeBuilder.Do(builder =>
+            return dynamicTypeBuilder.Do(builder =>
             {
                 AddFakeTryParse(builder);
             });
-            return dynamicTypeBuilder;
         }
         
         private static void AddFakeTryParse(TypeBuilder typeBuilder)

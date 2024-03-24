@@ -31,7 +31,6 @@ namespace SlothfulCrud.Extensions
         {
             serviceCollection.AddScoped<ISlothfulCrudManager, SlothfulCrudManager>();
             serviceCollection.AddScoped<IApiSegmentProvider, ApiSegmentProvider>();
-            serviceCollection.AddScoped<ISlothfulEndpointRouteBuilder, SlothfulEndpointRouteBuilder>();
 
             return serviceCollection;
         }
