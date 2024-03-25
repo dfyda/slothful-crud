@@ -36,8 +36,11 @@ namespace SlothfulCrud.Managers
                     _modifyMethodBehavior);
                 
                 builder
-                    .GetEndpoint
-                        .Map(entityType);
+                    .GetEndpoint.Map(entityType)
+                    .BrowseEndpoint.Map(entityType)
+                    .CreateEndpoint.Map(entityType)
+                    .UpdateEndpoint.Map(entityType)
+                    .DeleteEndpoint.Map(entityType);
             }
 
             return webApplication;

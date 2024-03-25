@@ -10,7 +10,7 @@ namespace SlothfulCrud.Builders.Dynamic
         private static readonly AssemblyBuilder AssemblyBuilder =
             AssemblyBuilder.DefineDynamicAssembly(AssemblyName, AssemblyBuilderAccess.Run);
         private static readonly ModuleBuilder ModuleBuilder = AssemblyBuilder.DefineDynamicModule("DynamicModule");
-        private string TypeName { get; set;}
+        private string TypeName { get; set; }
         
         public DynamicTypeBuilder DefineType(string typeName) {
             TypeName = typeName;
