@@ -3,38 +3,34 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulBrowseEndpointBuilder
+    public class SlothfulBrowseEndpointBuilder : SlothfulEndpointRouteBuilder
     {
-        private readonly WebApplication _webApplication;
-        private readonly Type _dbContextType;
-        private readonly IApiSegmentProvider _apiSegmentProvider;
+        private RouteHandlerBuilder ConventionBuilder { get; set; }
 
-        public SlothfulBrowseEndpointBuilder(
-            WebApplication webApplication,
-            Type dbContextType,
-            IApiSegmentProvider apiSegmentProvider)
+        public SlothfulBrowseEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
         {
-            _webApplication = webApplication;
-            _dbContextType = dbContextType;
-            _apiSegmentProvider = apiSegmentProvider;
+            BuilderParams = builderParams;
         }
         
-        public IEndpointConventionBuilder Map(Type entityType)
+        public SlothfulBrowseEndpointBuilder Map(Type entityType)
         {
-            if (!BuildBrowseQueryType(entityType, out var inputType, out var resultType)) return;
+            if (!BuildBrowseQueryType(entityType, out var inputType, out var resultType)) return this;
             
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedGet));
-            return (IEndpointConventionBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [
-                _webApplication,
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [
+                BuilderParams.WebApplication,
                 entityType,
-                _dbContextType,
+                BuilderParams.DbContextType,
                 resultType
             ]);
+
+            return this;
         }
 
         private bool BuildBrowseQueryType(Type entityType, out Type inputType, out Type resultType)
@@ -60,7 +56,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         private MethodInfo GetGenericMapTypedMethod(string methodName)
         {
-            return typeof(SlothfulEndpointRouteBuilder).GetMethod(methodName);
+            return typeof(SlothfulBrowseEndpointBuilder).GetMethod(methodName);
         }
         
         public void MapTypedGet<T>(
@@ -69,7 +65,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             Type dbContextType,
             Type returnType) where T : new()
         {
-            app.MapGet(_apiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
+            app.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
                 {
                     query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
                     using var serviceScope = app.Services.CreateScope();

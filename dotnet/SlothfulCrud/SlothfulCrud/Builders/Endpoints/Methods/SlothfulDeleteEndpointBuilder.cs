@@ -2,33 +2,27 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulDeleteEndpointBuilder
+    public class SlothfulDeleteEndpointBuilder : SlothfulEndpointRouteBuilder
     {
-        private readonly WebApplication _webApplication;
-        private readonly Type _dbContextType;
-        private readonly IApiSegmentProvider _apiSegmentProvider;
+        private RouteHandlerBuilder ConventionBuilder { get; set; }
 
-        public SlothfulDeleteEndpointBuilder(
-            WebApplication webApplication,
-            Type dbContextType,
-            IApiSegmentProvider apiSegmentProvider)
+        public SlothfulDeleteEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
         {
-            _webApplication = webApplication;
-            _dbContextType = dbContextType;
-            _apiSegmentProvider = apiSegmentProvider;
+            BuilderParams = builderParams;
         }
         
-        public IEndpointConventionBuilder Map(Type entityType)
+        public SlothfulDeleteEndpointBuilder Map(Type entityType)
         {
-            return _webApplication.MapDelete(_apiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
+            ConventionBuilder = BuilderParams.WebApplication.MapDelete(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
                 {
-                    using var serviceScope = _webApplication.Services.CreateScope();
+                    using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service =
-                        SlothfulTypesProvider.GetConcreteOperationService(entityType, _dbContextType, serviceScope);
+                        SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     service.Delete(id);
                     return Results.NoContent();
                 })
@@ -36,6 +30,8 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 .Produces(204)
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
+
+            return this;
         }
     }
 }

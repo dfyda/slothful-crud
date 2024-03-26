@@ -2,38 +2,56 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulGetEndpointBuilder
+    public class SlothfulGetEndpointBuilder : SlothfulEndpointRouteBuilder
     {
-        private readonly WebApplication _webApplication;
-        private readonly Type _dbContextType;
-        private readonly IApiSegmentProvider _apiSegmentProvider;
+        private RouteHandlerBuilder ConventionBuilder { get; set; }
 
-        public SlothfulGetEndpointBuilder(
-            WebApplication webApplication,
-            Type dbContextType,
-            IApiSegmentProvider apiSegmentProvider)
+        public SlothfulGetEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
         {
-            _webApplication = webApplication;
-            _dbContextType = dbContextType;
-            _apiSegmentProvider = apiSegmentProvider;
+            BuilderParams = builderParams;
         }
         
-        public IEndpointConventionBuilder Map(Type entityType)
+        public SlothfulGetEndpointBuilder Map(Type entityType)
         {
-            return _webApplication.MapGet(_apiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
+            ConventionBuilder = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
                 {
-                    using var serviceScope = _webApplication.Services.CreateScope();
-                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, _dbContextType, serviceScope);
+                    using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
+                    var service =
+                        SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     return service.Get(id);
                 })
                 .WithName($"Get{entityType.Name}Details")
                 .Produces(200, entityType)
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
+
+            return this;
+        }
+
+        public SlothfulGetEndpointBuilder Produces(int statusCode)
+        {
+            ConventionBuilder.Produces(statusCode);
+            return this;
+        }
+
+        public SlothfulGetEndpointBuilder Produces(int statusCode, Type responseType)
+        {
+            ConventionBuilder.Produces(statusCode, responseType);
+            return this;
+        }
+
+        public SlothfulGetEndpointBuilder Produces<TResponse>(
+            int statusCode = StatusCodes.Status200OK,
+            string contentType = null,
+            params string[] additionalContentTypes)
+        {
+            ConventionBuilder.Produces(statusCode, typeof(TResponse), contentType, additionalContentTypes);
+            return this;
         }
     }
 }

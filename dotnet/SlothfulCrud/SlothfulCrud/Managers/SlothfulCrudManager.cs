@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using SlothfulCrud.Builders.Endpoints;
 using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
 using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
+using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Managers
@@ -28,15 +29,15 @@ namespace SlothfulCrud.Managers
             var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(executingAssembly);
             foreach (var entityType in entityTypes)
             {
-                var builder = new SlothfulEndpointRouteBuilder(
-                    webApplication,
+                var parameters = new SlothfulBuilderParams(webApplication,
                     dbContextType,
                     _apiSegmentProvider,
                     _createConstructorBehavior,
                     _modifyMethodBehavior);
+                var builder = new SlothfulEndpointRouteBuilder(parameters);
                 
                 builder
-                    .GetEndpoint.Map(entityType)
+                    .GetEndpoint.Map(entityType).Produces(200, entityType).Produces(404)
                     .BrowseEndpoint.Map(entityType)
                     .CreateEndpoint.Map(entityType)
                     .UpdateEndpoint.Map(entityType)
