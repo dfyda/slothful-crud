@@ -7,10 +7,8 @@ using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulGetEndpointBuilder : SlothfulEndpointRouteBuilder
+    public class SlothfulGetEndpointBuilder : SlothfulMethodEndpointRouteBuilder
     {
-        private RouteHandlerBuilder ConventionBuilder { get; set; }
-
         public SlothfulGetEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
         {
             BuilderParams = builderParams;
@@ -30,27 +28,6 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
 
-            return this;
-        }
-
-        public SlothfulGetEndpointBuilder Produces(int statusCode)
-        {
-            ConventionBuilder.Produces(statusCode);
-            return this;
-        }
-
-        public SlothfulGetEndpointBuilder Produces(int statusCode, Type responseType)
-        {
-            ConventionBuilder.Produces(statusCode, responseType);
-            return this;
-        }
-
-        public SlothfulGetEndpointBuilder Produces<TResponse>(
-            int statusCode = StatusCodes.Status200OK,
-            string contentType = null,
-            params string[] additionalContentTypes)
-        {
-            ConventionBuilder.Produces(statusCode, typeof(TResponse), contentType, additionalContentTypes);
             return this;
         }
     }

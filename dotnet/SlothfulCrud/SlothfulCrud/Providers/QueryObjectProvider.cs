@@ -35,7 +35,6 @@ namespace SlothfulCrud.Providers
                 .GetMethods()
                 .FirstOrDefault(x => x.Name == "Parse");
                 
-            dynamic parsedValue = null;
             var queryParam = context.Request.Query[propertyInfo.Name].ToString();
 
             return parseMethod switch

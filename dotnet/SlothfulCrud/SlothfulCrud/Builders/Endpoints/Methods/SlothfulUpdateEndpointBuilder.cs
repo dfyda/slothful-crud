@@ -9,10 +9,8 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulUpdateEndpointBuilder : SlothfulEndpointRouteBuilder
+    public class SlothfulUpdateEndpointBuilder : SlothfulMethodEndpointRouteBuilder
     {
-        private RouteHandlerBuilder ConventionBuilder { get; set; }
-
         public SlothfulUpdateEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
         {
             BuilderParams = builderParams;

@@ -1,6 +1,4 @@
-﻿using System.Dynamic;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
 using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
 using SlothfulCrud.Domain;
@@ -55,7 +53,7 @@ namespace SlothfulCrud.Services
             }
             
             object[] constructorArgs = constructor.GetParameters()
-                .Select(param => GetProperties(command)[param.Name])
+                .Select(param => ((object)command).GetProperties()[param.Name])
                 .ToArray();
 
             constructorArgs[0] = id;
@@ -79,7 +77,7 @@ namespace SlothfulCrud.Services
             var item = Get(id);
             
             object[] methodArgs = updateMethod.GetParameters()
-                .Select(param => GetProperties(command)[param.Name])
+                .Select(param => ((object)command).GetProperties()[param.Name])
                 .ToArray();
             
             updateMethod.Invoke(item, methodArgs);
@@ -162,26 +160,6 @@ namespace SlothfulCrud.Services
             {
                 throw new ConfigurationException("Entity must have a property named 'Id'");
             };
-        }
-        
-        // TO DO: Move to an extension method
-        static IDictionary<string, object> GetProperties(object obj)
-        {
-            if (obj is ExpandoObject expandoObject)
-            {
-                return expandoObject.ToDictionary(kv => kv.Key, kv => kv.Value);
-            }
-
-            Type type = obj.GetType();
-            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            var propertyValues = new Dictionary<string, object>();
-
-            foreach (var property in properties)
-            {
-                propertyValues[property.Name] = property.GetValue(obj);
-            }
-
-            return propertyValues;
         }
     }
 }

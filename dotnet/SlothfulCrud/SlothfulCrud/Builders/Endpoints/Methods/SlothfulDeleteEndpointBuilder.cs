@@ -7,10 +7,8 @@ using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulDeleteEndpointBuilder : SlothfulEndpointRouteBuilder
+    public class SlothfulDeleteEndpointBuilder : SlothfulMethodEndpointRouteBuilder
     {
-        private RouteHandlerBuilder ConventionBuilder { get; set; }
-
         public SlothfulDeleteEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
         {
             BuilderParams = builderParams;
