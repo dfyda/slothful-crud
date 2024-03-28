@@ -57,7 +57,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             return app.MapPut(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", ([FromRoute] Guid id, [FromBody] T command) =>
                 {
                     using var serviceScope = app.Services.CreateScope();
-                    var service = SlothfulTypesProvider.GetConcreteOperationService(dbContextType, entityType, serviceScope);
+                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, dbContextType, serviceScope);
                     service.Update(id, command);
                     return Results.NoContent();
                 })

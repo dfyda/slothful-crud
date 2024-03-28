@@ -67,7 +67,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 {
                     query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
                     using var serviceScope = app.Services.CreateScope();
-                    var service = SlothfulTypesProvider.GetConcreteOperationService(dbContextType, entityType, serviceScope);
+                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, dbContextType, serviceScope);
                     return service.Browse(page, query);
                 })
                 .WithName($"Browse{entityType.Name}s")

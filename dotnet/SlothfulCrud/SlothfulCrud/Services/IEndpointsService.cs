@@ -4,7 +4,7 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services
 {
-    public interface IOperationService<T, TDbContext> 
+    public interface IEndpointsService<T, TDbContext> 
         where T : class, ISlothfulEntity, new() 
         where TDbContext : DbContext
     {

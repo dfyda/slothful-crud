@@ -58,7 +58,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 {
                     var id = Guid.NewGuid();
                     using var serviceScope = app.Services.CreateScope();
-                    var service = SlothfulTypesProvider.GetConcreteOperationService(dbContextType, entityType, serviceScope);
+                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, dbContextType, serviceScope);
                     service.Create(id, command);
                     return Results.Created($"/{entityType.Name}s/", id);
                 })
