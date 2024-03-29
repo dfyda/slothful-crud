@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
+using SlothfulCrud.Extensions;
 using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services.Endpoints.Get
@@ -18,7 +19,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
         
         public PagedResults<T> Browse(ushort page, dynamic query)
         {
-            var queryObject = DbContext.Set<T>().AsQueryable();
+            var queryObject = DbContext.Set<T>().AsQueryable().IncludeAllFirstLevelDependencies();
             var properties = query.GetType().GetProperties();
 
             // TO DO: Add configuration for custom filtering and sorting

@@ -22,6 +22,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             CheckEntityKey(typeof(T));
             
             return DbContext.Set<T>()
+                .IncludeAllFirstLevelDependencies()
                 .FirstOrDefault(x => EF.Property<Guid>(x, "Id") == id)
                 .OrFail($"{typeof(T)}NotFound", $"{typeof(T)} with id '{id}' not found.");  
         }

@@ -29,8 +29,8 @@ app.MapGet("/", () => "SlothfulCrud.Tests.Api")
     .WithName("GetApiName")
     .WithOpenApi();
 
-app.MapGet("/db/test", (SlothfulDbContext context) => context.Sloths.ToList())
-    .WithName("GetSloths")
+app.MapGet("/db/test", (SlothfulDbContext context) => context.Koalas.ToList())
+    .WithName("GetKoalas")
     .WithOpenApi();
 
 app.UseSlothfulCrud<SlothfulDbContext>();

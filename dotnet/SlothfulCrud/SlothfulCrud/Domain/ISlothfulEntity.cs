@@ -2,6 +2,7 @@
 {
     public interface ISlothfulEntity
     {
-        // marker
+        Guid Id { get; }
+        public string DisplayName { get; }
     }
 }

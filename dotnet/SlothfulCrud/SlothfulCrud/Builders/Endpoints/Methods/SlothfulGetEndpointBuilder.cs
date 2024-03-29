@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Providers;
+using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
@@ -21,7 +22,9 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service =
                         SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    return service.Get(id);
+                    var item = service.Get(id);
+                    var resultDto = DynamicType.NewDynamicDto(item, entityType, $"{entityType}DetailsDto");
+                    return resultDto;
                 })
                 .WithName($"Get{entityType.Name}Details")
                 .Produces(200, entityType)

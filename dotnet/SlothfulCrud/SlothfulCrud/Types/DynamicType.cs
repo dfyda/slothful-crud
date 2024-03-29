@@ -2,6 +2,7 @@
 using SlothfulCrud.Builders.Dynamic;
 using SlothfulCrud.Builders.Dynamic.Extensions.Methods;
 using SlothfulCrud.Builders.Dynamic.Extensions.Properties;
+using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Types
 {
@@ -53,6 +54,47 @@ namespace SlothfulCrud.Types
                 .AddAdditionalProperties(additionalProperties, isNullable)
                 .AddFakeTryParse()
                 .Build();
+        }
+
+        public static dynamic NewDynamicDto(dynamic item, Type entityType, string typeName)
+        {
+            // TODO: Add configuration for exposing all nested properties
+            var properties = entityType.GetProperties();
+            var primitiveProperties = properties
+                .Where(x => !x.PropertyType.IsClass || x.PropertyType == typeof(string))
+                .ToList();
+            var nestedProperties = properties
+                .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
+                .ToList();
+            
+            var builder = new DynamicTypeBuilder();
+            var type = builder
+                .DefineType(typeName)
+                .AddProperties(primitiveProperties.Select(x => new TypeProperty(x.Name, x.PropertyType)).ToArray(), false)
+                .AddProperties(nestedProperties.Select(x => new TypeProperty(x.Name, typeof(BaseEntityDto))).ToArray(), false)
+                .AddFakeTryParse()
+                .Build();
+            
+            var instance = Activator.CreateInstance(type);
+            foreach (var property in properties)
+            {
+                var value = property.GetValue(item);
+                if (nestedProperties.Contains(property))
+                {
+                    var nestedDto = new BaseEntityDto()
+                    {
+                        Id = (Guid)property.PropertyType.GetProperty("Id").GetValue(value),
+                        DisplayName = (string)property.PropertyType.GetProperty("DisplayName").GetValue(value)
+                    };
+                    type.GetProperty(property.Name).SetValue(instance, nestedDto);
+                }
+                else
+                {
+                    type.GetProperty(property.Name).SetValue(instance, value);
+                }
+            }
+
+            return instance;
         }
     }
 }

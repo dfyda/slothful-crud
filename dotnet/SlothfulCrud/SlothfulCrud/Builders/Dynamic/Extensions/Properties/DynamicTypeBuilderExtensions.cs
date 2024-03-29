@@ -70,7 +70,7 @@ namespace SlothfulCrud.Builders.Dynamic.Extensions.Properties
             bool isNullable = false)
         {
             var actualPropertyType = propertyType;
-            if (isNullable && propertyType.IsValueType)
+            if (isNullable && propertyType.IsValueType && !IsAlreadyNullable(propertyType))
             {
                 actualPropertyType = typeof(Nullable<>).MakeGenericType(propertyType);
             }
@@ -89,6 +89,11 @@ namespace SlothfulCrud.Builders.Dynamic.Extensions.Properties
 
             propertyBuilder.SetGetMethod(getMethodBuilder);
             propertyBuilder.SetSetMethod(setMethodBuilder);
+        }
+        
+        private static bool IsAlreadyNullable(Type propertyType)
+        {
+            return propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
         
         private static MethodBuilder SetMethodBuilder(
