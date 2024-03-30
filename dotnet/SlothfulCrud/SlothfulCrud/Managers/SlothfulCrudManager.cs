@@ -37,7 +37,7 @@ namespace SlothfulCrud.Managers
                 var builder = new SlothfulEndpointRouteBuilder(parameters);
                 
                 builder
-                    .GetEndpoint.Map(entityType).Produces(200, entityType).Produces(404)
+                    .GetEndpoint.Map(entityType)
                     .BrowseEndpoint.Map(entityType)
                     .CreateEndpoint.Map(entityType)
                     .UpdateEndpoint.Map(entityType)

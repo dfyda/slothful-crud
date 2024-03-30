@@ -56,7 +56,7 @@ namespace SlothfulCrud.Types
                 .Build();
         }
 
-        public static dynamic NewDynamicDto(dynamic item, Type entityType, string typeName)
+        public static Type NewDynamicTypeDto(Type entityType, string typeName)
         {
             // TODO: Add configuration for exposing all nested properties
             var properties = entityType.GetProperties();
@@ -66,16 +66,27 @@ namespace SlothfulCrud.Types
             var nestedProperties = properties
                 .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
                 .ToList();
-            
+
             var builder = new DynamicTypeBuilder();
-            var type = builder
+            return builder
                 .DefineType(typeName)
-                .AddProperties(primitiveProperties.Select(x => new TypeProperty(x.Name, x.PropertyType)).ToArray(), false)
-                .AddProperties(nestedProperties.Select(x => new TypeProperty(x.Name, typeof(BaseEntityDto))).ToArray(), false)
+                .AddProperties(primitiveProperties.Select(x => new TypeProperty(x.Name, x.PropertyType)).ToArray(),
+                    false)
+                .AddProperties(nestedProperties.Select(x => new TypeProperty(x.Name, typeof(BaseEntityDto))).ToArray(),
+                    false)
                 .AddFakeTryParse()
                 .Build();
+        }
+
+        public static dynamic MapToDto(dynamic item, Type entityType, Type dtoType)
+        {
+            // TODO: Add configuration for exposing all nested properties
+            var properties = entityType.GetProperties();
+            var nestedProperties = entityType.GetProperties()
+                .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
+                .ToList();
             
-            var instance = Activator.CreateInstance(type);
+            var instance = Activator.CreateInstance(dtoType);
             foreach (var property in properties)
             {
                 var value = property.GetValue(item);
@@ -86,11 +97,11 @@ namespace SlothfulCrud.Types
                         Id = (Guid)property.PropertyType.GetProperty("Id").GetValue(value),
                         DisplayName = (string)property.PropertyType.GetProperty("DisplayName").GetValue(value)
                     };
-                    type.GetProperty(property.Name).SetValue(instance, nestedDto);
+                    dtoType.GetProperty(property.Name).SetValue(instance, nestedDto);
                 }
                 else
                 {
-                    type.GetProperty(property.Name).SetValue(instance, value);
+                    dtoType.GetProperty(property.Name).SetValue(instance, value);
                 }
             }
 

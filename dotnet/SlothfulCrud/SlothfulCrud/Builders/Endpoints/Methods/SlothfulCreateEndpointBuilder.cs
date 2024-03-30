@@ -21,11 +21,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             if (!BuildCreateCommandType(entityType, out var inputType)) return this;
 
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedPost));
-            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [
-                BuilderParams.WebApplication,
-                entityType,
-                BuilderParams.DbContextType
-            ]);
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [entityType]);
 
             return this;
         }
@@ -49,16 +45,13 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             return true;
         }
         
-        public IEndpointConventionBuilder MapTypedPost<T>(
-            WebApplication app,
-            Type entityType,
-            Type dbContextType)
+        public IEndpointConventionBuilder MapTypedPost<T>(Type entityType)
         {
-            return app.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), ([FromBody] T command) =>
+            return BuilderParams.WebApplication.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), ([FromBody] T command) =>
                 {
                     var id = Guid.NewGuid();
-                    using var serviceScope = app.Services.CreateScope();
-                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, dbContextType, serviceScope);
+                    using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
+                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     service.Create(id, command);
                     return Results.Created($"/{entityType.Name}s/", id);
                 })
