@@ -27,7 +27,9 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         private Type BuildGetDtoType(Type entityType)
         {
-            return DynamicType.NewDynamicTypeDto(entityType, $"{entityType}DetailsDto");
+            var type = DynamicType.NewDynamicTypeDto(entityType, $"{entityType}DetailsDto");
+            GeneratedDynamicTypes.Add(type.Name, type);
+            return type;
         }
         
         private MethodInfo GetGenericMapTypedMethod(string methodName)

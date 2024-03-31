@@ -87,6 +87,39 @@ namespace SlothfulCrud.Types
                 .ToList();
             
             var instance = Activator.CreateInstance(dtoType);
+            FlatNestedEntities(item, dtoType, properties, nestedProperties, instance);
+
+            return instance;
+        }
+
+        public static dynamic MapToPagedResultsDto(dynamic item, Type entityType, Type dtoType)
+        {
+            // TODO: Add configuration for exposing all nested properties
+            var properties = entityType.GetProperties();
+            var nestedProperties = entityType.GetProperties()
+                .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
+                .ToList();
+            
+            var instances = new List<object>();
+            var elements = item.Data;
+            foreach (var element in elements)
+            {
+                var instance = Activator.CreateInstance(dtoType);
+                FlatNestedEntities(element, dtoType, properties, nestedProperties, instance);
+
+                instances.Add(instance);
+            }
+
+            return new PagedResults<object>(item.First, item.Total, item.Rows, instances);
+        }
+
+        private static void FlatNestedEntities(
+            dynamic item,
+            Type dtoType,
+            PropertyInfo[] properties,
+            List<PropertyInfo> nestedProperties,
+            object instance)
+        {
             foreach (var property in properties)
             {
                 var value = property.GetValue(item);
@@ -104,8 +137,6 @@ namespace SlothfulCrud.Types
                     dtoType.GetProperty(property.Name).SetValue(instance, value);
                 }
             }
-
-            return instance;
         }
     }
 }

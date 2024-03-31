@@ -48,10 +48,17 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 true,
                 BrowseFields.Fields);
             
-            resultType = typeof(PagedResults<>).MakeGenericType(entityType);
+            var resultDto = GetResultDto(entityType);
+            resultType = typeof(PagedResults<>).MakeGenericType(resultDto);
             return true;
         }
-        
+
+        private Type GetResultDto(Type entityType)
+        {
+            var resultDto = GeneratedDynamicTypes[entityType.Name + "DetailsDto"];
+            return resultDto;
+        }
+
         private MethodInfo GetGenericMapTypedMethod(string methodName)
         {
             return typeof(SlothfulBrowseEndpointBuilder).GetMethod(methodName);
@@ -68,7 +75,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                     query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
                     using var serviceScope = app.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, dbContextType, serviceScope);
-                    return service.Browse(page, query);
+                    return DynamicType.MapToPagedResultsDto(service.Browse(page, query), entityType, GetResultDto(entityType));
                 })
                 .WithName($"Browse{entityType.Name}s")
                 .Produces(200, returnType)
