@@ -14,9 +14,11 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             BuilderParams = builderParams;
         }
         
-        public SlothfulDeleteEndpointBuilder Map(Type entityType)
+        public SlothfulDeleteEndpointBuilder Map()
         {
-            ConventionBuilder = BuilderParams.WebApplication.MapDelete(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
+            var entityType = BuilderParams.EntityType;
+            ConventionBuilder = BuilderParams.WebApplication.MapDelete(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", 
+                    (Guid id) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service =

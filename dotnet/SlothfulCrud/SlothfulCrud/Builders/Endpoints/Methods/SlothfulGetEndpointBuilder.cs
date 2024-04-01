@@ -16,18 +16,18 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             BuilderParams = builderParams;
         }
         
-        public SlothfulGetEndpointBuilder Map(Type entityType)
+        public SlothfulGetEndpointBuilder Map()
         {
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedGet));
-            var resultType = BuildGetDtoType(entityType);
-            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(resultType).Invoke(this, [entityType]);
+            var resultType = BuildGetDtoType();
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(resultType).Invoke(this, [BuilderParams.EntityType]);
 
             return this;
         }
         
-        private Type BuildGetDtoType(Type entityType)
+        private Type BuildGetDtoType()
         {
-            var type = DynamicType.NewDynamicTypeDto(entityType, $"{entityType}DetailsDto");
+            var type = DynamicType.NewDynamicTypeDto(BuilderParams.EntityType, $"{BuilderParams.EntityType}DetailsDto");
             GeneratedDynamicTypes.Add(type.Name, type);
             return type;
         }

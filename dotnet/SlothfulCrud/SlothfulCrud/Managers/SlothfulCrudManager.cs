@@ -29,19 +29,21 @@ namespace SlothfulCrud.Managers
             var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(executingAssembly);
             foreach (var entityType in entityTypes)
             {
-                var parameters = new SlothfulBuilderParams(webApplication,
+                var parameters = new SlothfulBuilderParams(
+                    webApplication,
                     dbContextType,
+                    entityType,
                     _apiSegmentProvider,
                     _createConstructorBehavior,
                     _modifyMethodBehavior);
                 var builder = new SlothfulEndpointRouteBuilder(parameters);
                 
                 builder
-                    .GetEndpoint.Map(entityType)
-                    .BrowseEndpoint.Map(entityType)
-                    .CreateEndpoint.Map(entityType)
-                    .UpdateEndpoint.Map(entityType)
-                    .DeleteEndpoint.Map(entityType);
+                    .GetEndpoint.Map()
+                    .BrowseEndpoint.Map()
+                    .CreateEndpoint.Map()
+                    .UpdateEndpoint.Map()
+                    .DeleteEndpoint.Map();
             }
 
             return webApplication;

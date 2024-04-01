@@ -16,16 +16,12 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             BuilderParams = builderParams;
         }
         
-        public SlothfulUpdateEndpointBuilder Map(Type entityType)
+        public SlothfulUpdateEndpointBuilder Map()
         {
-            if (!BuildModifyMethodType(entityType, out var inputType)) return this;
+            if (!BuildModifyMethodType(BuilderParams.EntityType, out var inputType)) return this;
 
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedPut));
-            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [
-                BuilderParams.WebApplication,
-                entityType,
-                BuilderParams.DbContextType
-            ]);
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [BuilderParams.EntityType]);
 
             return this;
         }
@@ -39,8 +35,9 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 return false;
             }
             
-            ParameterInfo[] parameters = modifyMethod.GetParameters();
+            var parameters = modifyMethod.GetParameters();
             inputType = DynamicType.NewDynamicType(parameters, entityType, "Update");
+            GeneratedDynamicTypes.Add(inputType.Name, inputType);
             return true;
         }
         
@@ -49,15 +46,13 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             return typeof(SlothfulUpdateEndpointBuilder).GetMethod(methodName);
         }
         
-        public IEndpointConventionBuilder MapTypedPut<T>(
-            WebApplication app,
-            Type entityType,
-            Type dbContextType)
+        public IEndpointConventionBuilder MapTypedPut<T>(Type entityType)
         {
-            return app.MapPut(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", ([FromRoute] Guid id, [FromBody] T command) =>
+            return BuilderParams.WebApplication.MapPut(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", 
+                    ([FromRoute] Guid id, [FromBody] T command) =>
                 {
-                    using var serviceScope = app.Services.CreateScope();
-                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, dbContextType, serviceScope);
+                    using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
+                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     service.Update(id, command);
                     return Results.NoContent();
                 })

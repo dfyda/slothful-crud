@@ -16,24 +16,20 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             BuilderParams = builderParams;
         }
         
-        public SlothfulBrowseEndpointBuilder Map(Type entityType)
+        public SlothfulBrowseEndpointBuilder Map()
         {
-            if (!BuildBrowseQueryType(entityType, out var inputType, out var resultType)) return this;
+            if (!BuildBrowseQueryType(BuilderParams.EntityType, out var inputType, out var resultType))
+                return this;
             
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedGet));
-            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [
-                BuilderParams.WebApplication,
-                entityType,
-                BuilderParams.DbContextType,
-                resultType
-            ]);
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [BuilderParams.EntityType, resultType]);
 
             return this;
         }
 
         private bool BuildBrowseQueryType(Type entityType, out Type inputType, out Type resultType)
         {
-            PropertyInfo[] parameters = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var parameters = entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             if (parameters.Length == 0)
             {
                 inputType = null;
@@ -47,6 +43,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 "Browse",
                 true,
                 BrowseFields.Fields);
+            GeneratedDynamicTypes.Add(inputType.Name, inputType);
             
             var resultDto = GetResultDto(entityType);
             resultType = typeof(PagedResults<>).MakeGenericType(resultDto);
@@ -64,17 +61,14 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             return typeof(SlothfulBrowseEndpointBuilder).GetMethod(methodName);
         }
         
-        public void MapTypedGet<T>(
-            WebApplication app,
-            Type entityType,
-            Type dbContextType,
-            Type returnType) where T : new()
+        public void MapTypedGet<T>(Type entityType, Type returnType) where T : new()
         {
-            app.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
+            BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", 
+                    (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
                 {
                     query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
-                    using var serviceScope = app.Services.CreateScope();
-                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, dbContextType, serviceScope);
+                    using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
+                    var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     return DynamicType.MapToPagedResultsDto(service.Browse(page, query), entityType, GetResultDto(entityType));
                 })
                 .WithName($"Browse{entityType.Name}s")
