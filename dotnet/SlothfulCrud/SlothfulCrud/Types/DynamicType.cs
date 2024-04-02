@@ -16,7 +16,7 @@ namespace SlothfulCrud.Types
             IDictionary<string, Type> additionalProperties = null)
         {
             var typeProperties = parameters.Select(x => new TypeProperty(x.Name, x.ParameterType));
-            return BuildType(
+            return NewDynamicType(
                 typeProperties.ToArray(),
                 entityType,
                 methodName,
@@ -32,7 +32,7 @@ namespace SlothfulCrud.Types
             IDictionary<string, Type> additionalProperties = null)
         {
             var typeProperties = parameters.Select(x => new TypeProperty(x.Name, x.PropertyType));
-            return BuildType(
+            return NewDynamicType(
                 typeProperties.ToArray(),
                 entityType,
                 methodName,
@@ -40,7 +40,7 @@ namespace SlothfulCrud.Types
                 additionalProperties);
         }
         
-        private static Type BuildType(
+        public static Type NewDynamicType(
             TypeProperty[] parameters,
             Type entityType,
             string methodName,

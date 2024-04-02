@@ -28,15 +28,15 @@ namespace SlothfulCrud.Tests.Api.EF
         {
             if (!dbContext.Set<Sloth>().Any() && !dbContext.Set<WildKoala>().Any())
             {
-                var slothId = Guid.NewGuid();
+                var sloth = new Sloth(Guid.NewGuid(), "DapperSloth", 10);
                 dbContext.Set<Sloth>()
                     .AddRange(
-                        new Sloth(slothId, "DapperSloth", 10),
+                        sloth,
                         new Sloth(Guid.NewGuid(), "EnergySloth", 1));
                 dbContext.Set<WildKoala>()
                     .AddRange(
-                        new WildKoala(Guid.NewGuid(), "SpeedyKoala", 11, slothId),
-                        new WildKoala(Guid.NewGuid(), "DevKoala", 5, slothId));
+                        new WildKoala(Guid.NewGuid(), "SpeedyKoala", 11, sloth),
+                        new WildKoala(Guid.NewGuid(), "DevKoala", 5, sloth));
 
                 dbContext.SaveChanges();
             }

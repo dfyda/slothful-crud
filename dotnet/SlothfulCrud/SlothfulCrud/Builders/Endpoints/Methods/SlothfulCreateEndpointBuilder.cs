@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Providers;
-using SlothfulCrud.Types;
+using SlothfulCrud.Providers.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
@@ -40,12 +40,11 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 return false;
             }
 
-            var parameters = constructor.GetParameters();
-            inputType = DynamicType.NewDynamicType(parameters, entityType, "Create");
+            inputType = CreateCommandProvider.PrepareCommand(constructor, entityType);
             GeneratedDynamicTypes.Add(inputType.Name, inputType);
             return true;
         }
-        
+
         public IEndpointConventionBuilder MapTypedPost<T>(Type entityType)
         {
             return BuilderParams.WebApplication.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), 

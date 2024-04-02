@@ -64,5 +64,21 @@ namespace SlothfulCrud.Extensions
         {
             return suffixes.Any(suffix => input.EndsWith(suffix, StringComparison.OrdinalIgnoreCase));
         }
+        
+        public static string FirstCharToUpper(this string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return input;
+
+            return char.ToUpperInvariant(input[0]) + input.Substring(1);
+        }
+        
+        public static string FirstCharToLower(this string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return input;
+
+            return char.ToLowerInvariant(input[0]) + input.Substring(1);
+        }
     }
 }

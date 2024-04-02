@@ -18,12 +18,13 @@ namespace SlothfulCrud.Tests.Api.Domain
             Name = "SpeedyKoala";
         }
         
-        public WildKoala(Guid id, string name, int age, Guid cuisineId)
+        public WildKoala(Guid id, string name, int age, Sloth cuisine)
         {
             Id = id;
             Name = name;
             Age = age;
-            CuisineId = cuisineId;
+            CuisineId = cuisine.Id;
+            Cuisine = cuisine;
         }
     }
 }

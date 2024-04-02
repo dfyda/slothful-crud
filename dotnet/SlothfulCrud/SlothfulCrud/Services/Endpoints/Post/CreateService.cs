@@ -27,6 +27,7 @@ namespace SlothfulCrud.Services.Endpoints.Post
                 throw new ConfigurationException($"Entity '{typeof(T).Name}' must have a constructor.");
             }
             
+            // TODO: Get nested object by id and pass it to the constructor
             var constructorArgs = constructor.GetParameters()
                 .Select(param => ((object)command).GetProperties()[param.Name])
                 .ToArray();
