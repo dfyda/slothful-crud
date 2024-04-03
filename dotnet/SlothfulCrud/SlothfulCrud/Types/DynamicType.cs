@@ -123,7 +123,7 @@ namespace SlothfulCrud.Types
             foreach (var property in properties)
             {
                 var value = property.GetValue(item);
-                if (nestedProperties.Contains(property))
+                if (nestedProperties.Contains(property) && value != null)
                 {
                     var nestedDto = new BaseEntityDto()
                     {

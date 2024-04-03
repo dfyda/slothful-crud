@@ -35,8 +35,8 @@ namespace SlothfulCrud.Tests.Api.EF
                         new Sloth(Guid.NewGuid(), "EnergySloth", 1));
                 dbContext.Set<WildKoala>()
                     .AddRange(
-                        new WildKoala(Guid.NewGuid(), "SpeedyKoala", 11, sloth),
-                        new WildKoala(Guid.NewGuid(), "DevKoala", 5, sloth));
+                        new WildKoala(Guid.NewGuid(), "SpeedyKoala", 11, sloth, sloth),
+                        new WildKoala(Guid.NewGuid(), "DevKoala", 5, sloth, null));
 
                 dbContext.SaveChanges();
             }
