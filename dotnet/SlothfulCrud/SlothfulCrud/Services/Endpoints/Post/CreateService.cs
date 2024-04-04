@@ -28,8 +28,8 @@ namespace SlothfulCrud.Services.Endpoints.Post
                 throw new ConfigurationException($"Entity '{typeof(T).Name}' must have a constructor.");
             }
             
-            var constructorArgs = constructor.GetParameters()
-                .Select(param => GetConstructorParam(command, param))
+            var constructorArgs = constructor.GetParameters().ToArray()
+                .Select(param => param.GetDomainMethodParam((object)command, DbContext))
                 .ToArray();
 
             constructorArgs[0] = id;
@@ -40,34 +40,6 @@ namespace SlothfulCrud.Services.Endpoints.Post
             DbContext.SaveChanges();
             
             return id;
-        }
-
-        private object GetConstructorParam(dynamic command, ParameterInfo param)
-        {
-            if (param.ParameterType.IsAssignableTo(typeof(ISlothfulEntity)))
-            {
-                var entityIdProperty = ((object)command).GetProperties()[$"{param.Name.FirstCharToLower()}Id"];
-                return GetEntityItem(param.ParameterType,
-                    (Guid)(entityIdProperty ?? Guid.Empty), entityIdProperty is null);
-            }
-            return ((object)command).GetProperties()[param.Name];
-        }
-
-        private object GetEntityItem(Type entityType, Guid id, bool isNullable = false)
-        {
-            if (id == Guid.Empty && isNullable)
-            {
-                return null;
-            }
-            
-            var item = DbContext.Find(entityType, id);
-            if (item is null && !isNullable)
-            {
-                throw new NotFoundException($"{entityType.Name.ToLowerInvariant()}_not_found", 
-                    $"Entity '{entityType.Name}' with id '{id}' not found.");
-            }
-
-            return item;
         }
     }
 }

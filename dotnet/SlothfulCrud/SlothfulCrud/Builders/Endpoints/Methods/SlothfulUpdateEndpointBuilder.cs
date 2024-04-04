@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Providers;
-using SlothfulCrud.Types;
+using SlothfulCrud.Providers.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
@@ -35,8 +35,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 return false;
             }
             
-            var parameters = modifyMethod.GetParameters();
-            inputType = DynamicType.NewDynamicType(parameters, entityType, "Update");
+            inputType = CommandProvider.PrepareUpdateCommand(modifyMethod, entityType);
             GeneratedDynamicTypes.Add(inputType.Name, inputType);
             return true;
         }

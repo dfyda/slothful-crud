@@ -36,7 +36,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
             var item = _getService.Get(id);
             
             var methodArgs = updateMethod.GetParameters()
-                .Select(param => ((object)command).GetProperties()[param.Name])
+                .Select(param => param.GetDomainMethodParam((object)command, DbContext))
                 .ToArray();
             
             updateMethod.Invoke(item, methodArgs);

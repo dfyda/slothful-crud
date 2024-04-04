@@ -40,7 +40,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 return false;
             }
 
-            inputType = CreateCommandProvider.PrepareCommand(constructor, entityType);
+            inputType = CommandProvider.PrepareCreateCommand(constructor, entityType);
             GeneratedDynamicTypes.Add(inputType.Name, inputType);
             return true;
         }

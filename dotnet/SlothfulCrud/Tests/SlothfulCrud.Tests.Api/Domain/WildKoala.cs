@@ -30,5 +30,16 @@ namespace SlothfulCrud.Tests.Api.Domain
             NeighbourId = neighbour?.Id;
             Neighbour = neighbour;
         }
+        
+        public void Update(string name, int age, int? age2, Sloth cuisine, Sloth neighbour)
+        {
+            Name = name;
+            Age = age;
+            Age2 = age2;
+            CuisineId = cuisine.Id;
+            Cuisine = cuisine;
+            NeighbourId = neighbour?.Id;
+            Neighbour = neighbour;
+        }
     }
 }

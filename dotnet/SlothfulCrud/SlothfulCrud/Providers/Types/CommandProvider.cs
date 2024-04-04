@@ -4,18 +4,29 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Providers.Types
 {
-    public static class CreateCommandProvider
+    public static class CommandProvider
     {
-        public static Type PrepareCommand(ConstructorInfo constructor, Type entityType)
+        public static Type PrepareCreateCommand(ConstructorInfo constructor, Type entityType)
         {
             var parameters = constructor.GetParameters();
+            return NewCommandType(entityType, parameters, "Create");
+        }
+        
+        public static Type PrepareUpdateCommand(MethodInfo methodInfo, Type entityType)
+        {
+            var parameters = methodInfo.GetParameters();
+            return NewCommandType(entityType, parameters, "Update");
+        }
+
+        private static Type NewCommandType(Type entityType, ParameterInfo[] parameters, string methodName)
+        {
             var nested = entityType.GetProperties()
                 .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
                 .ToArray();
 
             var parametersWithoutNested = ChangeObjectToIdParam(entityType, parameters, nested).ToArray();
             
-            return DynamicType.NewDynamicType(parametersWithoutNested, entityType, "Create");
+            return DynamicType.NewDynamicType(parametersWithoutNested, entityType, methodName);
         }
 
         private static IEnumerable<TypeProperty> ChangeObjectToIdParam(Type entityType, ParameterInfo[] parameters, PropertyInfo[] nested)
