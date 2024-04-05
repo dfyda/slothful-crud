@@ -12,6 +12,8 @@ namespace SlothfulCrud.Tests.Api.Domain
         public Guid? NeighbourId { get; private set; }
         public Sloth Cuisine { get; private set; }
         public Sloth Neighbour { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; private set; }
         public string DisplayName => Name;
 
         public WildKoala()
@@ -29,6 +31,7 @@ namespace SlothfulCrud.Tests.Api.Domain
             Cuisine = cuisine;
             NeighbourId = neighbour?.Id;
             Neighbour = neighbour;
+            CreatedAt = DateTime.UtcNow;
         }
         
         public void Update(string name, int age, int? age2, Sloth cuisine, Sloth neighbour)
@@ -40,6 +43,7 @@ namespace SlothfulCrud.Tests.Api.Domain
             Cuisine = cuisine;
             NeighbourId = neighbour?.Id;
             Neighbour = neighbour;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }

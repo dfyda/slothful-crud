@@ -19,19 +19,19 @@ namespace SlothfulCrud.Services.Endpoints.Get
         
         public PagedResults<T> Browse(ushort page, dynamic query)
         {
-            var queryObject = DbContext.Set<T>().AsQueryable().IncludeAllFirstLevelDependencies();
+            var baseQuery = DbContext.Set<T>().AsQueryable().IncludeAllFirstLevelDependencies();
             var properties = query.GetType().GetProperties();
 
             // TO DO: Add configuration for custom filtering and sorting
-            queryObject = FilterQuery(query, properties, queryObject);
-            queryObject = SortQuery(query, queryObject);
+            var resultQuery = FilterQuery(query, properties, baseQuery) as IQueryable<T>;
+            resultQuery = SortQuery(query, resultQuery);
 
-            var totalQuery = queryObject;
-            queryObject = queryObject
+            var totalQuery = baseQuery;
+            resultQuery = resultQuery
                 .Take((int)query.Rows)
                 .Skip((int)query.Skip);
 
-            var data = queryObject.ToList();
+            var data = resultQuery.ToList();
             var total = totalQuery.Count();
             
             return new PagedResults<T>(query.Skip, total, page, data);
@@ -68,10 +68,15 @@ namespace SlothfulCrud.Services.Endpoints.Get
                     continue;
                 }
                 
-                var propertyType = propertyInfo.PropertyType;
+                var propertyType = propertyInfo.PropertyType as Type;
+                
                 if (propertyType == typeof(string))
                 {
-                    queryObject = queryObject.Where(x => EF.Property<string>(x, propertyName).Contains((string)propertyValue));
+                    queryObject = FilterStringField(queryObject, propertyName, propertyValue);
+                } 
+                else if (propertyType == typeof(DateTime?))
+                {
+                    queryObject = FilterDateField(queryObject, propertyName, propertyValue);
                 }
                 else
                 {
@@ -81,7 +86,22 @@ namespace SlothfulCrud.Services.Endpoints.Get
 
             return queryObject;
         }
-        
+
+        private static IQueryable<T> FilterDateField(IQueryable<T> queryObject, string propertyName, object propertyValue)
+        {
+            if (propertyName.EndsWith("From"))
+                queryObject = queryObject.Where(x => EF.Property<DateTime?>(x, propertyName.Replace("From", "")) >= ((DateTime?)propertyValue));
+            if (propertyName.EndsWith("To"))
+                queryObject = queryObject.Where(x => EF.Property<DateTime?>(x, propertyName.Replace("To", "")) < ((DateTime?)propertyValue).Value.AddDays(1));
+            return queryObject;
+        }
+
+        private static IQueryable<T> FilterStringField(IQueryable<T> queryObject, string propertyName, object propertyValue)
+        {
+            queryObject = queryObject.Where(x => EF.Property<string>(x, propertyName).Contains((string)propertyValue));
+            return queryObject;
+        }
+
         private IQueryable<TDbSet> FilterField<TDbSet, TField>(string propertyName, TField propertyValue, IQueryable<TDbSet> queryObject)
         {
             return queryObject.Where(x => EF.Property<TField>(x, propertyName).Equals(propertyValue));

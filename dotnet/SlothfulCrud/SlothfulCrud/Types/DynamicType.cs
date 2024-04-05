@@ -40,6 +40,57 @@ namespace SlothfulCrud.Types
                 additionalProperties);
         }
         
+        public static Type NewDynamicBrowseQuery(
+            PropertyInfo[] parameters,
+            Type entityType,
+            string methodName,
+            IDictionary<string, Type> additionalProperties = null)
+        {
+            var typeProperties = ReplaceDateToDateRange(parameters);
+            typeProperties = RemoveNestedEntities(typeProperties);
+            return NewDynamicType(
+                typeProperties.ToArray(),
+                entityType,
+                methodName,
+                true,
+                additionalProperties);
+        }
+
+        private static List<TypeProperty> RemoveNestedEntities(IEnumerable<TypeProperty> typeProperties)
+        {
+            return typeProperties
+                .Where(x => !x.Type.IsClass || x.Type == typeof(string))
+                .ToList();
+        }
+
+        private static List<TypeProperty> ReplaceDateToDateRange(PropertyInfo[] parameters)
+        {
+            var typeProperties = parameters
+                .Select(x => new TypeProperty(x.Name, x.PropertyType))
+                .ToList();
+            var dates = typeProperties
+                .Where(x => x.Type == typeof(DateTime) || x.Type == typeof(DateTime?))
+                .ToList();
+            
+            if (dates.Count != 0)
+            {
+                typeProperties = typeProperties
+                    .Where(x => x.Type != typeof(DateTime) && x.Type != typeof(DateTime?))
+                    .ToList();
+                
+                foreach (var date in dates)
+                {
+                    typeProperties.AddRange(new[]
+                    {
+                        new TypeProperty($"{date.Name}From", typeof(DateTime?)),
+                        new TypeProperty($"{date.Name}To", typeof(DateTime?))
+                    });
+                }
+            }
+
+            return typeProperties;
+        }
+
         public static Type NewDynamicType(
             TypeProperty[] parameters,
             Type entityType,

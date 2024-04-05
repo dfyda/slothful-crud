@@ -37,11 +37,10 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 return false;
             }
             
-            inputType = DynamicType.NewDynamicType(
+            inputType = DynamicType.NewDynamicBrowseQuery(
                 parameters,
                 entityType,
                 "Browse",
-                true,
                 BrowseFields.Fields);
             GeneratedDynamicTypes.Add(inputType.Name, inputType);
             
