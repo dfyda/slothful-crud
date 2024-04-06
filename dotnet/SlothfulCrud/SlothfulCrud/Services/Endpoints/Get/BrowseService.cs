@@ -50,6 +50,14 @@ namespace SlothfulCrud.Services.Endpoints.Get
             }
                 
             var sortBy = (string)query.SortBy;
+            var sortProperty = typeof(T).GetProperties().First(x => x.Name == sortBy);
+            if (sortProperty.PropertyType.IsClass && sortProperty.PropertyType != typeof(string))
+            {
+                // TODO: Add support for setting the sort property
+                queryObject = queryObject.OrderByNestedProperty($"{sortBy}.Name", (string)query.SortDirection == "asc");
+                return queryObject;
+            }
+            
             queryObject = ((string)query.SortDirection).ToLower() == "asc"
                 ? queryObject.OrderBy(x => EF.Property<object>(x, sortBy))
                 : queryObject.OrderByDescending(x => EF.Property<object>(x, sortBy));
