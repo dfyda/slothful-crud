@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Builders.Endpoints;
 using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
 using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
@@ -13,6 +14,7 @@ namespace SlothfulCrud.Managers
         private readonly IApiSegmentProvider _apiSegmentProvider;
         private readonly ICreateConstructorBehavior _createConstructorBehavior;
         private readonly IModifyMethodBehavior _modifyMethodBehavior;
+        private readonly SlothConfigurationBuilder _slothConfigurationBuilder = new SlothConfigurationBuilder();
 
         public SlothfulCrudManager(
             IApiSegmentProvider apiSegmentProvider,
@@ -26,6 +28,8 @@ namespace SlothfulCrud.Managers
         
         public WebApplication Register(WebApplication webApplication, Type dbContextType, Assembly executingAssembly)
         {
+            _slothConfigurationBuilder.ApplyConfigurationsFromAssembly(executingAssembly);
+            
             var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(executingAssembly);
             foreach (var entityType in entityTypes)
             {
