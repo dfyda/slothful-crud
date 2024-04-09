@@ -1,5 +1,6 @@
 ﻿using SlothfulCrud.Builders.Configurations.Methods;
 using SlothfulCrud.Domain;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Builders.Configurations
 {
@@ -10,24 +11,30 @@ namespace SlothfulCrud.Builders.Configurations
         public SlothfulCreateEndpointConfigurationBuilder<T> CreateEndpoint => new();
         public SlothfulUpdateEndpointConfigurationBuilder<T> UpdateEndpoint => new();
         public SlothfulDeleteEndpointConfigurationBuilder<T> DeleteEndpoint => new();
+        protected GlobalConfiguration GlobalConfiguration { get; set; }
         
-        public SlothEntityBuilder<T> AllowAnonymous()
+        public virtual SlothEntityBuilder<T> AllowAnonymous()
         {
+            GlobalConfiguration.SetIsAuthorizationEnable(false);
             return this;
         }
         
-        public SlothEntityBuilder<T> RequireAuthorization(params string[] policyNames)
+        public virtual SlothEntityBuilder<T> RequireAuthorization(params string[] policyNames)
         {
+            GlobalConfiguration.SetIsAuthorizationEnable(true);
+            GlobalConfiguration.SetPolicyNames(policyNames);
             return this;
         }
         
-        public SlothEntityBuilder<T> HasSortProperty(string propertyName)
+        public virtual SlothEntityBuilder<T> HasSortProperty(string sortProperty)
         {
+            GlobalConfiguration.SetSortProperty(sortProperty);
             return this;
         }
         
-        public SlothEntityBuilder<T> ExposeAllNestedProperties(bool expose = true)
+        public virtual SlothEntityBuilder<T> ExposeAllNestedProperties(bool expose = true)
         {
+            GlobalConfiguration.SetExposeAllNestedProperties(expose);
             return this;
         }
     }
