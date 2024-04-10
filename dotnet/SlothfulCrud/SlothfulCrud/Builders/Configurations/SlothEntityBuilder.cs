@@ -4,38 +4,50 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Builders.Configurations
 {
-    public class SlothEntityBuilder<T> where T : class, ISlothfulEntity
+    public class SlothEntityBuilder<TEntity> where TEntity : class, ISlothfulEntity
     {
-        public SlothfulGetEndpointConfigurationBuilder<T> GetEndpoint => new();
-        public SlothfulBrowseEndpointConfigurationBuilder<T> BrowseEndpoint => new();
-        public SlothfulCreateEndpointConfigurationBuilder<T> CreateEndpoint => new();
-        public SlothfulUpdateEndpointConfigurationBuilder<T> UpdateEndpoint => new();
-        public SlothfulDeleteEndpointConfigurationBuilder<T> DeleteEndpoint => new();
+        public SlothfulGetEndpointConfigurationBuilder<TEntity> GetEndpoint => new();
+        public SlothfulBrowseEndpointConfigurationBuilder<TEntity> BrowseEndpoint => new();
+        public SlothfulCreateEndpointConfigurationBuilder<TEntity> CreateEndpoint => new();
+        public SlothfulUpdateEndpointConfigurationBuilder<TEntity> UpdateEndpoint => new();
+        public SlothfulDeleteEndpointConfigurationBuilder<TEntity> DeleteEndpoint => new();
         protected GlobalConfiguration GlobalConfiguration { get; set; }
+
+        public SlothEntityBuilder()
+        {
+            GlobalConfiguration = new GlobalConfiguration();
+        }
         
-        public virtual SlothEntityBuilder<T> AllowAnonymous()
+        public virtual SlothEntityBuilder<TEntity> AllowAnonymous()
         {
             GlobalConfiguration.SetIsAuthorizationEnable(false);
             return this;
         }
         
-        public virtual SlothEntityBuilder<T> RequireAuthorization(params string[] policyNames)
+        public virtual SlothEntityBuilder<TEntity> RequireAuthorization(params string[] policyNames)
         {
             GlobalConfiguration.SetIsAuthorizationEnable(true);
             GlobalConfiguration.SetPolicyNames(policyNames);
             return this;
         }
         
-        public virtual SlothEntityBuilder<T> HasSortProperty(string sortProperty)
+        public virtual SlothEntityBuilder<TEntity> HasSortProperty(string sortProperty)
         {
             GlobalConfiguration.SetSortProperty(sortProperty);
             return this;
         }
         
-        public virtual SlothEntityBuilder<T> ExposeAllNestedProperties(bool expose = true)
+        public virtual SlothEntityBuilder<TEntity> ExposeAllNestedProperties(bool expose = true)
         {
             GlobalConfiguration.SetExposeAllNestedProperties(expose);
             return this;
+        }
+        
+        public EndpointsConfiguration Build()
+        {
+            var item = new EndpointsConfiguration(
+                GetEndpoint.GetConfiguration);
+            return item;
         }
     }
 }

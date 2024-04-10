@@ -3,20 +3,25 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Builders.Endpoints.Parameters;
+using SlothfulCrud.Domain;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulBrowseEndpointBuilder : SlothfulMethodEndpointRouteBuilder
+    public class SlothfulBrowseEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity> 
+        where TEntity : class, ISlothfulEntity
     {
-        public SlothfulBrowseEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
+        public SlothfulBrowseEndpointBuilder(
+            SlothfulBuilderParams builderParams,
+            SlothfulEndpointConfigurationBuilder<TEntity> configurationBuilder) : base(builderParams, configurationBuilder)
         {
             BuilderParams = builderParams;
         }
         
-        public SlothfulBrowseEndpointBuilder Map()
+        public SlothfulBrowseEndpointBuilder<TEntity> Map()
         {
             if (!BuildBrowseQueryType(BuilderParams.EntityType, out var inputType, out var resultType))
                 return this;
@@ -57,7 +62,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
 
         private MethodInfo GetGenericMapTypedMethod(string methodName)
         {
-            return typeof(SlothfulBrowseEndpointBuilder).GetMethod(methodName);
+            return typeof(SlothfulBrowseEndpointBuilder<TEntity>).GetMethod(methodName);
         }
         
         public void MapTypedGet<T>(Type entityType, Type returnType) where T : new()

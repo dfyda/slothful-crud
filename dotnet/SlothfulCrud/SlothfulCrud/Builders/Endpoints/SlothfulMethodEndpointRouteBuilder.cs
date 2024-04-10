@@ -1,31 +1,37 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Builders.Endpoints.Parameters;
+using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Builders.Endpoints
 {
-    public abstract class SlothfulMethodEndpointRouteBuilder : SlothfulEndpointRouteBuilder
+    public abstract class SlothfulMethodEndpointRouteBuilder<TEntity> : SlothfulEndpointRouteBuilder<TEntity> 
+        where TEntity : class, ISlothfulEntity
     {
         protected RouteHandlerBuilder ConventionBuilder { get; set; }
         
-        protected SlothfulMethodEndpointRouteBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
+        protected SlothfulMethodEndpointRouteBuilder(
+            SlothfulBuilderParams builderParams,
+            SlothfulEndpointConfigurationBuilder<TEntity> configurationBuilder) : base(builderParams, configurationBuilder)
         {
             BuilderParams = builderParams;
+            EndpointsConfiguration = configurationBuilder.Build();
         }
         
-        public SlothfulMethodEndpointRouteBuilder Produces(int statusCode)
+        public SlothfulMethodEndpointRouteBuilder<TEntity> Produces(int statusCode)
         {
             ConventionBuilder.Produces(statusCode);
             return this;
         }
 
-        public SlothfulMethodEndpointRouteBuilder Produces(int statusCode, Type responseType)
+        public SlothfulMethodEndpointRouteBuilder<TEntity> Produces(int statusCode, Type responseType)
         {
             ConventionBuilder.Produces(statusCode, responseType);
             return this;
         }
 
-        public SlothfulMethodEndpointRouteBuilder Produces<TResponse>(
+        public SlothfulMethodEndpointRouteBuilder<TEntity> Produces<TResponse>(
             int statusCode = StatusCodes.Status200OK,
             string contentType = null,
             params string[] additionalContentTypes)

@@ -3,20 +3,25 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Builders.Endpoints.Parameters;
+using SlothfulCrud.Domain;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Providers.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulCreateEndpointBuilder : SlothfulMethodEndpointRouteBuilder
+    public class SlothfulCreateEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity>
+        where TEntity : class, ISlothfulEntity
     {
-        public SlothfulCreateEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
+        public SlothfulCreateEndpointBuilder(
+            SlothfulBuilderParams builderParams,
+            SlothfulEndpointConfigurationBuilder<TEntity> configurationBuilder) : base(builderParams, configurationBuilder)
         {
             BuilderParams = builderParams;
         }
         
-        public SlothfulCreateEndpointBuilder Map()
+        public SlothfulCreateEndpointBuilder<TEntity> Map()
         {
             if (!BuildCreateCommandType(BuilderParams.EntityType, out var inputType)) return this;
 
@@ -28,7 +33,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         private MethodInfo GetGenericMapTypedMethod(string methodName)
         {
-            return typeof(SlothfulCreateEndpointBuilder).GetMethod(methodName);
+            return typeof(SlothfulCreateEndpointBuilder<TEntity>).GetMethod(methodName);
         }
 
         private bool BuildCreateCommandType(Type entityType, out Type inputType)

@@ -3,20 +3,25 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Builders.Endpoints.Parameters;
+using SlothfulCrud.Domain;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulGetEndpointBuilder : SlothfulMethodEndpointRouteBuilder
+    public class SlothfulGetEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity>
+        where TEntity : class, ISlothfulEntity
     {
-        public SlothfulGetEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
+        public SlothfulGetEndpointBuilder(
+            SlothfulBuilderParams builderParams,
+            SlothfulEndpointConfigurationBuilder<TEntity> configurationBuilder) : base(builderParams, configurationBuilder)
         {
             BuilderParams = builderParams;
         }
         
-        public SlothfulGetEndpointBuilder Map()
+        public SlothfulGetEndpointBuilder<TEntity> Map()
         {
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedGet));
             var resultType = BuildGetDtoType();
@@ -27,6 +32,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         private Type BuildGetDtoType()
         {
+            var exposeAll = EndpointsConfiguration.Get.ExposeAllNestedProperties;
             var type = DynamicType.NewDynamicTypeDto(BuilderParams.EntityType, $"{BuilderParams.EntityType}DetailsDto");
             GeneratedDynamicTypes.Add(type.Name, type);
             return type;
@@ -34,7 +40,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         private MethodInfo GetGenericMapTypedMethod(string methodName)
         {
-            return typeof(SlothfulGetEndpointBuilder).GetMethod(methodName);
+            return typeof(SlothfulGetEndpointBuilder<TEntity>).GetMethod(methodName);
         }
         
         public IEndpointConventionBuilder MapTypedGet<T>(Type entityType)
