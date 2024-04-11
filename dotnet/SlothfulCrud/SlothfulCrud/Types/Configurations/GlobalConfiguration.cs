@@ -14,6 +14,18 @@
             IsAuthorizationEnable = false;
             PolicyNames = Array.Empty<string>();
         }
+        
+        public GlobalConfiguration(
+            string sortProperty,
+            bool exposeAllNestedProperties,
+            bool isAuthorizationEnable,
+            string[] policyNames)
+        {
+            SortProperty = sortProperty;
+            ExposeAllNestedProperties = exposeAllNestedProperties;
+            IsAuthorizationEnable = isAuthorizationEnable;
+            PolicyNames = policyNames;
+        }
 
         public void SetSortProperty(string sortProperty)
         {

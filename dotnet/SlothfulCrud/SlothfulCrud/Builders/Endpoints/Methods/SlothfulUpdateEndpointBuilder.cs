@@ -3,20 +3,25 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Builders.Endpoints.Parameters;
+using SlothfulCrud.Domain;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Providers.Types;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulUpdateEndpointBuilder : SlothfulMethodEndpointRouteBuilder
+    public class SlothfulUpdateEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity>
+        where TEntity : class, ISlothfulEntity
     {
-        public SlothfulUpdateEndpointBuilder(SlothfulBuilderParams builderParams) : base(builderParams)
+        public SlothfulUpdateEndpointBuilder(
+            SlothfulBuilderParams builderParams,
+            SlothfulEndpointConfigurationBuilder<TEntity> configurationBuilder) : base(builderParams, configurationBuilder)
         {
             BuilderParams = builderParams;
         }
         
-        public SlothfulUpdateEndpointBuilder Map()
+        public SlothfulUpdateEndpointBuilder<TEntity> Map()
         {
             if (!BuildModifyMethodType(BuilderParams.EntityType, out var inputType)) return this;
 
@@ -42,7 +47,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         private MethodInfo GetGenericMapTypedMethod(string methodName)
         {
-            return typeof(SlothfulUpdateEndpointBuilder).GetMethod(methodName);
+            return typeof(SlothfulUpdateEndpointBuilder<TEntity>).GetMethod(methodName);
         }
         
         public IEndpointConventionBuilder MapTypedPut<T>(Type entityType)
