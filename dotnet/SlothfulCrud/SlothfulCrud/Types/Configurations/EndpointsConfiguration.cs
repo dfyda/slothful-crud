@@ -19,14 +19,20 @@
             Global = new GlobalConfiguration();
         }
         
-        public EndpointsConfiguration(EndpointConfiguration get)
+        public EndpointsConfiguration(
+            EndpointConfiguration get,
+            EndpointConfiguration browse,
+            EndpointConfiguration create,
+            EndpointConfiguration update,
+            EndpointConfiguration delete,
+            GlobalConfiguration global)
         {
             Get = get;
-            Browse = new EndpointConfiguration();
-            Create = new EndpointConfiguration();
-            Update = new EndpointConfiguration();
-            Delete = new EndpointConfiguration();
-            Global = new GlobalConfiguration();
+            Browse = browse;
+            Create = create;
+            Update = update;
+            Delete = delete;
+            Global = global;
         }
     }
 }

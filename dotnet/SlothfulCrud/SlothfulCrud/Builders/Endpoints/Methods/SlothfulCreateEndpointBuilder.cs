@@ -8,6 +8,7 @@ using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Providers.Types;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
@@ -16,7 +17,10 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
     {
         public SlothfulCreateEndpointBuilder(
             SlothfulBuilderParams builderParams,
-            SlothfulEndpointConfigurationBuilder<TEntity> configurationBuilder) : base(builderParams, configurationBuilder)
+            EndpointsConfiguration endpointsConfiguration,
+            IDictionary<string, Type> generatedDynamicTypes,
+            SlothEntityBuilder<TEntity> configurationBuilder
+        ) : base(builderParams, endpointsConfiguration, generatedDynamicTypes, configurationBuilder)
         {
             BuilderParams = builderParams;
         }

@@ -6,47 +6,52 @@ namespace SlothfulCrud.Builders.Configurations
 {
     public class SlothEntityBuilder<TEntity> where TEntity : class, ISlothfulEntity
     {
-        public SlothfulGetEndpointConfigurationBuilder<TEntity> GetEndpoint => new();
-        public SlothfulBrowseEndpointConfigurationBuilder<TEntity> BrowseEndpoint => new();
-        public SlothfulCreateEndpointConfigurationBuilder<TEntity> CreateEndpoint => new();
-        public SlothfulUpdateEndpointConfigurationBuilder<TEntity> UpdateEndpoint => new();
-        public SlothfulDeleteEndpointConfigurationBuilder<TEntity> DeleteEndpoint => new();
-        protected GlobalConfiguration GlobalConfiguration { get; set; }
+        public SlothfulGetEndpointConfigurationBuilder<TEntity> GetEndpoint => new(EndpointsConfiguration.Get);
+        public SlothfulBrowseEndpointConfigurationBuilder<TEntity> BrowseEndpoint => new(EndpointsConfiguration.Browse);
+        public SlothfulCreateEndpointConfigurationBuilder<TEntity> CreateEndpoint => new(EndpointsConfiguration.Create);
+        public SlothfulUpdateEndpointConfigurationBuilder<TEntity> UpdateEndpoint => new(EndpointsConfiguration.Update);
+        public SlothfulDeleteEndpointConfigurationBuilder<TEntity> DeleteEndpoint => new(EndpointsConfiguration.Delete);
+        protected EndpointsConfiguration EndpointsConfiguration { get; set; }
 
         public SlothEntityBuilder()
         {
-            GlobalConfiguration = new GlobalConfiguration();
+            EndpointsConfiguration = new EndpointsConfiguration();
         }
         
         public virtual SlothEntityBuilder<TEntity> AllowAnonymous()
         {
-            GlobalConfiguration.SetIsAuthorizationEnable(false);
+            EndpointsConfiguration.Global.SetIsAuthorizationEnable(false);
             return this;
         }
         
         public virtual SlothEntityBuilder<TEntity> RequireAuthorization(params string[] policyNames)
         {
-            GlobalConfiguration.SetIsAuthorizationEnable(true);
-            GlobalConfiguration.SetPolicyNames(policyNames);
+            EndpointsConfiguration.Global.SetIsAuthorizationEnable(true);
+            EndpointsConfiguration.Global.SetPolicyNames(policyNames);
             return this;
         }
         
         public virtual SlothEntityBuilder<TEntity> HasSortProperty(string sortProperty)
         {
-            GlobalConfiguration.SetSortProperty(sortProperty);
+            EndpointsConfiguration.Global.SetSortProperty(sortProperty);
             return this;
         }
         
         public virtual SlothEntityBuilder<TEntity> ExposeAllNestedProperties(bool expose = true)
         {
-            GlobalConfiguration.SetExposeAllNestedProperties(expose);
+            EndpointsConfiguration.Global.SetExposeAllNestedProperties(expose);
             return this;
         }
         
         public EndpointsConfiguration Build()
         {
             var item = new EndpointsConfiguration(
-                GetEndpoint.GetConfiguration);
+                GetEndpoint.Configuration,
+                BrowseEndpoint.Configuration,
+                CreateEndpoint.Configuration,
+                UpdateEndpoint.Configuration,
+                DeleteEndpoint.Configuration,
+                EndpointsConfiguration.Global);
             return item;
         }
     }

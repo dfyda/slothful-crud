@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Domain;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Builders.Endpoints
 {
@@ -13,10 +14,14 @@ namespace SlothfulCrud.Builders.Endpoints
         
         protected SlothfulMethodEndpointRouteBuilder(
             SlothfulBuilderParams builderParams,
-            SlothfulEndpointConfigurationBuilder<TEntity> configurationBuilder) : base(builderParams, configurationBuilder)
+            EndpointsConfiguration endpointsConfiguration,
+            IDictionary<string, Type> generatedDynamicTypes,
+            SlothEntityBuilder<TEntity> configurationBuilder)
+            : base(builderParams, configurationBuilder)
         {
             BuilderParams = builderParams;
-            EndpointsConfiguration = configurationBuilder.Build();
+            EndpointsConfiguration = endpointsConfiguration;
+            GeneratedDynamicTypes = generatedDynamicTypes;
         }
         
         public SlothfulMethodEndpointRouteBuilder<TEntity> Produces(int statusCode)

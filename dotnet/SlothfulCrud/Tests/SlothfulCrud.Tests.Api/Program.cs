@@ -1,4 +1,3 @@
-using System.Reflection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Extensions;
@@ -48,3 +47,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.Run();
+

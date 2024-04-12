@@ -44,24 +44,24 @@ namespace SlothfulCrud.Builders.Configurations
         public SlothConfigurationBuilder ApplyConfiguration<TEntity>(ISlothEntityConfiguration<TEntity> configuration)
             where TEntity : class, ISlothfulEntity
         {
-            var builder = new SlothfulEndpointConfigurationBuilder<TEntity>();
+            var builder = new SlothEntityBuilder<TEntity>();
             configuration.Configure(builder);
             _builders.Add(builder);
 
             return this;
         }
 
-        public SlothfulEndpointConfigurationBuilder<TEntity> GetBuilder<TEntity>()
+        public SlothEntityBuilder<TEntity> GetBuilder<TEntity>()
             where TEntity : class, ISlothfulEntity
         {
             var builder =
-                _builders.SingleOrDefault(builder => builder is SlothfulEndpointConfigurationBuilder<TEntity>);
+                _builders.SingleOrDefault(builder => builder is SlothEntityBuilder<TEntity>);
             if (builder is null)
             {
-                return new SlothfulEndpointConfigurationBuilder<TEntity>();
+                return new SlothEntityBuilder<TEntity>();
             }
 
-            return builder as SlothfulEndpointConfigurationBuilder<TEntity>;
+            return builder as SlothEntityBuilder<TEntity>;
         }
     }
 }

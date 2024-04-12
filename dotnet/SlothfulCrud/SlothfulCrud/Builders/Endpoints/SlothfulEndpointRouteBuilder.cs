@@ -8,19 +8,25 @@ namespace SlothfulCrud.Builders.Endpoints
 {
     public class SlothfulEndpointRouteBuilder<TEntity> where TEntity : class, ISlothfulEntity
     {
-        private readonly SlothfulEndpointConfigurationBuilder<TEntity> _configurationBuilder;
+        private readonly SlothEntityBuilder<TEntity> _configurationBuilder;
         protected SlothfulBuilderParams BuilderParams { get; set; }
+        protected IDictionary<string, Type> GeneratedDynamicTypes { get; set; }
         public EndpointsConfiguration EndpointsConfiguration { get; protected set; }
-        protected static IDictionary<string, Type> GeneratedDynamicTypes { get; set; } = new Dictionary<string, Type>();
-        public SlothfulGetEndpointBuilder<TEntity> GetEndpoint => new(BuilderParams, _configurationBuilder);
-        public SlothfulBrowseEndpointBuilder<TEntity> BrowseEndpoint => new(BuilderParams, _configurationBuilder);
-        public SlothfulDeleteEndpointBuilder<TEntity> DeleteEndpoint => new(BuilderParams, _configurationBuilder);
-        public SlothfulUpdateEndpointBuilder<TEntity> UpdateEndpoint => new(BuilderParams, _configurationBuilder);
-        public SlothfulCreateEndpointBuilder<TEntity> CreateEndpoint => new(BuilderParams, _configurationBuilder);
+        public SlothfulGetEndpointBuilder<TEntity> GetEndpoint 
+            => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
+        public SlothfulBrowseEndpointBuilder<TEntity> BrowseEndpoint
+            => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
+        public SlothfulDeleteEndpointBuilder<TEntity> DeleteEndpoint
+            => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
+        public SlothfulUpdateEndpointBuilder<TEntity> UpdateEndpoint
+            => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
+        public SlothfulCreateEndpointBuilder<TEntity> CreateEndpoint
+            => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
 
-        public SlothfulEndpointRouteBuilder(SlothfulBuilderParams builderParams, SlothfulEndpointConfigurationBuilder<TEntity> configurationBuilder)
+        public SlothfulEndpointRouteBuilder(SlothfulBuilderParams builderParams, SlothEntityBuilder<TEntity> configurationBuilder)
         {
             _configurationBuilder = configurationBuilder;
+            GeneratedDynamicTypes = new Dictionary<string, Type>();
             BuilderParams = builderParams;
             EndpointsConfiguration = configurationBuilder.Build();
         }
