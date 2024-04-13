@@ -3,14 +3,13 @@ using SlothfulCrud.Tests.Api.Domain;
 
 namespace SlothfulCrud.Tests.Api.Slothful.EntityConfigurations
 {
-    public class SlothConfiguration : ISlothEntityConfiguration<Sloth>
+    public class WildKoalaConfiguration : ISlothEntityConfiguration<WildKoala>
     {
-        public void Configure(SlothEntityBuilder<Sloth> builder)
+        public void Configure(SlothEntityBuilder<WildKoala> builder)
         {
             builder.GetEndpoint
-                .ExposeAllNestedProperties()
                 .AllowAnonymous();
-            
+                
             builder.BrowseEndpoint
                 .ExposeAllNestedProperties()
                 .AllowAnonymous();

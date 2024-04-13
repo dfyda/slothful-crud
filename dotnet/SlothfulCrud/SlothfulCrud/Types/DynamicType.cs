@@ -107,45 +107,50 @@ namespace SlothfulCrud.Types
                 .Build();
         }
 
-        public static Type NewDynamicTypeDto(Type entityType, string typeName)
+        public static Type NewDynamicTypeDto(Type entityType, string typeName, bool exposeAll)
         {
-            // TODO: Add configuration for exposing all nested properties
+            var propertiesToAdd = new List<TypeProperty>();
             var properties = entityType.GetProperties();
-            var primitiveProperties = properties
-                .Where(x => !x.PropertyType.IsClass || x.PropertyType == typeof(string))
-                .ToList();
-            var nestedProperties = properties
-                .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
-                .ToList();
-
+            if (exposeAll)
+            {
+                propertiesToAdd.AddRange(properties.Select(x => new TypeProperty(x.Name, x.PropertyType)));
+            }
+            else
+            {
+                var primitiveProperties = properties
+                    .Where(x => !x.PropertyType.IsClass || x.PropertyType == typeof(string))
+                    .ToList();
+                var nestedProperties = properties
+                    .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
+                    .ToList();
+                
+                propertiesToAdd.AddRange(primitiveProperties.Select(x => new TypeProperty(x.Name, x.PropertyType)));
+                propertiesToAdd.AddRange(nestedProperties.Select(x => new TypeProperty(x.Name, typeof(BaseEntityDto))));
+            }
+            
             var builder = new DynamicTypeBuilder();
             return builder
                 .DefineType(typeName)
-                .AddProperties(primitiveProperties.Select(x => new TypeProperty(x.Name, x.PropertyType)).ToArray(),
-                    false)
-                .AddProperties(nestedProperties.Select(x => new TypeProperty(x.Name, typeof(BaseEntityDto))).ToArray(),
-                    false)
+                .AddProperties(propertiesToAdd.ToArray(), false)
                 .AddFakeTryParse()
                 .Build();
         }
 
-        public static dynamic MapToDto(dynamic item, Type entityType, Type dtoType)
+        public static dynamic MapToDto(dynamic item, Type entityType, Type dtoType, bool exposeAll)
         {
-            // TODO: Add configuration for exposing all nested properties
             var properties = entityType.GetProperties();
             var nestedProperties = entityType.GetProperties()
                 .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
                 .ToList();
             
             var instance = Activator.CreateInstance(dtoType);
-            FlatNestedEntities(item, dtoType, properties, nestedProperties, instance);
+            FlatNestedEntities(item, dtoType, properties, nestedProperties, instance, exposeAll);
 
             return instance;
         }
 
-        public static dynamic MapToPagedResultsDto(dynamic item, Type entityType, Type dtoType)
+        public static dynamic MapToPagedResultsDto(dynamic item, Type entityType, Type dtoType, bool exposeAll)
         {
-            // TODO: Add configuration for exposing all nested properties
             var properties = entityType.GetProperties();
             var nestedProperties = entityType.GetProperties()
                 .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
@@ -156,7 +161,7 @@ namespace SlothfulCrud.Types
             foreach (var element in elements)
             {
                 var instance = Activator.CreateInstance(dtoType);
-                FlatNestedEntities(element, dtoType, properties, nestedProperties, instance);
+                FlatNestedEntities(element, dtoType, properties, nestedProperties, instance, exposeAll);
 
                 instances.Add(instance);
             }
@@ -169,12 +174,13 @@ namespace SlothfulCrud.Types
             Type dtoType,
             PropertyInfo[] properties,
             List<PropertyInfo> nestedProperties,
-            object instance)
+            object instance,
+            bool exposeAll)
         {
             foreach (var property in properties)
             {
                 var value = property.GetValue(item);
-                if (nestedProperties.Contains(property) && value != null)
+                if (!exposeAll && nestedProperties.Contains(property) && value != null)
                 {
                     var nestedDto = new BaseEntityDto()
                     {

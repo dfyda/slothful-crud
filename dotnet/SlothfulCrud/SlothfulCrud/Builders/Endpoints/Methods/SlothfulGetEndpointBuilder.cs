@@ -36,7 +36,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         private Type BuildGetDtoType()
         {
             var exposeAll = EndpointsConfiguration.Get.ExposeAllNestedProperties;
-            var type = DynamicType.NewDynamicTypeDto(BuilderParams.EntityType, $"{BuilderParams.EntityType}DetailsDto");
+            var type = DynamicType.NewDynamicTypeDto(BuilderParams.EntityType, $"{BuilderParams.EntityType}DetailsDto", exposeAll);
             GeneratedDynamicTypes.Add(type.Name, type);
             return type;
         }
@@ -48,13 +48,14 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         public IEndpointConventionBuilder MapTypedGet<T>(Type entityType)
         {
+            var exposeAll = EndpointsConfiguration.Get.ExposeAllNestedProperties;
             return BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service =
                         SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     var item = service.Get(id);
-                    var resultDto = DynamicType.MapToDto(item, entityType, typeof(T));
+                    var resultDto = DynamicType.MapToDto(item, entityType, typeof(T), exposeAll);
                     return resultDto;
                 })
                 .WithName($"Get{entityType.Name}Details")

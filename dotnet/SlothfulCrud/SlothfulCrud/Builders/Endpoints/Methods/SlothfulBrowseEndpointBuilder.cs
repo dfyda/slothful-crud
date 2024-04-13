@@ -52,17 +52,25 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 BrowseFields.Fields);
             GeneratedDynamicTypes.Add(inputType.Name, inputType);
             
-            var resultDto = GetResultDto(entityType);
+            var resultDto = BuildGetDtoType();
             resultType = typeof(PagedResults<>).MakeGenericType(resultDto);
             return true;
         }
 
         private Type GetResultDto(Type entityType)
         {
-            var resultDto = GeneratedDynamicTypes[entityType.Name + "DetailsDto"];
+            var resultDto = GeneratedDynamicTypes[entityType.Name + "Dto"];
             return resultDto;
         }
 
+        private Type BuildGetDtoType()
+        {
+            var exposeAll = EndpointsConfiguration.Browse.ExposeAllNestedProperties;
+            var type = DynamicType.NewDynamicTypeDto(BuilderParams.EntityType, $"{BuilderParams.EntityType}Dto", exposeAll);
+            GeneratedDynamicTypes.Add(type.Name, type);
+            return type;
+        }
+        
         private MethodInfo GetGenericMapTypedMethod(string methodName)
         {
             return typeof(SlothfulBrowseEndpointBuilder<TEntity>).GetMethod(methodName);
@@ -70,13 +78,14 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         public void MapTypedGet<T>(Type entityType, Type returnType) where T : new()
         {
+            var exposeAll = EndpointsConfiguration.Browse.ExposeAllNestedProperties;
             BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", 
                     (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
                 {
                     query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    return DynamicType.MapToPagedResultsDto(service.Browse(page, query), entityType, GetResultDto(entityType));
+                    return DynamicType.MapToPagedResultsDto(service.Browse(page, query), entityType, GetResultDto(entityType), exposeAll);
                 })
                 .WithName($"Browse{entityType.Name}s")
                 .Produces(200, returnType)
