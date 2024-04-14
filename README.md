@@ -1,7 +1,5 @@
-<div style="background-color: #072232">
-    <div align="center">
-      <img src="documentation/slothful-api.jpg" alt="slothful-api logo">
-    </div>
+<div align="center">
+    <img src="documentation/slothful-api.jpg" alt="slothful-api logo">
 </div>
 
 # slothful-api
