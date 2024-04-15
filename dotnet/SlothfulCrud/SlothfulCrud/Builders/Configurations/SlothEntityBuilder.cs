@@ -1,4 +1,5 @@
-﻿using SlothfulCrud.Builders.Configurations.Methods;
+﻿using System.Linq.Expressions;
+using SlothfulCrud.Builders.Configurations.Methods;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Types.Configurations;
 
@@ -31,9 +32,24 @@ namespace SlothfulCrud.Builders.Configurations
             return this;
         }
         
-        public virtual SlothEntityBuilder<TEntity> HasSortProperty(string sortProperty)
+        public SlothEntityBuilder<TEntity> SetSortProperty<TProperty>(Expression<Func<TEntity, TProperty>> sortExpression)
         {
-            EndpointsConfiguration.Global.SetSortProperty(sortProperty);
+            if (sortExpression.Body is MemberExpression memberExpression)
+            {
+                var sortProperty = memberExpression.Member.Name;
+                EndpointsConfiguration.Global.SetSortProperty(sortProperty);
+            }
+            else
+            {
+                throw new ArgumentException("Argument must be a property", nameof(sortExpression));
+            }
+            
+            return this;
+        }
+        
+        public SlothEntityBuilder<TEntity> SetUpdateMethodName(string updateMethodName)
+        {
+            EndpointsConfiguration.Global.SetUpdateMethod(updateMethodName);
             return this;
         }
         

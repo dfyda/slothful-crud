@@ -1,22 +1,21 @@
 ﻿namespace SlothfulCrud.Types.Configurations
 {
-    public class EndpointConfiguration : GlobalConfiguration
+    public class EndpointConfiguration : Configuration
     {
         public bool IsEnable { get; private set; }
 
-        public EndpointConfiguration() : base()
+        public EndpointConfiguration()
         {
-            IsEnable = true;
+            SetIsEnable(true);
         }
         
         public EndpointConfiguration(
-            string sortProperty,
             bool exposeAllNestedProperties,
             bool isAuthorizationEnable,
             string[] policyNames,
-            bool isEnable) : base(sortProperty, exposeAllNestedProperties, isAuthorizationEnable, policyNames)
+            bool isEnable) : base(exposeAllNestedProperties, isAuthorizationEnable, policyNames)
         {
-            IsEnable = isEnable;
+            SetIsEnable(isEnable);
         }
         
         public void SetIsEnable(bool isEnable)

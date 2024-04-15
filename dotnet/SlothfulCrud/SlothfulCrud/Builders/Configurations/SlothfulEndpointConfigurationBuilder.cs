@@ -32,12 +32,6 @@ namespace SlothfulCrud.Builders.Configurations
             return this;
         }
         
-        public override SlothfulEndpointConfigurationBuilder<T> HasSortProperty(string sortProperty)
-        {
-            Configuration.SetSortProperty(sortProperty);
-            return this;
-        }
-        
         public override SlothfulEndpointConfigurationBuilder<T> ExposeAllNestedProperties(bool expose = true)
         {
             Configuration.SetExposeAllNestedProperties(expose);

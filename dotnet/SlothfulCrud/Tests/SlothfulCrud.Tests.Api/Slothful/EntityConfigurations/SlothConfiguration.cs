@@ -7,6 +7,10 @@ namespace SlothfulCrud.Tests.Api.Slothful.EntityConfigurations
     {
         public void Configure(SlothEntityBuilder<Sloth> builder)
         {
+            builder
+                .SetSortProperty(x => x.DisplayName)
+                .SetUpdateMethodName("Update");
+            
             builder.GetEndpoint
                 .ExposeAllNestedProperties()
                 .AllowAnonymous();
