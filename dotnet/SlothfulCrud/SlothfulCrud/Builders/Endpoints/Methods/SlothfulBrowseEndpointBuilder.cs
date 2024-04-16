@@ -79,7 +79,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         public void MapTypedGet<T>(Type entityType, Type returnType) where T : new()
         {
             var exposeAll = EndpointsConfiguration.Browse.ExposeAllNestedProperties;
-            BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", 
+            var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", 
                     (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
                 {
                     query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
@@ -91,6 +91,11 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 .Produces(200, returnType)
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
+
+            if (EndpointsConfiguration.Browse.IsAuthorizationEnable)
+            {
+                endpoint.RequireAuthorization(EndpointsConfiguration.Browse.PolicyNames);
+            }
         }
     }
 }

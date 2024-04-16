@@ -40,6 +40,11 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
 
+            if (EndpointsConfiguration.Delete.IsAuthorizationEnable)
+            {
+                ConventionBuilder.RequireAuthorization(EndpointsConfiguration.Browse.PolicyNames);
+            }
+            
             return this;
         }
     }

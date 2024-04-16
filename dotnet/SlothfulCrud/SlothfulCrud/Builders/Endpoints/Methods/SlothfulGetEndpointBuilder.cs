@@ -49,7 +49,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         public IEndpointConventionBuilder MapTypedGet<T>(Type entityType)
         {
             var exposeAll = EndpointsConfiguration.Get.ExposeAllNestedProperties;
-            return BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
+            var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service =
@@ -63,6 +63,13 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 .Produces(200, typeof(T))
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
+            
+            if (EndpointsConfiguration.Get.IsAuthorizationEnable)
+            {
+                endpoint.RequireAuthorization(EndpointsConfiguration.Browse.PolicyNames);
+            }
+
+            return endpoint;
         }
     }
 }

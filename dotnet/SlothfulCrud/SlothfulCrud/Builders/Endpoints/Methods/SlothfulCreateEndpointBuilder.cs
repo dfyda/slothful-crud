@@ -56,7 +56,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
 
         public IEndpointConventionBuilder MapTypedPost<T>(Type entityType)
         {
-            return BuilderParams.WebApplication.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), 
+            var endpoint = BuilderParams.WebApplication.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), 
                     ([FromBody] T command) =>
                 {
                     var id = Guid.NewGuid();
@@ -68,6 +68,13 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 .WithName($"Create{entityType.Name}")
                 .Produces<Guid>(201)
                 .Produces<BadRequestResult>(400);
+            
+            if (EndpointsConfiguration.Create.IsAuthorizationEnable)
+            {
+                endpoint.RequireAuthorization(EndpointsConfiguration.Browse.PolicyNames);
+            }
+
+            return endpoint;
         }
     }
 }
