@@ -25,6 +25,9 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         public SlothfulDeleteEndpointBuilder<TEntity> Map()
         {
+            if (!EndpointsConfiguration.Delete.IsEnable) 
+                return this;
+
             var entityType = BuilderParams.EntityType;
             ConventionBuilder = BuilderParams.WebApplication.MapDelete(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", 
                     (Guid id) =>

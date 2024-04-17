@@ -26,9 +26,13 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         public SlothfulGetEndpointBuilder<TEntity> Map()
         {
+            if (!EndpointsConfiguration.Get.IsEnable) 
+                return this;
+            
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedGet));
             var resultType = BuildGetDtoType();
-            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(resultType).Invoke(this, [BuilderParams.EntityType]);
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(resultType)
+                .Invoke(this, [BuilderParams.EntityType]);
 
             return this;
         }

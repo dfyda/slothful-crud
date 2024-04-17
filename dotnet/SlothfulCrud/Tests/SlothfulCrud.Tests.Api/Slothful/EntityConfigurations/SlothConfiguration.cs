@@ -12,10 +12,12 @@ namespace SlothfulCrud.Tests.Api.Slothful.EntityConfigurations
                 .SetUpdateMethodName("Update");
             
             builder.GetEndpoint
+                .HasEndpoint(false)
                 .ExposeAllNestedProperties()
                 .AllowAnonymous();
             
             builder.BrowseEndpoint
+                .HasEndpoint(false)
                 .ExposeAllNestedProperties()
                 .AllowAnonymous();
         }

@@ -26,6 +26,9 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         public SlothfulBrowseEndpointBuilder<TEntity> Map()
         {
+            if (!EndpointsConfiguration.Browse.IsEnable) 
+                return this;
+            
             if (!BuildBrowseQueryType(BuilderParams.EntityType, out var inputType, out var resultType))
                 return this;
             

@@ -27,7 +27,11 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         
         public SlothfulUpdateEndpointBuilder<TEntity> Map()
         {
-            if (!BuildModifyMethodType(BuilderParams.EntityType, out var inputType)) return this;
+            if (!EndpointsConfiguration.Update.IsEnable) 
+                return this;
+            
+            if (!BuildModifyMethodType(BuilderParams.EntityType, out var inputType))
+                return this;
 
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedPut));
             ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [BuilderParams.EntityType]);
