@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
+using SlothfulCrud.Providers;
 using SlothfulCrud.Services.Endpoints.Get;
 
 namespace SlothfulCrud.Services.Endpoints.Put
@@ -12,22 +13,22 @@ namespace SlothfulCrud.Services.Endpoints.Put
         where TContext : DbContext
     {
         private readonly IGetService<T, TContext> _getService;
-        private readonly IModifyMethodBehavior _modifyMethodBehavior;
+        private readonly IGlobalConfigurationProvider _configurationProvider;
         private TContext DbContext { get; }
         
         public UpdateService(
             TContext dbContext,
             IGetService<T, TContext> getService,
-            IModifyMethodBehavior modifyMethodBehavior)
+            IGlobalConfigurationProvider configurationProvider)
         {
             DbContext = dbContext;
             _getService = getService;
-            _modifyMethodBehavior = modifyMethodBehavior;
+            _configurationProvider = configurationProvider;
         }
         
         public void Update(Guid id, dynamic command)
         {
-            var updateMethod = _modifyMethodBehavior.GetModifyMethod(typeof(T));
+            var updateMethod = GetModifyMethod();
             if (updateMethod is null)
             {
                 throw new ConfigurationException($"Entity '{typeof(T).Name}' must have a method named 'Update'.");
@@ -41,6 +42,12 @@ namespace SlothfulCrud.Services.Endpoints.Put
             
             updateMethod.Invoke(item, methodArgs);
             DbContext.SaveChanges();
+        }
+
+        private MethodInfo GetModifyMethod()
+        {
+            var methodName = _configurationProvider.GetConfiguration(typeof(T)).UpdateMethod;
+            return typeof(T).GetMethod(methodName);
         }
     }
 }

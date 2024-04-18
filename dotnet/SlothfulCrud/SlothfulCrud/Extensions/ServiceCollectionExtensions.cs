@@ -37,6 +37,7 @@ namespace SlothfulCrud.Extensions
             }
             return serviceCollection
                 .AddScoped()
+                .AddSingleton()
                 .AddBehaviors();
         }
         
@@ -44,6 +45,13 @@ namespace SlothfulCrud.Extensions
         {
             serviceCollection.AddScoped<ISlothfulCrudManager, SlothfulCrudManager>();
             serviceCollection.AddScoped<IApiSegmentProvider, ApiSegmentProvider>();
+
+            return serviceCollection;
+        }
+        
+        private static IServiceCollection AddSingleton(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddSingleton<IGlobalConfigurationProvider, GlobalConfigurationProvider>();
 
             return serviceCollection;
         }

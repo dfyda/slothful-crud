@@ -2,6 +2,7 @@
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
+using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services.Endpoints.Get
@@ -10,10 +11,12 @@ namespace SlothfulCrud.Services.Endpoints.Get
         where T : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
+        private readonly IGlobalConfigurationProvider _configurationProvider;
         private TContext DbContext { get; }
         
-        public BrowseService(TContext dbContext)
+        public BrowseService(TContext dbContext, IGlobalConfigurationProvider configurationProvider)
         {
+            _configurationProvider = configurationProvider;
             DbContext = dbContext;
         }
         
@@ -22,7 +25,6 @@ namespace SlothfulCrud.Services.Endpoints.Get
             var baseQuery = DbContext.Set<T>().AsQueryable().IncludeAllFirstLevelDependencies();
             var properties = query.GetType().GetProperties();
 
-            // TO DO: Add configuration for custom filtering and sorting
             var resultQuery = FilterQuery(query, properties, baseQuery) as IQueryable<T>;
             resultQuery = SortQuery(query, resultQuery);
 
@@ -37,7 +39,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             return new PagedResults<T>(query.Skip, total, page, data);
         }
         
-        private static IQueryable<T> SortQuery(dynamic query, IQueryable<T> queryObject)
+        private IQueryable<T> SortQuery(dynamic query, IQueryable<T> queryObject)
         {
             if (query.SortBy is null)
             {
@@ -53,8 +55,8 @@ namespace SlothfulCrud.Services.Endpoints.Get
             var sortProperty = typeof(T).GetProperties().First(x => x.Name == sortBy);
             if (sortProperty.PropertyType.IsClass && sortProperty.PropertyType != typeof(string))
             {
-                // TODO: Add support for setting the sort property
-                queryObject = queryObject.OrderByNestedProperty($"{sortBy}.Name", (string)query.SortDirection == "asc");
+                var nestedSortProperty = _configurationProvider.GetConfiguration(sortProperty.PropertyType).SortProperty;
+                queryObject = queryObject.OrderByNestedProperty($"{sortBy}.{nestedSortProperty}", (string)query.SortDirection == "asc");
                 return queryObject;
             }
             
