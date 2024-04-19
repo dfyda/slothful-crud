@@ -21,14 +21,14 @@ namespace SlothfulCrud.Builders.Configurations
         
         public virtual SlothEntityBuilder<TEntity> AllowAnonymous()
         {
-            EndpointsConfiguration.Global.SetIsAuthorizationEnable(false);
+            EndpointsConfiguration.Entity.SetIsAuthorizationEnable(false);
             return this;
         }
         
         public virtual SlothEntityBuilder<TEntity> RequireAuthorization(params string[] policyNames)
         {
-            EndpointsConfiguration.Global.SetIsAuthorizationEnable(true);
-            EndpointsConfiguration.Global.SetPolicyNames(policyNames);
+            EndpointsConfiguration.Entity.SetIsAuthorizationEnable(true);
+            EndpointsConfiguration.Entity.SetPolicyNames(policyNames);
             return this;
         }
         
@@ -37,7 +37,7 @@ namespace SlothfulCrud.Builders.Configurations
             if (sortExpression.Body is MemberExpression memberExpression)
             {
                 var sortProperty = memberExpression.Member.Name;
-                EndpointsConfiguration.Global.SetSortProperty(sortProperty);
+                EndpointsConfiguration.Entity.SetSortProperty(sortProperty);
             }
             else
             {
@@ -49,13 +49,13 @@ namespace SlothfulCrud.Builders.Configurations
         
         public SlothEntityBuilder<TEntity> SetUpdateMethodName(string updateMethodName)
         {
-            EndpointsConfiguration.Global.SetUpdateMethod(updateMethodName);
+            EndpointsConfiguration.Entity.SetUpdateMethod(updateMethodName);
             return this;
         }
         
         public virtual SlothEntityBuilder<TEntity> ExposeAllNestedProperties(bool expose = true)
         {
-            EndpointsConfiguration.Global.SetExposeAllNestedProperties(expose);
+            EndpointsConfiguration.Entity.SetExposeAllNestedProperties(expose);
             return this;
         }
         
@@ -67,7 +67,7 @@ namespace SlothfulCrud.Builders.Configurations
                 CreateEndpoint.Configuration,
                 UpdateEndpoint.Configuration,
                 DeleteEndpoint.Configuration,
-                EndpointsConfiguration.Global);
+                EndpointsConfiguration.Entity);
             return item;
         }
     }

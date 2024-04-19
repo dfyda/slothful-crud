@@ -13,13 +13,13 @@ namespace SlothfulCrud.Services.Endpoints.Put
         where TContext : DbContext
     {
         private readonly IGetService<T, TContext> _getService;
-        private readonly IGlobalConfigurationProvider _configurationProvider;
+        private readonly IEntityConfigurationProvider _configurationProvider;
         private TContext DbContext { get; }
         
         public UpdateService(
             TContext dbContext,
             IGetService<T, TContext> getService,
-            IGlobalConfigurationProvider configurationProvider)
+            IEntityConfigurationProvider configurationProvider)
         {
             DbContext = dbContext;
             _getService = getService;

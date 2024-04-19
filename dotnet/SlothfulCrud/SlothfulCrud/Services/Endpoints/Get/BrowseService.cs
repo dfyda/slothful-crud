@@ -11,10 +11,10 @@ namespace SlothfulCrud.Services.Endpoints.Get
         where T : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        private readonly IGlobalConfigurationProvider _configurationProvider;
+        private readonly IEntityConfigurationProvider _configurationProvider;
         private TContext DbContext { get; }
         
-        public BrowseService(TContext dbContext, IGlobalConfigurationProvider configurationProvider)
+        public BrowseService(TContext dbContext, IEntityConfigurationProvider configurationProvider)
         {
             _configurationProvider = configurationProvider;
             DbContext = dbContext;

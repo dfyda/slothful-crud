@@ -7,7 +7,7 @@
         public EndpointConfiguration Create { get; private set; }
         public EndpointConfiguration Update { get; private set; }
         public EndpointConfiguration Delete { get; private set; }
-        public GlobalConfiguration Global { get; private set; }
+        public EntityConfiguration Entity { get; private set; }
         
         public EndpointsConfiguration()
         {
@@ -16,7 +16,7 @@
             Create = new EndpointConfiguration();
             Update = new EndpointConfiguration();
             Delete = new EndpointConfiguration();
-            Global = new GlobalConfiguration();
+            Entity = new EntityConfiguration();
         }
         
         public EndpointsConfiguration(
@@ -25,14 +25,14 @@
             EndpointConfiguration create,
             EndpointConfiguration update,
             EndpointConfiguration delete,
-            GlobalConfiguration global)
+            EntityConfiguration entity)
         {
             Get = get;
             Browse = browse;
             Create = create;
             Update = update;
             Delete = delete;
-            Global = global;
+            Entity = entity;
         }
     }
 }

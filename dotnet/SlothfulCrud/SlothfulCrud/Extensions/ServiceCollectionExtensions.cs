@@ -51,7 +51,7 @@ namespace SlothfulCrud.Extensions
         
         private static IServiceCollection AddSingleton(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IGlobalConfigurationProvider, GlobalConfigurationProvider>();
+            serviceCollection.AddSingleton<IEntityConfigurationProvider, EntityConfigurationProvider>();
 
             return serviceCollection;
         }

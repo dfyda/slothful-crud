@@ -1,17 +1,17 @@
 ﻿namespace SlothfulCrud.Types.Configurations
 {
-    public class GlobalConfiguration : Configuration
+    public class EntityConfiguration : Configuration
     {
         public string SortProperty { get; private set; }
         public string UpdateMethod { get; private set; }
 
-        public GlobalConfiguration()
+        public EntityConfiguration()
         {
             SetSortProperty("Name");
             SetUpdateMethod("Update");
         }
         
-        public GlobalConfiguration(
+        public EntityConfiguration(
             string sortProperty,
             bool exposeAllNestedProperties,
             bool isAuthorizationEnable,
