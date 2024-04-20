@@ -80,5 +80,11 @@ namespace SlothfulCrud.Extensions
 
             return char.ToLowerInvariant(input[0]) + input.Substring(1);
         }
+
+        public static string SnakeCaseToHumanReadable(this string input)
+        {
+            var withoutUnderscore = input.Replace("_", " ");
+            return withoutUnderscore.FirstCharToUpper();
+        }
     }
 }

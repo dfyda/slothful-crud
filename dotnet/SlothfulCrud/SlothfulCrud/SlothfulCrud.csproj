@@ -13,7 +13,12 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
       <PackageReference Include="Microsoft.OpenApi" Version="1.4.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Exceptions\Middlewares\" />
     </ItemGroup>
 
 </Project>
