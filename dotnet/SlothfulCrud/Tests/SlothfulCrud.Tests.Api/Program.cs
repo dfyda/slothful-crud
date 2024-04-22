@@ -42,7 +42,7 @@ app.MapGet("/db/test", (SlothfulDbContext context) => context.Koalas.ToList())
     .WithName("GetKoalas")
     .WithOpenApi();
 
-app.UseSlothfulCrud<SlothfulDbContext>();
+app.UseSlothfulCrud<SlothfulDbContext>(options => options.UseSlothfullProblemHandling = true);
 app.UseAuthentication();
 app.UseAuthorization();
 

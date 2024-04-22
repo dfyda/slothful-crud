@@ -40,23 +40,29 @@ namespace SlothfulCrud.Managers
             var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(executingAssembly);
             foreach (var entityType in entityTypes)
             {
-                var configurationBuilder = getConfigurationBuilderMethod.MakeGenericMethod(entityType).Invoke(_slothConfigurationBuilder, null);
-                
-                var parameters = new SlothfulBuilderParams(
-                    webApplication,
-                    dbContextType,
-                    entityType,
-                    _apiSegmentProvider,
-                    _createConstructorBehavior,
-                    _modifyMethodBehavior);
-                
-                var genericBuilderType = typeof(SlothfulEndpointRouteBuilder<>).MakeGenericType(entityType);
-                var builder = Activator.CreateInstance(genericBuilderType, parameters, configurationBuilder);
-                
-                buildEndpointMethod.MakeGenericMethod(entityType).Invoke(this, [builder]);
+                RegisterEntity(webApplication, dbContextType, getConfigurationBuilderMethod, entityType, buildEndpointMethod);
             }
 
             return webApplication;
+        }
+
+        private void RegisterEntity(WebApplication webApplication, Type dbContextType, MethodInfo getConfigurationBuilderMethod,
+            Type entityType, MethodInfo buildEndpointMethod)
+        {
+            var configurationBuilder = getConfigurationBuilderMethod.MakeGenericMethod(entityType).Invoke(_slothConfigurationBuilder, null);
+                
+            var parameters = new SlothfulBuilderParams(
+                webApplication,
+                dbContextType,
+                entityType,
+                _apiSegmentProvider,
+                _createConstructorBehavior,
+                _modifyMethodBehavior);
+                
+            var genericBuilderType = typeof(SlothfulEndpointRouteBuilder<>).MakeGenericType(entityType);
+            var builder = Activator.CreateInstance(genericBuilderType, parameters, configurationBuilder);
+                
+            buildEndpointMethod.MakeGenericMethod(entityType).Invoke(this, [builder]);
         }
 
         private void BuildEndpoints<TEntity>(SlothfulEndpointRouteBuilder<TEntity> builder)

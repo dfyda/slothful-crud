@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
 using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
+using SlothfulCrud.Exceptions.Handlers;
 using SlothfulCrud.Managers;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services;
@@ -38,9 +39,10 @@ namespace SlothfulCrud.Extensions
             return serviceCollection
                 .AddScoped()
                 .AddSingleton()
+                .AddTransient()
                 .AddBehaviors();
         }
-        
+
         private static IServiceCollection AddScoped(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<ISlothfulCrudManager, SlothfulCrudManager>();
@@ -52,6 +54,13 @@ namespace SlothfulCrud.Extensions
         private static IServiceCollection AddSingleton(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IEntityConfigurationProvider, EntityConfigurationProvider>();
+
+            return serviceCollection;
+        }
+        
+        private static IServiceCollection AddTransient(this IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddTransient<IExceptionHandler, ExceptionHandler>();
 
             return serviceCollection;
         }
