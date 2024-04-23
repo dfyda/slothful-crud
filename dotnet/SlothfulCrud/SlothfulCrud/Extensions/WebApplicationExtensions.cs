@@ -19,15 +19,13 @@ namespace SlothfulCrud.Extensions
         {
             var options = PrepareOptions(configureOptions);
 
-            if (options.UseSlothfullProblemHandling)
+            if (options.UseSlothfulProblemHandling)
             {
                 RegisterSlothfullProblemHandling(webApplication);
             }
             
             using var scope = webApplication.Services.CreateScope();
             var manager = scope.ServiceProvider.GetRequiredService<ISlothfulCrudManager>();
-            // pass configuration to the manager
-            // with for example additional produces to the endpoints
             return manager.Register(webApplication, typeof(T), Assembly.GetEntryAssembly());
         }
         

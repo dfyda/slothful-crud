@@ -7,7 +7,6 @@ namespace SlothfulCrud.Builders.Configurations
     {
         public EndpointConfiguration Configuration { get; protected set; }
         
-        // TODO: public SlothfulEndpointConfigurationBuilder(bool isDefault = false)
         public SlothfulEndpointConfigurationBuilder(EndpointConfiguration configuration)
         {
             Configuration = configuration;

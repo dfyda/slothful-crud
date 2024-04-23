@@ -2,6 +2,6 @@
 {
     public class SlothfulOptions
     {
-        public bool UseSlothfullProblemHandling { get; set; }
+        public bool UseSlothfulProblemHandling { get; set; }
     }
 }
