@@ -4,11 +4,13 @@
     {
         public string SortProperty { get; private set; }
         public string UpdateMethod { get; private set; }
+        public bool HasValidation { get; private set; }
 
         public EntityConfiguration()
         {
             SetSortProperty("Name");
             SetUpdateMethod("Update");
+            SetHasValidation(true);
         }
         
         public EntityConfiguration(
@@ -28,6 +30,11 @@
         public void SetUpdateMethod(string updateMethod)
         {
             UpdateMethod = updateMethod;
+        }
+
+        public void SetHasValidation(bool hasValidation)
+        {
+            HasValidation = hasValidation;
         }
     }
 }

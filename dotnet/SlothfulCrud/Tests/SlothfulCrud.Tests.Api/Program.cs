@@ -1,7 +1,9 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Tests.Api.EF;
+using SlothfulCrud.Tests.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddDbContext<SlothfulDbContext>(options =>
     options.UseInMemoryDatabase(databaseName: "InMemoryDatabase"));
 
+builder.Services.AddValidatorsFromAssemblyContaining<SlothValidator>();
 builder.Services.AddSlothfulCrud<SlothfulDbContext>();
 var app = builder.Build();
 
