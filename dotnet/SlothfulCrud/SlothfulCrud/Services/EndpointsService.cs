@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Services.Endpoints.Delete;
 using SlothfulCrud.Services.Endpoints.Get;
@@ -47,9 +48,9 @@ namespace SlothfulCrud.Services
             return _createService.Create(id, command);
         }
 
-        public void Update(Guid id, dynamic command)
+        public void Update(Guid id, dynamic command, IServiceScope serviceScope)
         {
-            _updateService.Update(id, command);
+            _updateService.Update(id, command, serviceScope);
         }
 
         public PagedResults<T> Browse(ushort page, dynamic query)

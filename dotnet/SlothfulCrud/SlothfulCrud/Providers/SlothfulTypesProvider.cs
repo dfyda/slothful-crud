@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Services;
@@ -18,6 +19,12 @@ namespace SlothfulCrud.Providers
         {
             var serviceType = GetConcreteOperationServiceType(entityType, dbContextType);
             return serviceScope.ServiceProvider.GetService(serviceType);
+        }
+        
+        public static IValidator<TEntityType> GetConcreteValidator<TEntityType>(IServiceScope serviceScope)
+        {
+            var validatorType = typeof(IValidator<TEntityType>);
+            return serviceScope.ServiceProvider.GetService<IValidator<TEntityType>>();
         }
 
         private static Type GetConcreteOperationServiceType(Type entityType, Type dbContextType)

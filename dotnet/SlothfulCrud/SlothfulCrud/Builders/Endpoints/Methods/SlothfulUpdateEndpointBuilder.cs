@@ -65,7 +65,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    service.Update(id, command);
+                    service.Update(id, command, serviceScope);
                     return Results.NoContent();
                 })
                 .WithName($"Update{entityType.Name}")

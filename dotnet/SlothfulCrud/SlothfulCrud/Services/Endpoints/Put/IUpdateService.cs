@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Put
@@ -7,6 +8,6 @@ namespace SlothfulCrud.Services.Endpoints.Put
         where T : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        void Update(Guid id, dynamic command);
+        void Update(Guid id, dynamic command, IServiceScope serviceScope);
     }
 }

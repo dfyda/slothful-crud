@@ -1,10 +1,12 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services.Endpoints.Get;
+using FluentValidation;
 
 namespace SlothfulCrud.Services.Endpoints.Put
 {
@@ -26,7 +28,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
             _configurationProvider = configurationProvider;
         }
         
-        public void Update(Guid id, dynamic command)
+        public void Update(Guid id, dynamic command, IServiceScope serviceScope)
         {
             var updateMethod = GetModifyMethod();
             if (updateMethod is null)
@@ -36,12 +38,23 @@ namespace SlothfulCrud.Services.Endpoints.Put
             
             var item = _getService.Get(id);
             
+            ModifyEntity(command, updateMethod, item);
+
+            if (_configurationProvider.GetConfiguration(typeof(T)).HasValidation)
+            {
+                SlothfulTypesProvider.GetConcreteValidator<T>(serviceScope).ValidateAndThrow(item);
+            }
+            
+            DbContext.SaveChanges();
+        }
+
+        private void ModifyEntity(dynamic command, MethodInfo updateMethod, T item)
+        {
             var methodArgs = updateMethod.GetParameters()
                 .Select(param => param.GetDomainMethodParam((object)command, DbContext))
                 .ToArray();
-            
+
             updateMethod.Invoke(item, methodArgs);
-            DbContext.SaveChanges();
         }
 
         private MethodInfo GetModifyMethod()
