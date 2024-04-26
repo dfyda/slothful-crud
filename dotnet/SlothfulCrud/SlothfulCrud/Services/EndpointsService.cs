@@ -43,9 +43,9 @@ namespace SlothfulCrud.Services
             _deleteService.Delete(id);
         }
 
-        public Guid Create(Guid id, dynamic command)
+        public Guid Create(Guid id, dynamic command, IServiceScope serviceScope)
         {
-            return _createService.Create(id, command);
+            return _createService.Create(id, command, serviceScope);
         }
 
         public void Update(Guid id, dynamic command, IServiceScope serviceScope)

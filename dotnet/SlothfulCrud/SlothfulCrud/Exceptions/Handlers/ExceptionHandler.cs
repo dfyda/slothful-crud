@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Security.Authentication;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 using SlothfulCrud.Extensions;
 
@@ -23,6 +24,8 @@ namespace SlothfulCrud.Exceptions.Handlers
             {
                 NotFoundException notFoundException when exceptionType == typeof(NotFoundException) => HandleNotFoundException(notFoundException,
                     problemId),
+                ValidationException validationException when exceptionType == typeof(ValidationException) =>
+                    HandleValidationException(validationException, problemId),
                 ConfigurationException configurationException when exceptionType == typeof(ConfigurationException) =>
                     HandleConfigurationException(configurationException, problemId),
                 AuthenticationException authenticationException when exceptionType == typeof(AuthenticationException) =>
@@ -71,6 +74,19 @@ namespace SlothfulCrud.Exceptions.Handlers
             };
         }
 
+        private SlothProblemDetails HandleValidationException(ValidationException validationException, Guid problemId)
+        {
+            var httpResponseCode = HttpStatusCode.BadRequest;
+
+            var result = PrepareHandledResponse(
+                problemId,
+                httpResponseCode,
+                "validation_error",
+                validationException.Message);
+
+            return result;
+        }
+        
         private SlothProblemDetails HandleConfigurationException(ConfigurationException exception, Guid problemId)
         {
             var httpResponseCode = HttpStatusCode.Forbidden;
