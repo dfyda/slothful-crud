@@ -82,7 +82,14 @@ namespace SlothfulCrud.Exceptions.Handlers
                 problemId,
                 httpResponseCode,
                 "validation_error",
-                validationException.Message);
+                "One or more validation errors occurred. Please refer to the validationErrors for detailed information.");
+            
+            result.Extensions["validationErrors"] = validationException.Errors
+                .GroupBy(validationFailure => validationFailure.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.ErrorMessage).ToArray()
+                );
 
             return result;
         }
