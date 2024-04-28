@@ -9,6 +9,7 @@ namespace SlothfulCrud.Builders.Configurations
     {
         public SlothfulGetEndpointConfigurationBuilder<TEntity> GetEndpoint => new(EndpointsConfiguration.Get);
         public SlothfulBrowseEndpointConfigurationBuilder<TEntity> BrowseEndpoint => new(EndpointsConfiguration.Browse);
+        public SlothfulBrowseEndpointConfigurationBuilder<TEntity> BrowseSelectableEndpoint => new(EndpointsConfiguration.BrowseSelectable);
         public SlothfulCreateEndpointConfigurationBuilder<TEntity> CreateEndpoint => new(EndpointsConfiguration.Create);
         public SlothfulUpdateEndpointConfigurationBuilder<TEntity> UpdateEndpoint => new(EndpointsConfiguration.Update);
         public SlothfulDeleteEndpointConfigurationBuilder<TEntity> DeleteEndpoint => new(EndpointsConfiguration.Delete);
@@ -64,6 +65,7 @@ namespace SlothfulCrud.Builders.Configurations
             var item = new EndpointsConfiguration(
                 GetEndpoint.Configuration,
                 BrowseEndpoint.Configuration,
+                BrowseSelectableEndpoint.Configuration,
                 CreateEndpoint.Configuration,
                 UpdateEndpoint.Configuration,
                 DeleteEndpoint.Configuration,

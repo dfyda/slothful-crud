@@ -16,6 +16,8 @@ namespace SlothfulCrud.Builders.Endpoints
             => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
         public SlothfulBrowseEndpointBuilder<TEntity> BrowseEndpoint
             => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
+        public SlothfulBrowseSelectableEndpointBuilder<TEntity> BrowseSelectableEndpoint
+            => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
         public SlothfulDeleteEndpointBuilder<TEntity> DeleteEndpoint
             => new(BuilderParams, EndpointsConfiguration, GeneratedDynamicTypes, _configurationBuilder);
         public SlothfulUpdateEndpointBuilder<TEntity> UpdateEndpoint

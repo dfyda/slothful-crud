@@ -71,6 +71,7 @@ namespace SlothfulCrud.Managers
             builder
                 .GetEndpoint.Map()
                 .BrowseEndpoint.Map()
+                .BrowseSelectableEndpoint.Map()
                 .CreateEndpoint.Map()
                 .UpdateEndpoint.Map()
                 .DeleteEndpoint.Map();

@@ -4,6 +4,7 @@
     {
         public EndpointConfiguration Get { get; private set; }
         public EndpointConfiguration Browse { get; private set; }
+        public EndpointConfiguration BrowseSelectable { get; private set; }
         public EndpointConfiguration Create { get; private set; }
         public EndpointConfiguration Update { get; private set; }
         public EndpointConfiguration Delete { get; private set; }
@@ -13,6 +14,7 @@
         {
             Get = new EndpointConfiguration();
             Browse = new EndpointConfiguration();
+            BrowseSelectable = new EndpointConfiguration();
             Create = new EndpointConfiguration();
             Update = new EndpointConfiguration();
             Delete = new EndpointConfiguration();
@@ -22,6 +24,7 @@
         public EndpointsConfiguration(
             EndpointConfiguration get,
             EndpointConfiguration browse,
+            EndpointConfiguration browseSelectable,
             EndpointConfiguration create,
             EndpointConfiguration update,
             EndpointConfiguration delete,
@@ -29,6 +32,7 @@
         {
             Get = get;
             Browse = browse;
+            BrowseSelectable = browseSelectable;
             Create = create;
             Update = update;
             Delete = delete;
