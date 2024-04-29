@@ -6,6 +6,7 @@ using SlothfulCrud.Services.Endpoints.Get;
 using SlothfulCrud.Services.Endpoints.Post;
 using SlothfulCrud.Services.Endpoints.Put;
 using SlothfulCrud.Types;
+using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services
 {
@@ -56,6 +57,12 @@ namespace SlothfulCrud.Services
         public PagedResults<T> Browse(ushort page, dynamic query)
         {
             return _browseService.Browse(page, query);
+        }
+
+        public PagedResults<BaseEntityDto> BrowseSelectable(ushort page, dynamic query)
+        {
+            // TODO: Implement the method
+            throw new System.NotImplementedException();
         }
     }
 }

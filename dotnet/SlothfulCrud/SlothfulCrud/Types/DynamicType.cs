@@ -169,6 +169,24 @@ namespace SlothfulCrud.Types
             return new PagedResults<object>(item.First, item.Total, item.Rows, instances);
         }
 
+        public static PagedResults<BaseEntityDto> MapToPagedBaseEntityDto(dynamic item)
+        {
+            var instances = new List<BaseEntityDto>();
+            var elements = item.Data;
+            foreach (var element in elements)
+            {
+                var instance = new BaseEntityDto()
+                {
+                    Id = element.Id,
+                    DisplayName = element.DisplayName
+                };
+
+                instances.Add(instance);
+            }
+
+            return new PagedResults<BaseEntityDto>(item.First, item.Total, item.Rows, instances);
+        }
+
         private static void FlatNestedEntities(
             dynamic item,
             Type dtoType,

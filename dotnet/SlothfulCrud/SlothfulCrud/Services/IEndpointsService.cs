@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Types;
+using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services
 {
@@ -14,6 +15,7 @@ namespace SlothfulCrud.Services
         Guid Create(Guid id, dynamic command, IServiceScope serviceScope);
         void Update(Guid id, dynamic command, IServiceScope serviceScope);
         PagedResults<T> Browse(ushort page, dynamic query);
+        PagedResults<BaseEntityDto> BrowseSelectable(ushort page, dynamic query);
     }
 }
 
