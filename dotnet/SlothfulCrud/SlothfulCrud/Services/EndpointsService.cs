@@ -19,19 +19,22 @@ namespace SlothfulCrud.Services
         private readonly ICreateService<T, TContext> _createService;
         private readonly IUpdateService<T, TContext> _updateService;
         private readonly IBrowseService<T, TContext> _browseService;
+        private readonly IBrowseSelectableService<T, TContext> _browseSelectableService;
         
         public EndpointsService(
             IGetService<T, TContext> getService,
             IDeleteService<T, TContext> deleteService,
             ICreateService<T, TContext> createService,
             IUpdateService<T, TContext> updateService,
-            IBrowseService<T, TContext> browseService)
+            IBrowseService<T, TContext> browseService,
+            IBrowseSelectableService<T, TContext> browseSelectableService)
         {
             _getService = getService;
             _deleteService = deleteService;
             _createService = createService;
             _updateService = updateService;
             _browseService = browseService;
+            _browseSelectableService = browseSelectableService;
         }
         
         public T Get(Guid id)

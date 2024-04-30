@@ -27,6 +27,7 @@ namespace SlothfulCrud.Extensions
                     { typeof(IEndpointsService<,>).MakeGenericType(entityType, typeof(T)), typeof(EndpointsService<,>).MakeGenericType(entityType, typeof(T)) },
                     { typeof(IGetService<,>).MakeGenericType(entityType, typeof(T)), typeof(GetService<,>).MakeGenericType(entityType, typeof(T))},
                     { typeof(IBrowseService<,>).MakeGenericType(entityType, typeof(T)), typeof(BrowseService<,>).MakeGenericType(entityType, typeof(T)) },
+                    { typeof(IBrowseSelectableService<,>).MakeGenericType(entityType, typeof(T)), typeof(BrowseSelectableService<,>).MakeGenericType(entityType, typeof(T)) },
                     { typeof(ICreateService<,>).MakeGenericType(entityType, typeof(T)), typeof(CreateService<,>).MakeGenericType(entityType, typeof(T)) },
                     { typeof(IUpdateService<,>).MakeGenericType(entityType, typeof(T)), typeof(UpdateService<,>).MakeGenericType(entityType, typeof(T)) },
                     { typeof(IDeleteService<,>).MakeGenericType(entityType, typeof(T)), typeof(DeleteService<,>).MakeGenericType(entityType, typeof(T)) }
