@@ -22,9 +22,8 @@ namespace SlothfulCrud.Services.Endpoints.Get
         public PagedResults<BaseEntityDto> Browse(ushort page, dynamic query)
         {
             var baseQuery = DbContext.Set<T>().AsQueryable();
-            var properties = query.GetType().GetProperties();
 
-            var resultQuery = FilterQuery(query, properties, baseQuery) as IQueryable<T>;
+            var resultQuery = FilterQuery(query.Search, baseQuery) as IQueryable<T>;
             resultQuery = SortQuery(query, resultQuery);
 
             resultQuery = resultQuery
@@ -39,12 +38,19 @@ namespace SlothfulCrud.Services.Endpoints.Get
 
         private IQueryable<T> SortQuery(dynamic query, IQueryable<T> queryObject)
         {
-            throw new NotImplementedException();
+            var sortBy = _configurationProvider.GetConfiguration(typeof(T)).SortProperty;
+            
+            queryObject = ((string)query.SortDirection).ToLower() == "asc"
+                ? queryObject.OrderBy(x => EF.Property<string>(x, sortBy))
+                : queryObject.OrderByDescending(x => EF.Property<string>(x, sortBy));
+
+            return queryObject;
         }
 
-        private IQueryable<T> FilterQuery(dynamic query, dynamic properties, IQueryable<T> queryObject)
+        private IQueryable<T> FilterQuery(string search, IQueryable<T> queryObject)
         {
-            throw new NotImplementedException();
+            var filterProperty = _configurationProvider.GetConfiguration(typeof(T)).FilterProperty;
+            return queryObject.Where(x => EF.Property<string>(x, filterProperty).Contains(search));
         }
         
         private IEnumerable<BaseEntityDto> GetBaseEntities(IQueryable<T> resultQuery)
