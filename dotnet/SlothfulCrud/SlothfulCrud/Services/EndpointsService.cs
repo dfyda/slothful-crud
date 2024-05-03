@@ -64,8 +64,7 @@ namespace SlothfulCrud.Services
 
         public PagedResults<BaseEntityDto> BrowseSelectable(ushort page, dynamic query)
         {
-            // TODO: Implement the method
-            throw new System.NotImplementedException();
+            return _browseSelectableService.Browse(page, query);
         }
     }
 }
