@@ -2,6 +2,8 @@
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
+using SlothfulCrud.Providers;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
@@ -9,29 +11,37 @@ namespace SlothfulCrud.Services.Endpoints.Get
         where T : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
+        private readonly EntityConfiguration _entityConfiguration;
         private TContext DbContext { get; }
         
-        public GetService(TContext dbContext)
+        public GetService(TContext dbContext, IEntityConfigurationProvider configurationProvider)
         {
+            _entityConfiguration = configurationProvider.GetConfiguration(typeof(T));
             DbContext = dbContext;
         }
         
-        // TO DO: Add configuration for entity id parameter type
+        // TODO: Key property should be from EntityConfiguration
+        // Refactor other places to use KeyProperty from EntityConfiguration
         public T Get(Guid id)
         {
             CheckEntityKey(typeof(T));
-            
+
+            return GetEntity(id);
+        }
+
+        private T GetEntity<TField>(TField id)
+        {
             return DbContext.Set<T>()
                 .IncludeAllFirstLevelDependencies()
-                .FirstOrDefault(x => EF.Property<Guid>(x, "Id") == id)
-                .OrFail($"{typeof(T)}NotFound", $"{typeof(T)} with id '{id}' not found.");  
+                .FirstOrDefault(x => EF.Property<TField>(x, _entityConfiguration.KeyProperty).Equals(id))
+                .OrFail($"{typeof(T)}NotFound", $"{typeof(T)} with {_entityConfiguration.KeyProperty}: '{id}' not found.");
         }
 
         private void CheckEntityKey(Type type)
         {
-            if (type.GetProperty("Id") is null)
+            if (type.GetProperty(_entityConfiguration.KeyProperty) is null)
             {
-                throw new ConfigurationException("Entity must have a property named 'Id'");
+                throw new ConfigurationException($"Entity '{typeof(T)}' must have a property named '{_entityConfiguration.KeyProperty}'");
             };
         }
     }
