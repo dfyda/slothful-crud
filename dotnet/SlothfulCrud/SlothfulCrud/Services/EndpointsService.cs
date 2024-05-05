@@ -10,24 +10,24 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services
 {
-    public class EndpointsService<T, TContext> : IEndpointsService<T, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public class EndpointsService<TEntity, TKeyProperty, TContext> : IEndpointsService<TEntity, TKeyProperty, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        private readonly IGetService<T, TContext> _getService;
-        private readonly IDeleteService<T, TContext> _deleteService;
-        private readonly ICreateService<T, TContext> _createService;
-        private readonly IUpdateService<T, TContext> _updateService;
-        private readonly IBrowseService<T, TContext> _browseService;
-        private readonly IBrowseSelectableService<T, TContext> _browseSelectableService;
+        private readonly IGetService<TEntity, TKeyProperty, TContext> _getService;
+        private readonly IDeleteService<TEntity, TKeyProperty, TContext> _deleteService;
+        private readonly ICreateService<TEntity, TKeyProperty, TContext> _createService;
+        private readonly IUpdateService<TEntity, TKeyProperty, TContext> _updateService;
+        private readonly IBrowseService<TEntity, TContext> _browseService;
+        private readonly IBrowseSelectableService<TEntity, TContext> _browseSelectableService;
         
         public EndpointsService(
-            IGetService<T, TContext> getService,
-            IDeleteService<T, TContext> deleteService,
-            ICreateService<T, TContext> createService,
-            IUpdateService<T, TContext> updateService,
-            IBrowseService<T, TContext> browseService,
-            IBrowseSelectableService<T, TContext> browseSelectableService)
+            IGetService<TEntity, TKeyProperty, TContext> getService,
+            IDeleteService<TEntity, TKeyProperty, TContext> deleteService,
+            ICreateService<TEntity, TKeyProperty,TContext> createService,
+            IUpdateService<TEntity, TKeyProperty, TContext> updateService,
+            IBrowseService<TEntity, TContext> browseService,
+            IBrowseSelectableService<TEntity, TContext> browseSelectableService)
         {
             _getService = getService;
             _deleteService = deleteService;
@@ -37,27 +37,27 @@ namespace SlothfulCrud.Services
             _browseSelectableService = browseSelectableService;
         }
         
-        public T Get(Guid id)
+        public TEntity Get(TKeyProperty id)
         {
             return _getService.Get(id);
         }
         
-        public void Delete(Guid id)
+        public void Delete(TKeyProperty id)
         {
             _deleteService.Delete(id);
         }
 
-        public Guid Create(Guid id, dynamic command, IServiceScope serviceScope)
+        public TKeyProperty Create(TKeyProperty id, dynamic command, IServiceScope serviceScope)
         {
             return _createService.Create(id, command, serviceScope);
         }
 
-        public void Update(Guid id, dynamic command, IServiceScope serviceScope)
+        public void Update(TKeyProperty id, dynamic command, IServiceScope serviceScope)
         {
             _updateService.Update(id, command, serviceScope);
         }
 
-        public PagedResults<T> Browse(ushort page, dynamic query)
+        public PagedResults<TEntity> Browse(ushort page, dynamic query)
         {
             return _browseService.Browse(page, query);
         }

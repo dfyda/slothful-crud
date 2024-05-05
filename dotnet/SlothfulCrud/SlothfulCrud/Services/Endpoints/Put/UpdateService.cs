@@ -10,17 +10,17 @@ using FluentValidation;
 
 namespace SlothfulCrud.Services.Endpoints.Put
 {
-    public class UpdateService<T, TContext> : IUpdateService<T, TContext> 
+    public class UpdateService<T, TKeyProperty, TContext> : IUpdateService<T, TKeyProperty, TContext> 
         where T : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        private readonly IGetService<T, TContext> _getService;
+        private readonly IGetService<T, TKeyProperty, TContext> _getService;
         private readonly IEntityConfigurationProvider _configurationProvider;
         private TContext DbContext { get; }
         
         public UpdateService(
             TContext dbContext,
-            IGetService<T, TContext> getService,
+            IGetService<T, TKeyProperty, TContext> getService,
             IEntityConfigurationProvider configurationProvider)
         {
             DbContext = dbContext;
@@ -28,7 +28,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
             _configurationProvider = configurationProvider;
         }
         
-        public void Update(Guid id, dynamic command, IServiceScope serviceScope)
+        public void Update(TKeyProperty id, dynamic command, IServiceScope serviceScope)
         {
             var updateMethod = GetModifyMethod();
             if (updateMethod is null)

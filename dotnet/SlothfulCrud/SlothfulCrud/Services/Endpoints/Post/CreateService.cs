@@ -9,7 +9,7 @@ using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Services.Endpoints.Post
 {
-    public class CreateService<T, TContext> : ICreateService<T, TContext> 
+    public class CreateService<T, TKeyProperty, TContext> : ICreateService<T, TKeyProperty, TContext> 
         where T : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
@@ -27,7 +27,7 @@ namespace SlothfulCrud.Services.Endpoints.Post
             _configurationProvider = configurationProvider;
         }
         
-        public Guid Create(Guid id, dynamic command, IServiceScope serviceScope)
+        public TKeyProperty Create(TKeyProperty id, dynamic command, IServiceScope serviceScope)
         {
             var constructor = _createConstructorBehavior.GetConstructorInfo(typeof(T));
             if (constructor is null)

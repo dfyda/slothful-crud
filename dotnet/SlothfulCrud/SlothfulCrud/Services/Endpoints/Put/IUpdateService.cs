@@ -4,10 +4,10 @@ using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Put
 {
-    public interface IUpdateService<T, TContext> 
+    public interface IUpdateService<T, TKeyProperty, TContext> 
         where T : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        void Update(Guid id, dynamic command, IServiceScope serviceScope);
+        void Update(TKeyProperty id, dynamic command, IServiceScope serviceScope);
     }
 }

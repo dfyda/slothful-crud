@@ -7,8 +7,8 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public class GetService<T, TContext> : IGetService<T, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public class GetService<TEntity, TKeyProperty, TContext> : IGetService<TEntity, TKeyProperty, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
         private readonly EntityConfiguration _entityConfiguration;
@@ -16,32 +16,32 @@ namespace SlothfulCrud.Services.Endpoints.Get
         
         public GetService(TContext dbContext, IEntityConfigurationProvider configurationProvider)
         {
-            _entityConfiguration = configurationProvider.GetConfiguration(typeof(T));
+            _entityConfiguration = configurationProvider.GetConfiguration(typeof(TEntity));
             DbContext = dbContext;
         }
         
         // TODO: Key property should be from EntityConfiguration
         // Refactor other places to use KeyProperty from EntityConfiguration
-        public T Get(Guid id)
+        public TEntity Get(TKeyProperty id)
         {
-            CheckEntityKey(typeof(T));
+            CheckEntityKey(typeof(TEntity));
 
             return GetEntity(id);
         }
 
-        private T GetEntity<TField>(TField id)
+        private TEntity GetEntity(TKeyProperty id)
         {
-            return DbContext.Set<T>()
+            return DbContext.Set<TEntity>()
                 .IncludeAllFirstLevelDependencies()
-                .FirstOrDefault(x => EF.Property<TField>(x, _entityConfiguration.KeyProperty).Equals(id))
-                .OrFail($"{typeof(T)}NotFound", $"{typeof(T)} with {_entityConfiguration.KeyProperty}: '{id}' not found.");
+                .FirstOrDefault(x => EF.Property<TKeyProperty>(x, _entityConfiguration.KeyProperty).Equals(id))
+                .OrFail($"{typeof(TEntity)}NotFound", $"{typeof(TEntity)} with {_entityConfiguration.KeyProperty}: '{id}' not found.");
         }
 
         private void CheckEntityKey(Type type)
         {
             if (type.GetProperty(_entityConfiguration.KeyProperty) is null)
             {
-                throw new ConfigurationException($"Entity '{typeof(T)}' must have a property named '{_entityConfiguration.KeyProperty}'");
+                throw new ConfigurationException($"Entity '{typeof(TEntity)}' must have a property named '{_entityConfiguration.KeyProperty}'");
             };
         }
     }
