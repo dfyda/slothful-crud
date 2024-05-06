@@ -4,24 +4,24 @@ using SlothfulCrud.Services.Endpoints.Get;
 
 namespace SlothfulCrud.Services.Endpoints.Delete
 {
-    public class DeleteService<T, TKeyProperty, TContext> : IDeleteService<T, TKeyProperty, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public class DeleteService<TEntity, TContext> : IDeleteService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        private readonly IGetService<T, TKeyProperty, TContext> _getService;
+        private readonly IGetService<TEntity, TContext> _getService;
         private TContext DbContext { get; }
         
-        public DeleteService(TContext dbContext, IGetService<T, TKeyProperty, TContext> getService)
+        public DeleteService(TContext dbContext, IGetService<TEntity, TContext> getService)
         {
             DbContext = dbContext;
             _getService = getService;
         }
         
-        public void Delete(TKeyProperty id)
+        public void Delete(object id)
         {
             var item = _getService.Get(id);
             
-            DbContext.Set<T>().Remove(item);
+            DbContext.Set<TEntity>().Remove(item);
             DbContext.SaveChanges();
         }
     }

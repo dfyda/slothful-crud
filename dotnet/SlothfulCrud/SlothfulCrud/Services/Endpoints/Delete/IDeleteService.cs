@@ -3,10 +3,10 @@ using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Delete
 {
-    public interface IDeleteService<T, TKeyProperty, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public interface IDeleteService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        void Delete(TKeyProperty id);
+        void Delete(object id);
     }
 }

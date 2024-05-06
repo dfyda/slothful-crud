@@ -4,10 +4,10 @@ using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Post
 {
-    public interface ICreateService<T, TKeyProperty, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public interface ICreateService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        TKeyProperty Create(TKeyProperty id, dynamic command, IServiceScope serviceScope);
+        object Create(object id, dynamic command, IServiceScope serviceScope);
     }
 }

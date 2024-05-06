@@ -15,7 +15,10 @@ namespace SlothfulCrud.Providers
             return types.Where(t => t.GetInterfaces().Contains(typeof(ISlothfulEntity)));
         }
         
-        public static dynamic GetConcreteOperationService(Type entityType, Type dbContextType, IServiceScope serviceScope)
+        public static dynamic GetConcreteOperationService(
+            Type entityType,
+            Type dbContextType,
+            IServiceScope serviceScope)
         {
             var serviceType = GetConcreteOperationServiceType(entityType, dbContextType);
             return serviceScope.ServiceProvider.GetService(serviceType);

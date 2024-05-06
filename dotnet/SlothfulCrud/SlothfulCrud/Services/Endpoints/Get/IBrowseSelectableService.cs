@@ -5,8 +5,8 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public interface IBrowseSelectableService<T, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public interface IBrowseSelectableService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
         PagedResults<BaseEntityDto> Browse(ushort page, dynamic query);

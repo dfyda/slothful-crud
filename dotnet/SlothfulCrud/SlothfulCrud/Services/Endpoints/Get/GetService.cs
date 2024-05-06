@@ -7,7 +7,7 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public class GetService<TEntity, TKeyProperty, TContext> : IGetService<TEntity, TKeyProperty, TContext> 
+    public class GetService<TEntity, TContext> : IGetService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
@@ -20,20 +20,19 @@ namespace SlothfulCrud.Services.Endpoints.Get
             DbContext = dbContext;
         }
         
-        // TODO: Key property should be from EntityConfiguration
-        // Refactor other places to use KeyProperty from EntityConfiguration
-        public TEntity Get(TKeyProperty id)
+        // TODO: Map to concrete type in dtos, query and commands.
+        public TEntity Get(object id)
         {
             CheckEntityKey(typeof(TEntity));
 
             return GetEntity(id);
         }
 
-        private TEntity GetEntity(TKeyProperty id)
+        private TEntity GetEntity(object id)
         {
             return DbContext.Set<TEntity>()
                 .IncludeAllFirstLevelDependencies()
-                .FirstOrDefault(x => EF.Property<TKeyProperty>(x, _entityConfiguration.KeyProperty).Equals(id))
+                .FirstOrDefault(x => EF.Property<object>(x, _entityConfiguration.KeyProperty).Equals(id))
                 .OrFail($"{typeof(TEntity)}NotFound", $"{typeof(TEntity)} with {_entityConfiguration.KeyProperty}: '{id}' not found.");
         }
 

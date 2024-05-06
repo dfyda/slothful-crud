@@ -4,10 +4,10 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public interface IBrowseService<T, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public interface IBrowseService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        PagedResults<T> Browse(ushort page, dynamic query);
+        PagedResults<TEntity> Browse(ushort page, dynamic query);
     }
 }

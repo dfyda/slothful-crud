@@ -6,8 +6,8 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public class BrowseSelectableService<T, TContext> : IBrowseSelectableService<T, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public class BrowseSelectableService<TEntity, TContext> : IBrowseSelectableService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
         private readonly IEntityConfigurationProvider _configurationProvider;
@@ -21,9 +21,9 @@ namespace SlothfulCrud.Services.Endpoints.Get
         
         public PagedResults<BaseEntityDto> Browse(ushort page, dynamic query)
         {
-            var baseQuery = DbContext.Set<T>().AsQueryable();
+            var baseQuery = DbContext.Set<TEntity>().AsQueryable();
 
-            var resultQuery = FilterQuery(query.Search, baseQuery) as IQueryable<T>;
+            var resultQuery = FilterQuery(query.Search, baseQuery) as IQueryable<TEntity>;
             resultQuery = SortQuery(query, resultQuery);
 
             resultQuery = resultQuery
@@ -36,9 +36,9 @@ namespace SlothfulCrud.Services.Endpoints.Get
             return new PagedResults<BaseEntityDto>(query.Skip, total, page, data.ToList());
         }
 
-        private IQueryable<T> SortQuery(dynamic query, IQueryable<T> queryObject)
+        private IQueryable<TEntity> SortQuery(dynamic query, IQueryable<TEntity> queryObject)
         {
-            var sortBy = _configurationProvider.GetConfiguration(typeof(T)).SortProperty;
+            var sortBy = _configurationProvider.GetConfiguration(typeof(TEntity)).SortProperty;
             
             queryObject = ((string)query.SortDirection).ToLower() == "asc"
                 ? queryObject.OrderBy(x => EF.Property<string>(x, sortBy))
@@ -47,13 +47,13 @@ namespace SlothfulCrud.Services.Endpoints.Get
             return queryObject;
         }
 
-        private IQueryable<T> FilterQuery(string search, IQueryable<T> queryObject)
+        private IQueryable<TEntity> FilterQuery(string search, IQueryable<TEntity> queryObject)
         {
-            var filterProperty = _configurationProvider.GetConfiguration(typeof(T)).FilterProperty;
+            var filterProperty = _configurationProvider.GetConfiguration(typeof(TEntity)).FilterProperty;
             return queryObject.Where(x => EF.Property<string>(x, filterProperty).Contains(search));
         }
         
-        private IEnumerable<BaseEntityDto> GetBaseEntities(IQueryable<T> resultQuery)
+        private IEnumerable<BaseEntityDto> GetBaseEntities(IQueryable<TEntity> resultQuery)
         {
             var items = resultQuery.ToList();
             foreach (var item in items)

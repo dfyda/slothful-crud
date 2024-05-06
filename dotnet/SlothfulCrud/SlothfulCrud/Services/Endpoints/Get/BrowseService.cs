@@ -7,8 +7,8 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public class BrowseService<T, TContext> : IBrowseService<T, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public class BrowseService<TEntity, TContext> : IBrowseService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
         private readonly IEntityConfigurationProvider _configurationProvider;
@@ -20,12 +20,12 @@ namespace SlothfulCrud.Services.Endpoints.Get
             DbContext = dbContext;
         }
         
-        public PagedResults<T> Browse(ushort page, dynamic query)
+        public PagedResults<TEntity> Browse(ushort page, dynamic query)
         {
-            var baseQuery = DbContext.Set<T>().AsQueryable().IncludeAllFirstLevelDependencies();
+            var baseQuery = DbContext.Set<TEntity>().AsQueryable().IncludeAllFirstLevelDependencies();
             var properties = query.GetType().GetProperties();
 
-            var resultQuery = FilterQuery(query, properties, baseQuery) as IQueryable<T>;
+            var resultQuery = FilterQuery(query, properties, baseQuery) as IQueryable<TEntity>;
             resultQuery = SortQuery(query, resultQuery);
 
             var totalQuery = baseQuery;
@@ -36,23 +36,23 @@ namespace SlothfulCrud.Services.Endpoints.Get
             var data = resultQuery.ToList();
             var total = totalQuery.Count();
             
-            return new PagedResults<T>(query.Skip, total, page, data);
+            return new PagedResults<TEntity>(query.Skip, total, page, data);
         }
         
-        private IQueryable<T> SortQuery(dynamic query, IQueryable<T> queryObject)
+        private IQueryable<TEntity> SortQuery(dynamic query, IQueryable<TEntity> queryObject)
         {
             if (query.SortBy is null)
             {
                 return queryObject;
             }
             
-            if (typeof(T).GetProperties().All(x => x.Name != query.SortBy.ToString()))
+            if (typeof(TEntity).GetProperties().All(x => x.Name != query.SortBy.ToString()))
             {
-                throw new ConfigurationException($"Property '{query.SortBy}' not found on type '{typeof(T).Name}'.");
+                throw new ConfigurationException($"Property '{query.SortBy}' not found on type '{typeof(TEntity).Name}'.");
             }
                 
             var sortBy = (string)query.SortBy;
-            var sortProperty = typeof(T).GetProperties().First(x => x.Name == sortBy);
+            var sortProperty = typeof(TEntity).GetProperties().First(x => x.Name == sortBy);
             if (sortProperty.PropertyType.IsClass && sortProperty.PropertyType != typeof(string))
             {
                 var nestedSortProperty = _configurationProvider.GetConfiguration(sortProperty.PropertyType).SortProperty;
@@ -67,7 +67,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             return queryObject;
         }
 
-        private IQueryable<T> FilterQuery(dynamic query, dynamic properties, IQueryable<T> queryObject)
+        private IQueryable<TEntity> FilterQuery(dynamic query, dynamic properties, IQueryable<TEntity> queryObject)
         {
             foreach (var propertyInfo in properties)
             {
@@ -97,7 +97,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             return queryObject;
         }
 
-        private static IQueryable<T> FilterDateField(IQueryable<T> queryObject, string propertyName, object propertyValue)
+        private static IQueryable<TEntity> FilterDateField(IQueryable<TEntity> queryObject, string propertyName, object propertyValue)
         {
             if (propertyName.EndsWith("From"))
                 queryObject = queryObject.Where(x => EF.Property<DateTime?>(x, propertyName.Replace("From", "")) >= ((DateTime?)propertyValue));
@@ -106,7 +106,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             return queryObject;
         }
 
-        private static IQueryable<T> FilterStringField(IQueryable<T> queryObject, string propertyName, object propertyValue)
+        private static IQueryable<TEntity> FilterStringField(IQueryable<TEntity> queryObject, string propertyName, object propertyValue)
         {
             queryObject = queryObject.Where(x => EF.Property<string>(x, propertyName).Contains((string)propertyValue));
             return queryObject;

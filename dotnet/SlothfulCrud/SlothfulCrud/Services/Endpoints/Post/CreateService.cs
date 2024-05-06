@@ -9,8 +9,8 @@ using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Services.Endpoints.Post
 {
-    public class CreateService<T, TKeyProperty, TContext> : ICreateService<T, TKeyProperty, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public class CreateService<TEntity, TContext> : ICreateService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
         private readonly ICreateConstructorBehavior _createConstructorBehavior;
@@ -27,12 +27,12 @@ namespace SlothfulCrud.Services.Endpoints.Post
             _configurationProvider = configurationProvider;
         }
         
-        public TKeyProperty Create(TKeyProperty id, dynamic command, IServiceScope serviceScope)
+        public object Create(object id, dynamic command, IServiceScope serviceScope)
         {
-            var constructor = _createConstructorBehavior.GetConstructorInfo(typeof(T));
+            var constructor = _createConstructorBehavior.GetConstructorInfo(typeof(TEntity));
             if (constructor is null)
             {
-                throw new ConfigurationException($"Entity '{typeof(T).Name}' must have a constructor.");
+                throw new ConfigurationException($"Entity '{typeof(TEntity).Name}' must have a constructor.");
             }
             
             var constructorArgs = constructor.GetParameters().ToArray()
@@ -41,14 +41,14 @@ namespace SlothfulCrud.Services.Endpoints.Post
 
             constructorArgs[0] = id;
             
-            var item = (T)constructor.Invoke(constructorArgs);
+            var item = (TEntity)constructor.Invoke(constructorArgs);
             
-            if (_configurationProvider.GetConfiguration(typeof(T)).HasValidation)
+            if (_configurationProvider.GetConfiguration(typeof(TEntity)).HasValidation)
             {
-                SlothfulTypesProvider.GetConcreteValidator<T>(serviceScope).ValidateAndThrow(item);
+                SlothfulTypesProvider.GetConcreteValidator<TEntity>(serviceScope).ValidateAndThrow(item);
             }
             
-            DbContext.Set<T>().Add(item);
+            DbContext.Set<TEntity>().Add(item);
             DbContext.SaveChanges();
             
             return id;

@@ -10,17 +10,17 @@ using FluentValidation;
 
 namespace SlothfulCrud.Services.Endpoints.Put
 {
-    public class UpdateService<T, TKeyProperty, TContext> : IUpdateService<T, TKeyProperty, TContext> 
-        where T : class, ISlothfulEntity, new() 
+    public class UpdateService<TEntity, TContext> : IUpdateService<TEntity, TContext> 
+        where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        private readonly IGetService<T, TKeyProperty, TContext> _getService;
+        private readonly IGetService<TEntity, TContext> _getService;
         private readonly IEntityConfigurationProvider _configurationProvider;
         private TContext DbContext { get; }
         
         public UpdateService(
             TContext dbContext,
-            IGetService<T, TKeyProperty, TContext> getService,
+            IGetService<TEntity, TContext> getService,
             IEntityConfigurationProvider configurationProvider)
         {
             DbContext = dbContext;
@@ -28,27 +28,27 @@ namespace SlothfulCrud.Services.Endpoints.Put
             _configurationProvider = configurationProvider;
         }
         
-        public void Update(TKeyProperty id, dynamic command, IServiceScope serviceScope)
+        public void Update(object id, dynamic command, IServiceScope serviceScope)
         {
             var updateMethod = GetModifyMethod();
             if (updateMethod is null)
             {
-                throw new ConfigurationException($"Entity '{typeof(T).Name}' must have a method named 'Update'.");
+                throw new ConfigurationException($"Entity '{typeof(TEntity).Name}' must have a method named 'Update'.");
             }
             
             var item = _getService.Get(id);
             
             ModifyEntity(command, updateMethod, item);
 
-            if (_configurationProvider.GetConfiguration(typeof(T)).HasValidation)
+            if (_configurationProvider.GetConfiguration(typeof(TEntity)).HasValidation)
             {
-                SlothfulTypesProvider.GetConcreteValidator<T>(serviceScope).ValidateAndThrow(item);
+                SlothfulTypesProvider.GetConcreteValidator<TEntity>(serviceScope).ValidateAndThrow(item);
             }
             
             DbContext.SaveChanges();
         }
 
-        private void ModifyEntity(dynamic command, MethodInfo updateMethod, T item)
+        private void ModifyEntity(dynamic command, MethodInfo updateMethod, TEntity item)
         {
             var methodArgs = updateMethod.GetParameters()
                 .Select(param => param.GetDomainMethodParam((object)command, DbContext))
@@ -59,8 +59,8 @@ namespace SlothfulCrud.Services.Endpoints.Put
 
         private MethodInfo GetModifyMethod()
         {
-            var methodName = _configurationProvider.GetConfiguration(typeof(T)).UpdateMethod;
-            return typeof(T).GetMethod(methodName);
+            var methodName = _configurationProvider.GetConfiguration(typeof(TEntity)).UpdateMethod;
+            return typeof(TEntity).GetMethod(methodName);
         }
     }
 }

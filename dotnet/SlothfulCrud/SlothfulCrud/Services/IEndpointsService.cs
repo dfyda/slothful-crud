@@ -6,14 +6,14 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services
 {
-    public interface IEndpointsService<TEntity, TKeyProperty, TDbContext> 
+    public interface IEndpointsService<TEntity, TDbContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TDbContext : DbContext
     {
-        TEntity Get(TKeyProperty id);
-        void Delete(TKeyProperty id);
-        TKeyProperty Create(TKeyProperty id, dynamic command, IServiceScope serviceScope);
-        void Update(TKeyProperty id, dynamic command, IServiceScope serviceScope);
+        TEntity Get(object id);
+        void Delete(object id);
+        object Create(object id, dynamic command, IServiceScope serviceScope);
+        void Update(object id, dynamic command, IServiceScope serviceScope);
         PagedResults<TEntity> Browse(ushort page, dynamic query);
         PagedResults<BaseEntityDto> BrowseSelectable(ushort page, dynamic query);
     }
