@@ -34,7 +34,9 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 return this;
 
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedPut));
-            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [BuilderParams.EntityType]);
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod
+                .MakeGenericMethod(EndpointsConfiguration.Entity.KeyPropertyType, inputType)
+                .Invoke(this, [BuilderParams.EntityType]);
 
             return this;
         }
@@ -58,10 +60,10 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             return typeof(SlothfulUpdateEndpointBuilder<TEntity>).GetMethod(methodName);
         }
         
-        public IEndpointConventionBuilder MapTypedPut<T>(Type entityType)
+        public IEndpointConventionBuilder MapTypedPut<TKeyType, TCommand>(Type entityType)
         {
             var endpoint = BuilderParams.WebApplication.MapPut(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", 
-                    ([FromRoute] Guid id, [FromBody] T command) =>
+                    ([FromRoute] TKeyType id, [FromBody] TCommand command) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
