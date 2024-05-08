@@ -70,7 +70,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             
             if (EndpointsConfiguration.Get.IsAuthorizationEnable)
             {
-                endpoint.RequireAuthorization(EndpointsConfiguration.Browse.PolicyNames);
+                endpoint.RequireAuthorization(EndpointsConfiguration.Get.PolicyNames);
             }
 
             return endpoint;

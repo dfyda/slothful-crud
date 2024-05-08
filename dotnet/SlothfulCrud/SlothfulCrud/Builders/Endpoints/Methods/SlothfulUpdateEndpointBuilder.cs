@@ -77,7 +77,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             
             if (EndpointsConfiguration.Update.IsAuthorizationEnable)
             {
-                endpoint.RequireAuthorization(EndpointsConfiguration.Browse.PolicyNames);
+                endpoint.RequireAuthorization(EndpointsConfiguration.Update.PolicyNames);
             }
 
             return endpoint;

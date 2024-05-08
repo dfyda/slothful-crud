@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,27 +29,41 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             if (!EndpointsConfiguration.Delete.IsEnable) 
                 return this;
 
-            var entityType = BuilderParams.EntityType;
-            ConventionBuilder = BuilderParams.WebApplication.MapDelete(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", 
-                    (Guid id) =>
-                {
-                    using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
-                    var service =
-                        SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    service.Delete(id);
-                    return Results.NoContent();
-                })
+            var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedDelete));
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod
+                .MakeGenericMethod(EndpointsConfiguration.Entity.KeyPropertyType)
+                .Invoke(this, [BuilderParams.EntityType]);
+
+            return this;
+        }
+        
+        private MethodInfo GetGenericMapTypedMethod(string methodName)
+        {
+            return typeof(SlothfulDeleteEndpointBuilder<TEntity>).GetMethod(methodName);
+        }
+        
+        public IEndpointConventionBuilder MapTypedDelete<TKeyType>(Type entityType)
+        {
+            var endpoint = BuilderParams.WebApplication.MapDelete(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", 
+                    (TKeyType id) =>
+                    {
+                        using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
+                        var service =
+                            SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
+                        service.Delete(id);
+                        return Results.NoContent();
+                    })
                 .WithName($"Delete{entityType.Name}")
                 .Produces(204)
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
-
+            
             if (EndpointsConfiguration.Delete.IsAuthorizationEnable)
             {
-                ConventionBuilder.RequireAuthorization(EndpointsConfiguration.Browse.PolicyNames);
+                endpoint.RequireAuthorization(EndpointsConfiguration.Delete.PolicyNames);
             }
-            
-            return this;
+
+            return endpoint;
         }
     }
 }

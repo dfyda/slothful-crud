@@ -79,9 +79,9 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
 
-            if (EndpointsConfiguration.Browse.IsAuthorizationEnable)
+            if (EndpointsConfiguration.BrowseSelectable.IsAuthorizationEnable)
             {
-                endpoint.RequireAuthorization(EndpointsConfiguration.Browse.PolicyNames);
+                endpoint.RequireAuthorization(EndpointsConfiguration.BrowseSelectable.PolicyNames);
             }
         }
     }
