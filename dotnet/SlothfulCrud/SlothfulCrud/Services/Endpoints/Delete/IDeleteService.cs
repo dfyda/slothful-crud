@@ -7,6 +7,6 @@ namespace SlothfulCrud.Services.Endpoints.Delete
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        void Delete(object id);
+        void Delete(object keyProperty);
     }
 }

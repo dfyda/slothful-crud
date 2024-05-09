@@ -8,6 +8,6 @@ namespace SlothfulCrud.Services.Endpoints.Put
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        void Update(object id, dynamic command, IServiceScope serviceScope);
+        void Update(object keyProperty, dynamic command, IServiceScope serviceScope);
     }
 }

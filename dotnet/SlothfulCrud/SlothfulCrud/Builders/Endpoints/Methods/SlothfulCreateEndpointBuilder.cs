@@ -58,16 +58,16 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             return true;
         }
 
-        public IEndpointConventionBuilder MapTypedPost<T>(Type entityType)
+        public IEndpointConventionBuilder MapTypedPost<TCommandType>(Type entityType)
         {
             var endpoint = BuilderParams.WebApplication.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), 
-                    ([FromBody] T command) =>
+                    ([FromBody] TCommandType command) =>
                 {
-                    var id = Guid.NewGuid();
+                    var keyProperty = Guid.NewGuid();
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    service.Create(id, command);
-                    return Results.Created($"/{entityType.Name}s/", id);
+                    service.Create(keyProperty, command);
+                    return Results.Created($"/{entityType.Name}s/", keyProperty);
                 })
                 .WithName($"Create{entityType.Name}")
                 .Produces<Guid>(201)

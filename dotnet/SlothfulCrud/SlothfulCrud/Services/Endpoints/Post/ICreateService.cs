@@ -8,6 +8,6 @@ namespace SlothfulCrud.Services.Endpoints.Post
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        object Create(object id, dynamic command, IServiceScope serviceScope);
+        object Create(object keyProperty, dynamic command, IServiceScope serviceScope);
     }
 }

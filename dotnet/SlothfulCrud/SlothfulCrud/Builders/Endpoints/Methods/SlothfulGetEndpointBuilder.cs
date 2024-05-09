@@ -31,7 +31,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedGet));
             var resultType = BuildGetDtoType();
-            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(resultType)
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(EndpointsConfiguration.Entity.KeyPropertyType, resultType)
                 .Invoke(this, [BuilderParams.EntityType]);
 
             return this;
@@ -50,21 +50,21 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             return typeof(SlothfulGetEndpointBuilder<TEntity>).GetMethod(methodName);
         }
         
-        public IEndpointConventionBuilder MapTypedGet<T>(Type entityType)
+        public IEndpointConventionBuilder MapTypedGet<TKeyType, TResultType>(Type entityType)
         {
             var exposeAll = EndpointsConfiguration.Get.ExposeAllNestedProperties;
-            var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (Guid id) =>
+            var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (TKeyType id) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service =
                         SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     var item = service.Get(id);
-                    var resultDto = DynamicType.MapToDto(item, entityType, typeof(T), exposeAll);
+                    var resultDto = DynamicType.MapToDto(item, entityType, typeof(TResultType), exposeAll);
                     return resultDto;
                 })
                 .WithName($"Get{entityType.Name}Details")
                 .RequireAuthorization()
-                .Produces(200, typeof(T))
+                .Produces(200, typeof(TResultType))
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
             

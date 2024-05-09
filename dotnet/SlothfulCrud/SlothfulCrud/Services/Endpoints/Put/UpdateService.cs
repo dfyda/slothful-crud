@@ -28,7 +28,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
             _configurationProvider = configurationProvider;
         }
         
-        public void Update(object id, dynamic command, IServiceScope serviceScope)
+        public void Update(object keyProperty, dynamic command, IServiceScope serviceScope)
         {
             var updateMethod = GetModifyMethod();
             if (updateMethod is null)
@@ -36,7 +36,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
                 throw new ConfigurationException($"Entity '{typeof(TEntity).Name}' must have a method named 'Update'.");
             }
             
-            var item = _getService.Get(id);
+            var item = _getService.Get(keyProperty);
             
             ModifyEntity(command, updateMethod, item);
 

@@ -27,7 +27,7 @@ namespace SlothfulCrud.Services.Endpoints.Post
             _configurationProvider = configurationProvider;
         }
         
-        public object Create(object id, dynamic command, IServiceScope serviceScope)
+        public object Create(object keyProperty, dynamic command, IServiceScope serviceScope)
         {
             var constructor = _createConstructorBehavior.GetConstructorInfo(typeof(TEntity));
             if (constructor is null)
@@ -39,7 +39,7 @@ namespace SlothfulCrud.Services.Endpoints.Post
                 .Select(param => param.GetDomainMethodParam((object)command, DbContext))
                 .ToArray();
 
-            constructorArgs[0] = id;
+            constructorArgs[0] = keyProperty;
             
             var item = (TEntity)constructor.Invoke(constructorArgs);
             
@@ -51,7 +51,7 @@ namespace SlothfulCrud.Services.Endpoints.Post
             DbContext.Set<TEntity>().Add(item);
             DbContext.SaveChanges();
             
-            return id;
+            return keyProperty;
         }
     }
 }

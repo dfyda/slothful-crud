@@ -17,9 +17,9 @@ namespace SlothfulCrud.Services.Endpoints.Delete
             _getService = getService;
         }
         
-        public void Delete(object id)
+        public void Delete(object keyProperty)
         {
-            var item = _getService.Get(id);
+            var item = _getService.Get(keyProperty);
             
             DbContext.Set<TEntity>().Remove(item);
             DbContext.SaveChanges();

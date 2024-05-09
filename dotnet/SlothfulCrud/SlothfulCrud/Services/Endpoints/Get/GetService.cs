@@ -20,12 +20,11 @@ namespace SlothfulCrud.Services.Endpoints.Get
             DbContext = dbContext;
         }
         
-        // TODO: Map to concrete type in dtos, query and commands.
-        public TEntity Get(object id)
+        public TEntity Get(object keyProperty)
         {
             CheckEntityKey(typeof(TEntity));
 
-            return GetEntity(id);
+            return GetEntity(keyProperty);
         }
 
         private TEntity GetEntity(object id)

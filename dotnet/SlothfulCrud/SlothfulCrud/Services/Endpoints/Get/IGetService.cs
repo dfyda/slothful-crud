@@ -7,6 +7,6 @@ namespace SlothfulCrud.Services.Endpoints.Get
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        TEntity Get(object id);
+        TEntity Get(object keyProperty);
     }
 }
