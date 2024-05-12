@@ -16,22 +16,16 @@ namespace SlothfulCrud.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSlothfulCrud<T>(this IServiceCollection serviceCollection)
-            where T : DbContext
+        public static IServiceCollection AddSlothfulCrud<TDbContext>(this IServiceCollection serviceCollection)
+            where TDbContext : DbContext
         {
             var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(Assembly.GetEntryAssembly());
             foreach (var entityType in entityTypes)
             {
-                var collection = new Dictionary<Type, Type>
-                {
-                    { typeof(IEndpointsService<,>).MakeGenericType(entityType, typeof(T)), typeof(EndpointsService<,>).MakeGenericType(entityType, typeof(T)) },
-                    { typeof(IGetService<,>).MakeGenericType(entityType, typeof(T)), typeof(GetService<,>).MakeGenericType(entityType, typeof(T))},
-                    { typeof(IBrowseService<,>).MakeGenericType(entityType, typeof(T)), typeof(BrowseService<,>).MakeGenericType(entityType, typeof(T)) },
-                    { typeof(IBrowseSelectableService<,>).MakeGenericType(entityType, typeof(T)), typeof(BrowseSelectableService<,>).MakeGenericType(entityType, typeof(T)) },
-                    { typeof(ICreateService<,>).MakeGenericType(entityType, typeof(T)), typeof(CreateService<,>).MakeGenericType(entityType, typeof(T)) },
-                    { typeof(IUpdateService<,>).MakeGenericType(entityType, typeof(T)), typeof(UpdateService<,>).MakeGenericType(entityType, typeof(T)) },
-                    { typeof(IDeleteService<,>).MakeGenericType(entityType, typeof(T)), typeof(DeleteService<,>).MakeGenericType(entityType, typeof(T)) }
-                };
+                var services = GetDynamicServicesCollection<TDbContext>(entityType);
+                var providers = GetDynamicProvidersCollection(entityType);
+                var collection = services.Union(providers);
+                
                 foreach (var pair in collection)
                 {
                     serviceCollection.AddScoped(pair.Key, pair.Value);
@@ -42,6 +36,32 @@ namespace SlothfulCrud.Extensions
                 .AddSingleton()
                 .AddTransient()
                 .AddBehaviors();
+        }
+
+        private static Dictionary<Type, Type> GetDynamicServicesCollection<TDbContext>(Type entityType) where TDbContext : DbContext
+        {
+            var collection = new Dictionary<Type, Type>
+            {
+                { typeof(IEndpointsService<,>).MakeGenericType(entityType, typeof(TDbContext)), typeof(EndpointsService<,>).MakeGenericType(entityType, typeof(TDbContext)) },
+                { typeof(IGetService<,>).MakeGenericType(entityType, typeof(TDbContext)), typeof(GetService<,>).MakeGenericType(entityType, typeof(TDbContext))},
+                { typeof(IBrowseService<,>).MakeGenericType(entityType, typeof(TDbContext)), typeof(BrowseService<,>).MakeGenericType(entityType, typeof(TDbContext)) },
+                { typeof(IBrowseSelectableService<,>).MakeGenericType(entityType, typeof(TDbContext)), typeof(BrowseSelectableService<,>).MakeGenericType(entityType, typeof(TDbContext)) },
+                { typeof(ICreateService<,>).MakeGenericType(entityType, typeof(TDbContext)), typeof(CreateService<,>).MakeGenericType(entityType, typeof(TDbContext)) },
+                { typeof(IUpdateService<,>).MakeGenericType(entityType, typeof(TDbContext)), typeof(UpdateService<,>).MakeGenericType(entityType, typeof(TDbContext)) },
+                { typeof(IDeleteService<,>).MakeGenericType(entityType, typeof(TDbContext)), typeof(DeleteService<,>).MakeGenericType(entityType, typeof(TDbContext)) }
+                
+            };
+            return collection;
+        }
+
+        private static Dictionary<Type, Type> GetDynamicProvidersCollection(Type entityType)
+        {
+            var collection = new Dictionary<Type, Type>
+            {
+                { typeof(IEntityPropertyKeyValueProvider<>).MakeGenericType(entityType), typeof(EntityPropertyKeyValueProvider<>).MakeGenericType(entityType) }
+                
+            };
+            return collection;
         }
 
         private static IServiceCollection AddScoped(this IServiceCollection serviceCollection)

@@ -4,8 +4,6 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Providers
 {
-    // TODO: Register this provider in the DI container and use it in create endpoint builder
-    // After generate check generated type is same as type from EntityConfiguration
     public class EntityPropertyKeyValueProvider<TEntity> : IEntityPropertyKeyValueProvider<TEntity>
         where TEntity : class, ISlothfulEntity
     {
