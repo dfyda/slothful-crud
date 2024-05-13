@@ -88,7 +88,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                     query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    return DynamicType.MapToPagedResultsDto(service.Browse(page, query), entityType, GetResultDto(entityType), exposeAll);
+                    return DynamicType.MapToPagedResultsDto(service.Browse(page, query), entityType, GetResultDto(entityType), exposeAll, EndpointsConfiguration.Entity.KeyProperty);
                 })
                 .WithName($"Browse{entityType.Name}s")
                 .Produces(200, returnType)

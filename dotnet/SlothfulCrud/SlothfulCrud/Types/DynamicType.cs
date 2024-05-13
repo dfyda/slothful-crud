@@ -136,7 +136,7 @@ namespace SlothfulCrud.Types
                 .Build();
         }
 
-        public static dynamic MapToDto(dynamic item, Type entityType, Type dtoType, bool exposeAll)
+        public static dynamic MapToDto(dynamic item, Type entityType, Type dtoType, bool exposeAll, string keyPropertyType)
         {
             var properties = entityType.GetProperties();
             var nestedProperties = entityType.GetProperties()
@@ -144,12 +144,12 @@ namespace SlothfulCrud.Types
                 .ToList();
             
             var instance = Activator.CreateInstance(dtoType);
-            FlatNestedEntities(item, dtoType, properties, nestedProperties, instance, exposeAll);
+            FlatNestedEntities(item, dtoType, properties, nestedProperties, instance, exposeAll, keyPropertyType);
 
             return instance;
         }
 
-        public static dynamic MapToPagedResultsDto(dynamic item, Type entityType, Type dtoType, bool exposeAll)
+        public static dynamic MapToPagedResultsDto(dynamic item, Type entityType, Type dtoType, bool exposeAll, string keyPropertyType)
         {
             var properties = entityType.GetProperties();
             var nestedProperties = entityType.GetProperties()
@@ -161,7 +161,7 @@ namespace SlothfulCrud.Types
             foreach (var element in elements)
             {
                 var instance = Activator.CreateInstance(dtoType);
-                FlatNestedEntities(element, dtoType, properties, nestedProperties, instance, exposeAll);
+                FlatNestedEntities(element, dtoType, properties, nestedProperties, instance, exposeAll, keyPropertyType);
 
                 instances.Add(instance);
             }
@@ -169,15 +169,16 @@ namespace SlothfulCrud.Types
             return new PagedResults<object>(item.First, item.Total, item.Rows, instances);
         }
 
-        public static PagedResults<BaseEntityDto> MapToPagedBaseEntityDto(dynamic item)
+        public static PagedResults<BaseEntityDto> MapToPagedBaseEntityDto(dynamic item, string keyPropertyType)
         {
             var instances = new List<BaseEntityDto>();
             var elements = item.Data;
             foreach (var element in elements)
             {
+                var propertyKeyValue = element.GetKeyPropertyValue(keyPropertyType);
                 var instance = new BaseEntityDto()
                 {
-                    Id = element.Id,
+                    Id = element.propertyKeyValue,
                     DisplayName = element.DisplayName
                 };
 
@@ -193,7 +194,8 @@ namespace SlothfulCrud.Types
             PropertyInfo[] properties,
             List<PropertyInfo> nestedProperties,
             object instance,
-            bool exposeAll)
+            bool exposeAll,
+            string keyPropertyType)
         {
             foreach (var property in properties)
             {
@@ -202,7 +204,7 @@ namespace SlothfulCrud.Types
                 {
                     var nestedDto = new BaseEntityDto()
                     {
-                        Id = (Guid)property.PropertyType.GetProperty("Id").GetValue(value),
+                        Id = property.PropertyType.GetProperty(keyPropertyType).GetValue(value),
                         DisplayName = (string)property.PropertyType.GetProperty("DisplayName").GetValue(value)
                     };
                     dtoType.GetProperty(property.Name).SetValue(instance, nestedDto);

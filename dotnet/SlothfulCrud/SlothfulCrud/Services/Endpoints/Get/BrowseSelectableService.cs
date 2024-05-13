@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
+using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
 using SlothfulCrud.Types.Dto;
@@ -38,6 +39,11 @@ namespace SlothfulCrud.Services.Endpoints.Get
 
         private IQueryable<TEntity> SortQuery(dynamic query, IQueryable<TEntity> queryObject)
         {
+            if (query.SortBy is null)
+            {
+                return queryObject;
+            }
+            
             var sortBy = _configurationProvider.GetConfiguration(typeof(TEntity)).SortProperty;
             
             queryObject = ((string)query.SortDirection).ToLower() == "asc"
@@ -49,18 +55,25 @@ namespace SlothfulCrud.Services.Endpoints.Get
 
         private IQueryable<TEntity> FilterQuery(string search, IQueryable<TEntity> queryObject)
         {
-            var filterProperty = _configurationProvider.GetConfiguration(typeof(TEntity)).FilterProperty;
-            return queryObject.Where(x => EF.Property<string>(x, filterProperty).Contains(search));
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var filterProperty = _configurationProvider.GetConfiguration(typeof(TEntity)).FilterProperty;
+                queryObject = queryObject.Where(x => EF.Property<string>(x, filterProperty).Contains(search));
+            }
+
+            return queryObject;
         }
         
         private IEnumerable<BaseEntityDto> GetBaseEntities(IQueryable<TEntity> resultQuery)
         {
+            var configuration = _configurationProvider.GetConfiguration(typeof(TEntity));
             var items = resultQuery.ToList();
             foreach (var item in items)
             {
+                var propertyKeyValue = item.GetKeyPropertyValue(configuration.KeyProperty);
                 yield return new BaseEntityDto
                 {
-                    Id = item.Id,
+                    Id = propertyKeyValue,
                     DisplayName = item.DisplayName
                 };
             }

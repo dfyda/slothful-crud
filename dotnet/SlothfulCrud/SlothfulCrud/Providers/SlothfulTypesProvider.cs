@@ -29,6 +29,12 @@ namespace SlothfulCrud.Providers
             var validatorType = typeof(IValidator<TEntityType>);
             return serviceScope.ServiceProvider.GetService<IValidator<TEntityType>>();
         }
+        
+        public static dynamic GetEntityPropertyKeyValueProvider(Type entityType, IServiceScope serviceScope)
+        {
+            var serviceType = typeof(IEntityPropertyKeyValueProvider<>).MakeGenericType(entityType);
+            return serviceScope.ServiceProvider.GetService(serviceType);
+        }
 
         private static Type GetConcreteOperationServiceType(Type entityType, Type dbContextType)
         {

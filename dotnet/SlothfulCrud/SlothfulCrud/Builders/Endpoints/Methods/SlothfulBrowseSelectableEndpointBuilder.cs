@@ -50,7 +50,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 parameters.ToArray(),
                 entityType,
                 "BrowseSelectable",
-                false,
+                true,
                 BrowseFields.Fields);
             GeneratedDynamicTypes.Add(inputType.Name, inputType);
             
@@ -72,7 +72,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                         query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
                         using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                         var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                        return DynamicType.MapToPagedBaseEntityDto(service.BrowseSelectable(page, query));
+                        return service.BrowseSelectable(page, query);
                     })
                 .WithName($"BrowseSelectable{entityType.Name}s")
                 .Produces(200, returnType)

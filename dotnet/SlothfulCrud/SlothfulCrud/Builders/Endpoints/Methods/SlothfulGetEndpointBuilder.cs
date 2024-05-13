@@ -59,7 +59,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                     var service =
                         SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     var item = service.Get(id);
-                    var resultDto = DynamicType.MapToDto(item, entityType, typeof(TResultType), exposeAll);
+                    var resultDto = DynamicType.MapToDto(item, entityType, typeof(TResultType), exposeAll, EndpointsConfiguration.Entity.KeyProperty);
                     return resultDto;
                 })
                 .WithName($"Get{entityType.Name}Details")

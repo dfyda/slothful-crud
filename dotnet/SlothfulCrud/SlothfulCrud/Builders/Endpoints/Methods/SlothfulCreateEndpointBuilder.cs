@@ -63,10 +63,11 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             var endpoint = BuilderParams.WebApplication.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), 
                     ([FromBody] TCommandType command) =>
                 {
-                    var keyProperty = Guid.NewGuid();
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
+                    var entityPropertyKeyValueProvider = SlothfulTypesProvider.GetEntityPropertyKeyValueProvider(entityType, serviceScope);
+                    var keyProperty = (object)entityPropertyKeyValueProvider.GetNextValue(EndpointsConfiguration.Entity);
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    service.Create(keyProperty, command);
+                    service.Create(keyProperty, command, serviceScope);
                     return Results.Created($"/{entityType.Name}s/", keyProperty);
                 })
                 .WithName($"Create{entityType.Name}")

@@ -23,5 +23,14 @@ namespace SlothfulCrud.Extensions
 
             return propertyValues;
         }
+        
+        public static object GetKeyPropertyValue(this object obj, string keyProperty)
+        {
+            var properties = obj.GetProperties();
+            var keyPropertyValue = properties.FirstOrDefault(x => x.Key == keyProperty)
+                .OrFail($"KeyPropertyNotFound", $"Key property '{keyProperty}' not found on type '{obj.GetType().Name}'.");
+            
+            return keyPropertyValue.Value;
+        }
     }
 }
