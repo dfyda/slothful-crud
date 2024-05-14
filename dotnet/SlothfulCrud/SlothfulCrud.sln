@@ -6,6 +6,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{53EDFB92
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlothfulCrud.Tests.Api", "Tests\SlothfulCrud.Tests.Api\SlothfulCrud.Tests.Api.csproj", "{9507BFAE-91A6-45D4-AACE-CA8959D65517}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlothfulCrud.Tests.Unit", "Tests\SlothfulCrud.Tests.Unit\SlothfulCrud.Tests.Unit.csproj", "{C4A3F634-525C-4F07-8618-5F9326CC36D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +22,13 @@ Global
 		{9507BFAE-91A6-45D4-AACE-CA8959D65517}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9507BFAE-91A6-45D4-AACE-CA8959D65517}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9507BFAE-91A6-45D4-AACE-CA8959D65517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4A3F634-525C-4F07-8618-5F9326CC36D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4A3F634-525C-4F07-8618-5F9326CC36D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4A3F634-525C-4F07-8618-5F9326CC36D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4A3F634-525C-4F07-8618-5F9326CC36D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9507BFAE-91A6-45D4-AACE-CA8959D65517} = {53EDFB92-65C6-4E90-8B52-D3747A2B78F5}
+		{C4A3F634-525C-4F07-8618-5F9326CC36D1} = {53EDFB92-65C6-4E90-8B52-D3747A2B78F5}
 	EndGlobalSection
 EndGlobal
