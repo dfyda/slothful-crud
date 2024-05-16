@@ -7,6 +7,7 @@ using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services.Endpoints.Get;
 using FluentValidation;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints.Put
 {
@@ -30,6 +31,8 @@ namespace SlothfulCrud.Services.Endpoints.Put
         
         public void Update(object keyProperty, dynamic command, IServiceScope serviceScope)
         {
+            CheckEntityKey(typeof(TEntity), keyProperty);
+            
             var updateMethod = GetModifyMethod();
             if (updateMethod is null)
             {
@@ -61,6 +64,30 @@ namespace SlothfulCrud.Services.Endpoints.Put
         {
             var methodName = _configurationProvider.GetConfiguration(typeof(TEntity)).UpdateMethod;
             return typeof(TEntity).GetMethod(methodName);
+        }
+        
+        private void CheckEntityKey(Type type, object keyProperty)
+        {
+            var _entityConfiguration = _configurationProvider.GetConfiguration(typeof(TEntity));
+            if (_entityConfiguration is null)
+            {
+                throw new ConfigurationException($"Entity '{typeof(TEntity)}' has no configuration.");
+            }
+
+            if (keyProperty is null)
+            {
+                throw new ConfigurationException($"Parameter '{nameof(keyProperty)}' cannot be null.");
+            }
+            
+            if (type.GetProperty(_entityConfiguration.KeyProperty) is null)
+            {
+                throw new ConfigurationException($"Entity '{typeof(TEntity)}' must have a property named '{_entityConfiguration.KeyProperty}'");
+            };
+
+            if (keyProperty.GetType() != _entityConfiguration.KeyPropertyType)
+            {
+                throw new ConfigurationException($"Entity '{typeof(TEntity)}' key property '{_entityConfiguration.KeyProperty}' must be of type '{_entityConfiguration.KeyPropertyType}'");
+            }
         }
     }
 }

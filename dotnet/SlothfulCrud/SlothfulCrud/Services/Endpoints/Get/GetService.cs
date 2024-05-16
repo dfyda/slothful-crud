@@ -22,7 +22,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
         
         public TEntity Get(object keyProperty)
         {
-            CheckEntityKey(typeof(TEntity));
+            CheckEntityKey(typeof(TEntity), keyProperty);
 
             return GetEntity(keyProperty);
         }
@@ -35,12 +35,27 @@ namespace SlothfulCrud.Services.Endpoints.Get
                 .OrFail($"{typeof(TEntity)}NotFound", $"{typeof(TEntity)} with {_entityConfiguration.KeyProperty}: '{id}' not found.");
         }
 
-        private void CheckEntityKey(Type type)
+        private void CheckEntityKey(Type type, object keyProperty)
         {
+            if (_entityConfiguration is null)
+            {
+                throw new ConfigurationException($"Entity '{typeof(TEntity)}' has no configuration.");
+            }
+
+            if (keyProperty is null)
+            {
+                throw new ConfigurationException($"Parameter '{nameof(keyProperty)}' cannot be null.");
+            }
+            
             if (type.GetProperty(_entityConfiguration.KeyProperty) is null)
             {
                 throw new ConfigurationException($"Entity '{typeof(TEntity)}' must have a property named '{_entityConfiguration.KeyProperty}'");
             };
+
+            if (keyProperty.GetType() != _entityConfiguration.KeyPropertyType)
+            {
+                throw new ConfigurationException($"Entity '{typeof(TEntity)}' key property '{_entityConfiguration.KeyProperty}' must be of type '{_entityConfiguration.KeyPropertyType}'");
+            }
         }
     }
 }
