@@ -4,6 +4,10 @@
     {
         public string Code { get; }
 
+        public NotFoundException()
+        {
+        }
+        
         public NotFoundException(string code, string message) : base(message)
         {
             Code = code;
