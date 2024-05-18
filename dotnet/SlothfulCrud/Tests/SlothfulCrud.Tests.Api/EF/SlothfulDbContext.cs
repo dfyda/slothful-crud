@@ -21,7 +21,7 @@ namespace SlothfulCrud.Tests.Api.EF
 
         public void Configure()
         {
-            InitializeDatabase(this);
+            // InitializeDatabase(this);
         }
 
         private static void InitializeDatabase(SlothfulDbContext dbContext)

@@ -29,16 +29,26 @@ namespace SlothfulCrud.Services.Endpoints.Get
             resultQuery = SortQuery(query, resultQuery);
 
             var totalQuery = baseQuery;
+            var skip = CalculateSkip(page, query);
             resultQuery = resultQuery
-                .Take((int)query.Rows)
-                .Skip((int)query.Skip);
+                .Skip((int)skip)
+                .Take((int)query.Rows);
 
             var data = resultQuery.ToList();
             var total = totalQuery.Count();
             
-            return new PagedResults<TEntity>(query.Skip, total, page, data);
+            return new PagedResults<TEntity>(skip, total, page, data);
         }
-        
+
+        private int CalculateSkip(ushort page, dynamic query)
+        {
+            if (page == 0)
+            {
+                return 0;
+            }
+            return query.Rows * (page - 1);
+        }
+
         private IQueryable<TEntity> SortQuery(dynamic query, IQueryable<TEntity> queryObject)
         {
             if (query.SortBy is null)
