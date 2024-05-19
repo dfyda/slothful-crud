@@ -22,19 +22,34 @@ namespace SlothfulCrud.Services.Endpoints.Get
         
         public PagedResults<BaseEntityDto> Browse(ushort page, dynamic query)
         {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+            
             var baseQuery = DbContext.Set<TEntity>().AsQueryable();
 
             var resultQuery = FilterQuery(query.Search, baseQuery) as IQueryable<TEntity>;
             resultQuery = SortQuery(query, resultQuery);
 
+            var skip = CalculateSkip(page, query);
             resultQuery = resultQuery
-                .Take((int)query.Rows)
-                .Skip((int)query.Skip);
+                .Skip((int)skip)
+                .Take((int)query.Rows);
 
             var data = GetBaseEntities(resultQuery);
             var total = baseQuery.Count();
             
-            return new PagedResults<BaseEntityDto>(query.Skip, total, page, data.ToList());
+            return new PagedResults<BaseEntityDto>(skip, total, page, data.ToList());
+        }
+
+        private int CalculateSkip(ushort page, dynamic query)
+        {
+            if (page == 0)
+            {
+                return 0;
+            }
+            return query.Rows * (page - 1);
         }
 
         private IQueryable<TEntity> SortQuery(dynamic query, IQueryable<TEntity> queryObject)
