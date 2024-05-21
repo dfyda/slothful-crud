@@ -22,6 +22,11 @@ namespace SlothfulCrud.Services.Endpoints.Get
         
         public PagedResults<TEntity> Browse(ushort page, dynamic query)
         {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+            
             var baseQuery = DbContext.Set<TEntity>().AsQueryable().IncludeAllFirstLevelDependencies();
             var properties = query.GetType().GetProperties();
 
@@ -68,6 +73,11 @@ namespace SlothfulCrud.Services.Endpoints.Get
                 var nestedSortProperty = _configurationProvider.GetConfiguration(sortProperty.PropertyType).SortProperty;
                 queryObject = queryObject.OrderByNestedProperty($"{sortBy}.{nestedSortProperty}", (string)query.SortDirection == "asc");
                 return queryObject;
+            }
+            
+            if (((string)query.SortDirection).ToLower() != "asc" || ((string)query.SortDirection).ToLower() != "desc")
+            {
+                throw new ConfigurationException($"Sort direction '{query.SortDirection}' is invalid. Must be 'asc' or 'desc'.");
             }
             
             queryObject = ((string)query.SortDirection).ToLower() == "asc"

@@ -362,6 +362,56 @@ public class BrowseServiceTests : IDisposable
         Assert.Equal("Koala2", result.Data.First().Name);
         Assert.Equal("Koala1", result.Data.Last().Name);
     }
+
+    [Fact]
+    public void Browse_ShouldThrowException_WhenInvalidSortDirection()
+    {
+        var entities = new List<Sloth>
+        {
+            new Sloth(Guid.NewGuid(), "Sloth2", 6),
+            new Sloth(Guid.NewGuid(), "Sloth1", 5)
+        };
+
+        _dbContext.Sloths.AddRange(entities);
+        _dbContext.SaveChanges();
+
+        var query = new BrowseQuery
+        {
+            Rows = 10,
+            SortBy = "Name",
+            SortDirection = "invalid"
+        };
+
+        Assert.Throws<ConfigurationException>(() => _slothService.Browse(1, query));
+    }
+
+    [Fact]
+    public void Browse_ShouldThrowException_WhenQueryIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => _slothService.Browse(1, null));
+    }
+
+    [Fact]
+    public void Browse_ShouldThrowException_WhenSortPropertyIsNotFound()
+    {
+        var entities = new List<Sloth>
+        {
+            new Sloth(Guid.NewGuid(), "Sloth1", 5),
+            new Sloth(Guid.NewGuid(), "Sloth2", 6)
+        };
+
+        _dbContext.Sloths.AddRange(entities);
+        _dbContext.SaveChanges();
+
+        var query = new BrowseQuery
+        {
+            Rows = 10,
+            SortBy = "InvalidProperty",
+            SortDirection = "asc"
+        };
+
+        Assert.Throws<ConfigurationException>(() => _slothService.Browse(1, query));
+    }
 }
 
 public class BrowseQuery

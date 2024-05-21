@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
+using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
@@ -59,11 +60,23 @@ namespace SlothfulCrud.Services.Endpoints.Get
                 return queryObject;
             }
             
-            var sortBy = _configurationProvider.GetConfiguration(typeof(TEntity)).SortProperty;
+            if (typeof(TEntity).GetProperties().All(x => x.Name != query.SortBy.ToString()))
+            {
+                throw new ConfigurationException($"Property '{query.SortBy}' not found on type '{typeof(TEntity).Name}'.");
+            }
+                
+            var sortBy = (string)query.SortBy;
+            var sortProperty = typeof(TEntity).GetProperties().First(x => x.Name == sortBy);
+            if (sortProperty.PropertyType.IsClass && sortProperty.PropertyType != typeof(string))
+            {
+                var nestedSortProperty = _configurationProvider.GetConfiguration(sortProperty.PropertyType).SortProperty;
+                queryObject = queryObject.OrderByNestedProperty($"{sortBy}.{nestedSortProperty}", (string)query.SortDirection == "asc");
+                return queryObject;
+            }
             
             queryObject = ((string)query.SortDirection).ToLower() == "asc"
-                ? queryObject.OrderBy(x => EF.Property<string>(x, sortBy))
-                : queryObject.OrderByDescending(x => EF.Property<string>(x, sortBy));
+                ? queryObject.OrderBy(x => EF.Property<object>(x, sortBy))
+                : queryObject.OrderByDescending(x => EF.Property<object>(x, sortBy));
 
             return queryObject;
         }
