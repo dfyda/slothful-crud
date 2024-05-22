@@ -2,9 +2,13 @@
     <img src="documentation/slothful-api.jpg" alt="slothful-api logo">
 </div>
 
-# Slothful CRUD
-
+Slothful CRUD
+===========
 Slothful CRUD is a library designed to streamline the creation of CRUD endpoints effortlessly. By implementing the necessary interfaces in domain classes, you can quickly register the library and generate RESTful endpoints. Simplify your API development with Slothful CRUD.
+
+## Documentation
+
+Get started by [reading through the documentation](https://slothful.dev/).
 
 ## Getting Started
 
