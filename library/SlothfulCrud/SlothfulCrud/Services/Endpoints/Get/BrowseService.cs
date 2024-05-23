@@ -75,12 +75,14 @@ namespace SlothfulCrud.Services.Endpoints.Get
                 return queryObject;
             }
             
-            if (((string)query.SortDirection).ToLower() != "asc" || ((string)query.SortDirection).ToLower() != "desc")
+            var sortDirection = (string)query.SortDirection;
+            if (!sortDirection.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
+                && !sortDirection.Equals("desc", StringComparison.CurrentCultureIgnoreCase))
             {
                 throw new ConfigurationException($"Sort direction '{query.SortDirection}' is invalid. Must be 'asc' or 'desc'.");
             }
             
-            queryObject = ((string)query.SortDirection).ToLower() == "asc"
+            queryObject = sortDirection.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
                 ? queryObject.OrderBy(x => EF.Property<object>(x, sortBy))
                 : queryObject.OrderByDescending(x => EF.Property<object>(x, sortBy));
 

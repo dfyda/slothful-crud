@@ -1,127 +1,133 @@
-﻿using Moq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Moq;
 using SlothfulCrud.Exceptions;
-using SlothfulCrud.Services.Endpoints.Get;
 using SlothfulCrud.Providers;
+using SlothfulCrud.Services.Endpoints.Get;
 using SlothfulCrud.Tests.Api.Domain;
-using SlothfulCrud.Types.Configurations;
 using SlothfulCrud.Tests.Api.EF;
+using SlothfulCrud.Types.Configurations;
 
-public class GetServiceTests
+namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
-    private readonly SlothfulDbContext _dbContext;
-    private readonly GetService<Sloth, SlothfulDbContext> _slothService;
-    private readonly GetService<WildKoala, SlothfulDbContext> _wildKoalaService;
-
-    public GetServiceTests()
+    public class GetServiceTests
     {
-        var options = new DbContextOptionsBuilder<SlothfulDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestGetDatabase")
-            .Options;
+        private readonly SlothfulDbContext _dbContext;
+        private readonly GetService<Sloth, SlothfulDbContext> _slothService;
+        private readonly GetService<WildKoala, SlothfulDbContext> _wildKoalaService;
 
-        _dbContext = new SlothfulDbContext(options);
-        var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
-        var slothEntityConfiguration = new EntityConfiguration();
-        configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-            .Returns(slothEntityConfiguration);
+        public GetServiceTests()
+        {
+            var options = new DbContextOptionsBuilder<SlothfulDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestGetDatabase")
+                .Options;
 
-        var wildKoalaEntityConfiguration = new EntityConfiguration();
-        configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
-            .Returns(wildKoalaEntityConfiguration);
-        
-        _slothService = new GetService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
-        _wildKoalaService = new GetService<WildKoala, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
-    }
+            _dbContext = new SlothfulDbContext(options);
+            var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            var slothEntityConfiguration = new EntityConfiguration();
+            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(slothEntityConfiguration);
 
-    [Fact]
-    public void Get_ShouldReturnSlothEntity()
-    {
-        var entityId = Guid.NewGuid();
-        var entity = new Sloth(entityId, "Test", 5);
+            var wildKoalaEntityConfiguration = new EntityConfiguration();
+            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
+                .Returns(wildKoalaEntityConfiguration);
 
-        _dbContext.Sloths.Add(entity);
-        _dbContext.SaveChanges();
+            _slothService = new GetService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+            _wildKoalaService =
+                new GetService<WildKoala, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+        }
 
-        var result = _slothService.Get(entity.Id);
+        [Fact]
+        public void Get_ShouldReturnSlothEntity()
+        {
+            var entityId = Guid.NewGuid();
+            var entity = new Sloth(entityId, "Test", 5);
 
-        Assert.NotNull(result);
-        Assert.Equal(entity.Id, result.Id);
-        Assert.Equal(entity.Name, result.Name);
-        Assert.Equal(entity.Age, result.Age);
-    }
+            _dbContext.Sloths.Add(entity);
+            _dbContext.SaveChanges();
 
-    [Fact]
-    public void Get_ShouldReturnWildKoalaEntity()
-    {
-        var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
-        var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
-        var entityId = Guid.NewGuid();
-        var entity = new WildKoala(entityId, "SpeedyKoala", 5, cuisine, neighbour);
+            var result = _slothService.Get(entity.Id);
 
-        _dbContext.Sloths.Add(cuisine);
-        _dbContext.Sloths.Add(neighbour);
-        _dbContext.Koalas.Add(entity);
-        _dbContext.SaveChanges();
+            Assert.NotNull(result);
+            Assert.Equal(entity.Id, result.Id);
+            Assert.Equal(entity.Name, result.Name);
+            Assert.Equal(entity.Age, result.Age);
+        }
 
-        var result = _wildKoalaService.Get(entity.Id);
+        [Fact]
+        public void Get_ShouldReturnWildKoalaEntity()
+        {
+            var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
+            var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
+            var entityId = Guid.NewGuid();
+            var entity = new WildKoala(entityId, "SpeedyKoala", 5, cuisine, neighbour);
 
-        Assert.NotNull(result);
-        Assert.Equal(entity.Id, result.Id);
-        Assert.Equal(entity.Name, result.Name);
-        Assert.Equal(entity.Age, result.Age);
-        Assert.Equal(cuisine.Id, result.CuisineId);
-        Assert.Equal(neighbour.Id, result.NeighbourId);
-    }
+            _dbContext.Sloths.Add(cuisine);
+            _dbContext.Sloths.Add(neighbour);
+            _dbContext.Koalas.Add(entity);
+            _dbContext.SaveChanges();
 
-    [Fact]
-    public void Get_ShouldThrowException_WhenEntityNotFound()
-    {
-        var nonExistentId = Guid.NewGuid();
+            var result = _wildKoalaService.Get(entity.Id);
 
-        Assert.Throws<NotFoundException>(() => _slothService.Get(nonExistentId));
-        Assert.Throws<NotFoundException>(() => _wildKoalaService.Get(nonExistentId));
-    }
+            Assert.NotNull(result);
+            Assert.Equal(entity.Id, result.Id);
+            Assert.Equal(entity.Name, result.Name);
+            Assert.Equal(entity.Age, result.Age);
+            Assert.Equal(cuisine.Id, result.CuisineId);
+            Assert.Equal(neighbour.Id, result.NeighbourId);
+        }
 
-    [Fact]
-    public void Get_ShouldIncludeDependencies_ForWildKoala()
-    {
-        var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
-        var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
-        var entityId = Guid.NewGuid();
-        var entity = new WildKoala(entityId, "SpeedyKoala", 5, cuisine, neighbour);
+        [Fact]
+        public void Get_ShouldThrowException_WhenEntityNotFound()
+        {
+            var nonExistentId = Guid.NewGuid();
 
-        _dbContext.Sloths.Add(cuisine);
-        _dbContext.Sloths.Add(neighbour);
-        _dbContext.Koalas.Add(entity);
-        _dbContext.SaveChanges();
+            Assert.Throws<NotFoundException>(() => _slothService.Get(nonExistentId));
+            Assert.Throws<NotFoundException>(() => _wildKoalaService.Get(nonExistentId));
+        }
 
-        var result = _wildKoalaService.Get(entity.Id);
+        [Fact]
+        public void Get_ShouldIncludeDependencies_ForWildKoala()
+        {
+            var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
+            var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
+            var entityId = Guid.NewGuid();
+            var entity = new WildKoala(entityId, "SpeedyKoala", 5, cuisine, neighbour);
 
-        Assert.NotNull(result);
-        Assert.Equal(cuisine.Name, result.Cuisine.Name);
-        Assert.Equal(neighbour.Name, result.Neighbour.Name);
-    }
-    
-    [Fact]
-    public void Get_ShouldThrowException_ForInvalidIdType()
-    {
-        var invalidId = "invalid_id";
+            _dbContext.Sloths.Add(cuisine);
+            _dbContext.Sloths.Add(neighbour);
+            _dbContext.Koalas.Add(entity);
+            _dbContext.SaveChanges();
 
-        Assert.Throws<ConfigurationException>(() => _slothService.Get(invalidId));
-    }
+            var result = _wildKoalaService.Get(entity.Id);
 
-    [Fact]
-    public void Get_ShouldThrowException_WhenConfigurationNotFound()
-    {
-        var nonConfiguredService = new GetService<WildKoala, SlothfulDbContext>(_dbContext, new Mock<IEntityConfigurationProvider>().Object);
-        var entityId = Guid.NewGuid();
+            Assert.NotNull(result);
+            Assert.Equal(cuisine.Name, result.Cuisine.Name);
+            Assert.Equal(neighbour.Name, result.Neighbour.Name);
+        }
 
-        Assert.Throws<ConfigurationException>(() => nonConfiguredService.Get(entityId));
-    }
+        [Fact]
+        public void Get_ShouldThrowException_ForInvalidIdType()
+        {
+            var invalidId = "invalid_id";
 
-    [Fact]
-    public void Get_ShouldThrowException_WhenIdIsNull()
-    {
-        Assert.Throws<ConfigurationException>(() => _slothService.Get(null));
+            Assert.Throws<ConfigurationException>(() => _slothService.Get(invalidId));
+        }
+
+        [Fact]
+        public void Get_ShouldThrowException_WhenConfigurationNotFound()
+        {
+            var nonConfiguredService =
+                new GetService<WildKoala, SlothfulDbContext>(_dbContext,
+                    new Mock<IEntityConfigurationProvider>().Object);
+            var entityId = Guid.NewGuid();
+
+            Assert.Throws<ConfigurationException>(() => nonConfiguredService.Get(entityId));
+        }
+
+        [Fact]
+        public void Get_ShouldThrowException_WhenIdIsNull()
+        {
+            Assert.Throws<ConfigurationException>(() => _slothService.Get(null));
+        }
     }
 }
