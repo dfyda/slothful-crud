@@ -4,8 +4,22 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
+        <PackageId>slothful-crud</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>Damian Fyda</Authors>
+        <Description>Slothful CRUD is a library designed to streamline the creation of CRUD endpoints effortlessly. By implementing the necessary interfaces in domain classes, you can quickly register the library and generate RESTful endpoints. Simplify your API development with Slothful CRUD.</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/dfyda/slothful-crud</RepositoryUrl>
+        <PackageProjectUrl>https://slothful.dev</PackageProjectUrl>
+        <Copyright>2024 Damian Fyda</Copyright>
+        <PackageTags>crud;restful;api;development;library</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
+    <ItemGroup>
+        <None Include="../../../README.md" Pack="true" PackagePath="/" />
+    </ItemGroup>
+    
     <ItemGroup>
         <ProjectCapability Include="AspNetCore" />
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
