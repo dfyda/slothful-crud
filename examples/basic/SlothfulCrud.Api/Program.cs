@@ -1,10 +1,27 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+using SlothfulCrud.Api.EF;
+using SlothfulCrud.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<SlothfulDbContext>(options =>
+    options.UseInMemoryDatabase(databaseName: "InMemoryDatabase"));
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
+    .AddCookie();
+builder.Services.AddSlothfulCrud<SlothfulDbContext>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -14,7 +31,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSlothfulCrud<SlothfulDbContext>();
 app.UseHttpsRedirection();
+app.UseAuthorization();
 
 app.MapGet("/", () => "SlothfulCrud.Api")
     .WithName("Get")
