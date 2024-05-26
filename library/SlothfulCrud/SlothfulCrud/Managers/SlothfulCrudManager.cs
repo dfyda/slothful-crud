@@ -15,7 +15,7 @@ namespace SlothfulCrud.Managers
         private readonly IApiSegmentProvider _apiSegmentProvider;
         private readonly ICreateConstructorBehavior _createConstructorBehavior;
         private readonly IModifyMethodBehavior _modifyMethodBehavior;
-        private readonly SlothConfigurationBuilder _slothConfigurationBuilder = new SlothConfigurationBuilder();
+        private readonly SlothConfigurationBuilder _slothConfigurationBuilder = new();
 
         public SlothfulCrudManager(
             IApiSegmentProvider apiSegmentProvider,

@@ -85,7 +85,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", 
                     (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
                 {
-                    query = QueryObjectProvider.PrepareQueryObject<T>(query, context);
+                    query = QueryObjectProvider.PrepareQueryObject<T>(context);
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     return DynamicType.MapToPagedResultsDto(service.Browse(page, query), entityType, GetResultDto(entityType), exposeAll, EndpointsConfiguration.Entity.KeyProperty);

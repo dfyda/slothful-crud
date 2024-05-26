@@ -1,22 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
-using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public class BrowseService<TEntity, TContext> : IBrowseService<TEntity, TContext> 
+    public class BrowseService<TEntity, TContext> : BaseBrowseEndpointService<TEntity, TContext>, IBrowseService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        private readonly IEntityConfigurationProvider _configurationProvider;
         private TContext DbContext { get; }
         
-        public BrowseService(TContext dbContext, IEntityConfigurationProvider configurationProvider)
+        public BrowseService(TContext dbContext, IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
         {
-            _configurationProvider = configurationProvider;
             DbContext = dbContext;
         }
         
@@ -43,50 +40,6 @@ namespace SlothfulCrud.Services.Endpoints.Get
             var total = totalQuery.Count();
             
             return new PagedResults<TEntity>(skip, total, page, data);
-        }
-
-        private int CalculateSkip(ushort page, dynamic query)
-        {
-            if (page == 0)
-            {
-                return 0;
-            }
-            return query.Rows * (page - 1);
-        }
-
-        private IQueryable<TEntity> SortQuery(dynamic query, IQueryable<TEntity> queryObject)
-        {
-            if (query.SortBy is null)
-            {
-                return queryObject;
-            }
-            
-            if (typeof(TEntity).GetProperties().All(x => x.Name != query.SortBy.ToString()))
-            {
-                throw new ConfigurationException($"Property '{query.SortBy}' not found on type '{typeof(TEntity).Name}'.");
-            }
-                
-            var sortBy = (string)query.SortBy;
-            var sortProperty = typeof(TEntity).GetProperties().First(x => x.Name == sortBy);
-            if (sortProperty.PropertyType.IsClass && sortProperty.PropertyType != typeof(string))
-            {
-                var nestedSortProperty = _configurationProvider.GetConfiguration(sortProperty.PropertyType).SortProperty;
-                queryObject = queryObject.OrderByNestedProperty($"{sortBy}.{nestedSortProperty}", (string)query.SortDirection == "asc");
-                return queryObject;
-            }
-            
-            var sortDirection = (string)query.SortDirection;
-            if (!sortDirection.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
-                && !sortDirection.Equals("desc", StringComparison.CurrentCultureIgnoreCase))
-            {
-                throw new ConfigurationException($"Sort direction '{query.SortDirection}' is invalid. Must be 'asc' or 'desc'.");
-            }
-            
-            queryObject = sortDirection.Equals("asc", StringComparison.CurrentCultureIgnoreCase)
-                ? queryObject.OrderBy(x => EF.Property<object>(x, sortBy))
-                : queryObject.OrderByDescending(x => EF.Property<object>(x, sortBy));
-
-            return queryObject;
         }
 
         private IQueryable<TEntity> FilterQuery(dynamic query, dynamic properties, IQueryable<TEntity> queryObject)
@@ -128,7 +81,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             return queryObject;
         }
 
-        private static IQueryable<TEntity> FilterStringField(IQueryable<TEntity> queryObject, string propertyName, object propertyValue)
+        private IQueryable<TEntity> FilterStringField(IQueryable<TEntity> queryObject, string propertyName, object propertyValue)
         {
             queryObject = queryObject.Where(x => EF.Property<string>(x, propertyName).Contains((string)propertyValue));
             return queryObject;

@@ -7,9 +7,9 @@ namespace SlothfulCrud.Providers
 {
     public static class QueryObjectProvider
     {
-        public static T PrepareQueryObject<T>(T query, HttpContext context) where T : new()
+        public static T PrepareQueryObject<T>(HttpContext context) where T : new()
         {
-            query = new T();
+            var query = new T();
             
             var properties = typeof(T).GetProperties();
             foreach (var propertyInfo in properties)
@@ -28,7 +28,7 @@ namespace SlothfulCrud.Providers
 
         private static dynamic ParseQueryParam<T>(HttpContext context, PropertyInfo propertyInfo) where T : new()
         {
-            var baseType = GetBaseType<T>(propertyInfo);
+            var baseType = GetBaseType(propertyInfo);
             
             var parseMethod = baseType
                 .PropertyType
@@ -46,7 +46,7 @@ namespace SlothfulCrud.Providers
             };
         }
 
-        private static PropertyInfo GetBaseType<T>(PropertyInfo propertyInfo) where T : new()
+        private static PropertyInfo GetBaseType(PropertyInfo propertyInfo)
         {
             if (propertyInfo.PropertyType == typeof(string))
             {

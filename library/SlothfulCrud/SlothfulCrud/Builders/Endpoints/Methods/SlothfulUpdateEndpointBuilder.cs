@@ -43,6 +43,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
 
         private bool BuildModifyMethodType(Type entityType, out Type inputType)
         {
+            // TODO: That is now from EntityConfiguration
             var modifyMethod = BuilderParams.ModifyMethodBehavior.GetModifyMethod(entityType);
             if (modifyMethod is null)
             {

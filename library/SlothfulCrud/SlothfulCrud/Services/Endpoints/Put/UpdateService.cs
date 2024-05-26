@@ -7,26 +7,23 @@ using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services.Endpoints.Get;
 using FluentValidation;
-using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints.Put
 {
-    public class UpdateService<TEntity, TContext> : IUpdateService<TEntity, TContext> 
+    public class UpdateService<TEntity, TContext> : BaseEndpointService<TEntity>, IUpdateService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
         private readonly IGetService<TEntity, TContext> _getService;
-        private readonly IEntityConfigurationProvider _configurationProvider;
         private TContext DbContext { get; }
         
         public UpdateService(
             TContext dbContext,
             IGetService<TEntity, TContext> getService,
-            IEntityConfigurationProvider configurationProvider)
+            IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
         {
             DbContext = dbContext;
             _getService = getService;
-            _configurationProvider = configurationProvider;
         }
         
         public void Update(object keyProperty, dynamic command, IServiceScope serviceScope)
@@ -43,7 +40,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
             
             ModifyEntity(command, updateMethod, item);
 
-            if (_configurationProvider.GetConfiguration(typeof(TEntity)).HasValidation)
+            if (EntityConfiguration.HasValidation)
             {
                 SlothfulTypesProvider.GetConcreteValidator<TEntity>(serviceScope).ValidateAndThrow(item);
             }
@@ -62,32 +59,8 @@ namespace SlothfulCrud.Services.Endpoints.Put
 
         private MethodInfo GetModifyMethod()
         {
-            var methodName = _configurationProvider.GetConfiguration(typeof(TEntity)).UpdateMethod;
+            var methodName = EntityConfiguration.UpdateMethod;
             return typeof(TEntity).GetMethod(methodName);
-        }
-        
-        private void CheckEntityKey(Type type, object keyProperty)
-        {
-            var _entityConfiguration = _configurationProvider.GetConfiguration(typeof(TEntity));
-            if (_entityConfiguration is null)
-            {
-                throw new ConfigurationException($"Entity '{typeof(TEntity)}' has no configuration.");
-            }
-
-            if (keyProperty is null)
-            {
-                throw new ConfigurationException($"Parameter '{nameof(keyProperty)}' cannot be null.");
-            }
-            
-            if (type.GetProperty(_entityConfiguration.KeyProperty) is null)
-            {
-                throw new ConfigurationException($"Entity '{typeof(TEntity)}' must have a property named '{_entityConfiguration.KeyProperty}'");
-            };
-
-            if (keyProperty.GetType() != _entityConfiguration.KeyPropertyType)
-            {
-                throw new ConfigurationException($"Entity '{typeof(TEntity)}' key property '{_entityConfiguration.KeyProperty}' must be of type '{_entityConfiguration.KeyPropertyType}'");
-            }
         }
     }
 }

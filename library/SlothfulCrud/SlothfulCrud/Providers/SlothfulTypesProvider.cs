@@ -26,7 +26,6 @@ namespace SlothfulCrud.Providers
         
         public static IValidator<TEntityType> GetConcreteValidator<TEntityType>(IServiceScope serviceScope)
         {
-            var validatorType = typeof(IValidator<TEntityType>);
             return serviceScope.ServiceProvider.GetService<IValidator<TEntityType>>();
         }
         
