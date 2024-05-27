@@ -39,6 +39,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _slothValidatorMock = new Mock<IValidator<Sloth>>();
             _wildKoalaValidatorMock = new Mock<IValidator<WildKoala>>();
 
+            // TODO: Refactor tests setup
+            var wildKoalaEntityConfiguration = new EntityConfiguration();
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
+                .Returns(wildKoalaEntityConfiguration);
+            
             _slothService = new UpdateService<Sloth, SlothfulDbContext>(
                 _dbContext,
                 _slothGetServiceMock.Object,
@@ -48,6 +53,15 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _wildKoalaService = new UpdateService<WildKoala, SlothfulDbContext>(
                 _dbContext,
                 _wildKoalaGetServiceMock.Object,
+                _configurationProviderMock.Object
+            );
+        }
+
+        private UpdateService<Sloth, SlothfulDbContext> GetSlothService()
+        {
+            return new UpdateService<Sloth, SlothfulDbContext>(
+                _dbContext,
+                _slothGetServiceMock.Object,
                 _configurationProviderMock.Object
             );
         }
@@ -75,7 +89,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
-            _slothService.Update(entityId, command, _serviceScopeMock.Object);
+            GetSlothService().Update(entityId, command, _serviceScopeMock.Object);
 
             var updatedEntity = _dbContext.Sloths.Find(entityId);
             Assert.NotNull(updatedEntity);
@@ -109,7 +123,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
-            _slothService.Update(entityId, command, _serviceScopeMock.Object);
+            GetSlothService().Update(entityId, command, _serviceScopeMock.Object);
 
             _slothValidatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Once);
         }

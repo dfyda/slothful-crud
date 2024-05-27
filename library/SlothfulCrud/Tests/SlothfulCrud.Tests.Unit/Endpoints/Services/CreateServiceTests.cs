@@ -30,11 +30,25 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _dbContext = new SlothfulDbContext(options);
             _createConstructorBehaviorMock = new Mock<ICreateConstructorBehavior>();
+
             _configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            var slothEntityConfiguration = new EntityConfiguration();
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(slothEntityConfiguration);
+            
             _serviceScopeMock = new Mock<IServiceScope>();
             _validatorMock = new Mock<IValidator<Sloth>>();
 
             _service = new CreateService<Sloth, SlothfulDbContext>(
+                _dbContext,
+                _createConstructorBehaviorMock.Object,
+                _configurationProviderMock.Object
+            );
+        }
+        
+        private CreateService<Sloth, SlothfulDbContext> GetService()
+        {
+            return new CreateService<Sloth, SlothfulDbContext>(
                 _dbContext,
                 _createConstructorBehaviorMock.Object,
                 _configurationProviderMock.Object
@@ -152,7 +166,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(configuration);
 
-            _service.Create(entityId, command, _serviceScopeMock.Object);
+            GetService().Create(entityId, command, _serviceScopeMock.Object);
 
             _validatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Never);
         }
@@ -178,7 +192,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _serviceScopeMock.Setup(scope => scope.ServiceProvider)
                 .Returns(serviceProviderMock.Object);
 
-            Assert.Throws<KeyNotFoundException>(() => _service.Create(null, command, _serviceScopeMock.Object));
+            Assert.Throws<ConfigurationException>(() => _service.Create(null, command, _serviceScopeMock.Object));
         }
 
         [Fact]

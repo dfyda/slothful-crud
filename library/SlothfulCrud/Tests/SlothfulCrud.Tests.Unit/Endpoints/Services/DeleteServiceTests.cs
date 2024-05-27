@@ -6,6 +6,7 @@ using SlothfulCrud.Services.Endpoints.Delete;
 using SlothfulCrud.Services.Endpoints.Get;
 using SlothfulCrud.Tests.Api.Domain;
 using SlothfulCrud.Tests.Api.EF;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
@@ -24,7 +25,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _dbContext = new SlothfulDbContext(options);
             _getServiceMock = new Mock<IGetService<Sloth, SlothfulDbContext>>();
+            
             _configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            var slothEntityConfiguration = new EntityConfiguration();
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(slothEntityConfiguration);
+            
             _service = new DeleteService<Sloth, SlothfulDbContext>(_dbContext, _getServiceMock.Object,
                 _configurationProviderMock.Object);
         }
