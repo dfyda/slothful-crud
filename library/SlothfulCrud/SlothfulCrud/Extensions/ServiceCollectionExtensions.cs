@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
-using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
 using SlothfulCrud.Exceptions.Handlers;
 using SlothfulCrud.Managers;
 using SlothfulCrud.Providers;
@@ -89,7 +88,6 @@ namespace SlothfulCrud.Extensions
         private static IServiceCollection AddBehaviors(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddScoped<ICreateConstructorBehavior, BaseCreateConstructorBehavior>();
-            serviceCollection.AddScoped<IModifyMethodBehavior, BaseModifyMethodBehavior>();
 
             return serviceCollection;
         }

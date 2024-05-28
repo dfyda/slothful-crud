@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Builders.Endpoints;
 using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
-using SlothfulCrud.Builders.Endpoints.Behaviors.ModifyMethod;
 using SlothfulCrud.Builders.Endpoints.Parameters;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Providers;
@@ -14,17 +13,14 @@ namespace SlothfulCrud.Managers
     {
         private readonly IApiSegmentProvider _apiSegmentProvider;
         private readonly ICreateConstructorBehavior _createConstructorBehavior;
-        private readonly IModifyMethodBehavior _modifyMethodBehavior;
         private readonly SlothConfigurationBuilder _slothConfigurationBuilder = new();
 
         public SlothfulCrudManager(
             IApiSegmentProvider apiSegmentProvider,
-            ICreateConstructorBehavior createConstructorBehavior,
-            IModifyMethodBehavior modifyMethodBehavior)
+            ICreateConstructorBehavior createConstructorBehavior)
         {
             _apiSegmentProvider = apiSegmentProvider;
             _createConstructorBehavior = createConstructorBehavior;
-            _modifyMethodBehavior = modifyMethodBehavior;
         }
         
         public WebApplication Register(WebApplication webApplication, Type dbContextType, Assembly executingAssembly)
@@ -56,8 +52,7 @@ namespace SlothfulCrud.Managers
                 dbContextType,
                 entityType,
                 _apiSegmentProvider,
-                _createConstructorBehavior,
-                _modifyMethodBehavior);
+                _createConstructorBehavior);
                 
             var genericBuilderType = typeof(SlothfulEndpointRouteBuilder<>).MakeGenericType(entityType);
             var builder = Activator.CreateInstance(genericBuilderType, parameters, configurationBuilder);
