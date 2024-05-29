@@ -15,20 +15,29 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class CreateServiceTests
     {
-        private readonly SlothfulDbContext _dbContext;
-        private readonly CreateService<Sloth, SlothfulDbContext> _service;
-        private readonly Mock<ICreateConstructorBehavior> _createConstructorBehaviorMock;
-        private readonly Mock<IEntityConfigurationProvider> _configurationProviderMock;
-        private readonly Mock<IServiceScope> _serviceScopeMock;
-        private readonly Mock<IValidator<Sloth>> _validatorMock;
+        private SlothfulDbContext _dbContext;
+        private Mock<ICreateConstructorBehavior> _createConstructorBehaviorMock;
+        private Mock<IEntityConfigurationProvider> _configurationProviderMock;
+        private Mock<IServiceScope> _serviceScopeMock;
+        private Mock<IValidator<Sloth>> _validatorMock;
 
         public CreateServiceTests()
+        {
+            ConfigureDbContext();
+            ConfigureMocks();
+        }
+        
+        private void ConfigureDbContext()
         {
             var options = new DbContextOptionsBuilder<SlothfulDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
 
             _dbContext = new SlothfulDbContext(options);
+        }
+        
+        private void ConfigureMocks()
+        {
             _createConstructorBehaviorMock = new Mock<ICreateConstructorBehavior>();
 
             _configurationProviderMock = new Mock<IEntityConfigurationProvider>();
@@ -38,12 +47,6 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             
             _serviceScopeMock = new Mock<IServiceScope>();
             _validatorMock = new Mock<IValidator<Sloth>>();
-
-            _service = new CreateService<Sloth, SlothfulDbContext>(
-                _dbContext,
-                _createConstructorBehaviorMock.Object,
-                _configurationProviderMock.Object
-            );
         }
         
         private CreateService<Sloth, SlothfulDbContext> GetService()
@@ -55,25 +58,30 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             );
         }
 
+        private void ConfigureAdditionalMocks(bool hasValidation)
+        {
+            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
+            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
+                .Returns(constructorInfo);
+
+            var configuration = new EntityConfiguration();
+            configuration.SetHasValidation(hasValidation);
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(configuration);
+        }
+
         [Fact]
         public void Create_ShouldAddEntityToDbContext()
         {
             var entityId = Guid.NewGuid();
             var command = new { id = entityId, name = "NewSloth", age = 3 };
 
-            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
-            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Returns(constructorInfo);
-
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(false);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
+            ConfigureAdditionalMocks(false);
 
             _serviceScopeMock.Setup(scope => scope.ServiceProvider.GetService(typeof(IValidator<Sloth>)))
                 .Returns(_validatorMock.Object);
 
-            _service.Create(entityId, command, _serviceScopeMock.Object);
+            GetService().Create(entityId, command, _serviceScopeMock.Object);
 
             var createdEntity = _dbContext.Sloths.Find(entityId);
             Assert.NotNull(createdEntity);
@@ -88,21 +96,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
             var command = new { id = entityId, name = "NewSloth", age = 3 };
 
-            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
-            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Returns(constructorInfo);
-
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(true);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
-
+            ConfigureAdditionalMocks(true);
             _serviceScopeMock.Setup(scope => scope.ServiceProvider.GetService(typeof(IValidator<Sloth>)))
                 .Returns(_validatorMock.Object);
-
             _validatorMock.Setup(v => v.Validate(It.IsAny<IValidationContext>())).Returns(new ValidationResult());
 
-            _service.Create(entityId, command, _serviceScopeMock.Object);
+            GetService().Create(entityId, command, _serviceScopeMock.Object);
 
             _validatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Once);
         }
@@ -120,7 +119,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(configuration);
 
-            Assert.Throws<ConfigurationException>(() => _service.Create(entityId, command, _serviceScopeMock.Object));
+            Assert.Throws<ConfigurationException>(() => GetService().Create(entityId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
@@ -129,23 +128,15 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
             var command = new { id = entityId, name = "NewSloth", age = 3 };
 
-            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
-            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Returns(constructorInfo);
-
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(false);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
+            ConfigureAdditionalMocks(false);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
                 .Returns(_validatorMock.Object);
-
             _serviceScopeMock.Setup(scope => scope.ServiceProvider)
                 .Returns(serviceProviderMock.Object);
 
-            _service.Create(entityId, command, _serviceScopeMock.Object);
+            GetService().Create(entityId, command, _serviceScopeMock.Object);
 
             _createConstructorBehaviorMock.Verify(b => b.GetConstructorInfo(typeof(Sloth)), Times.Once);
         }
@@ -157,14 +148,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
             var command = new { id = entityId, name = "NewSloth", age = 3 };
 
-            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
-            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Returns(constructorInfo);
-
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(false);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
+            ConfigureAdditionalMocks(false);
 
             GetService().Create(entityId, command, _serviceScopeMock.Object);
 
@@ -176,23 +160,15 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             var command = new { name = "NewSloth", age = 3 };
 
-            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
-            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Returns(constructorInfo);
-
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(false);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
+            ConfigureAdditionalMocks(false);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
                 .Returns(_validatorMock.Object);
-
             _serviceScopeMock.Setup(scope => scope.ServiceProvider)
                 .Returns(serviceProviderMock.Object);
 
-            Assert.Throws<ConfigurationException>(() => _service.Create(null, command, _serviceScopeMock.Object));
+            Assert.Throws<ConfigurationException>(() => GetService().Create(null, command, _serviceScopeMock.Object));
         }
 
         [Fact]
@@ -201,23 +177,15 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
             var command = new { id = entityId, name = "NewSloth", age = 3 };
 
-            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
-            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Returns(constructorInfo);
-
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(false);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
+            ConfigureAdditionalMocks(false);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
                 .Returns(_validatorMock.Object);
-
             _serviceScopeMock.Setup(scope => scope.ServiceProvider)
                 .Returns(serviceProviderMock.Object);
 
-            var result = _service.Create(entityId, command, _serviceScopeMock.Object);
+            var result = GetService().Create(entityId, command, _serviceScopeMock.Object);
 
             Assert.Equal(entityId, result);
         }
@@ -229,23 +197,15 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
             var command = new { id = entityId, name = "NewSloth", age = 3 };
 
-            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
-            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Returns(constructorInfo);
-
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(false);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
+            ConfigureAdditionalMocks(false);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
                 .Returns(_validatorMock.Object);
-
             _serviceScopeMock.Setup(scope => scope.ServiceProvider)
                 .Returns(serviceProviderMock.Object);
 
-            _service.Create(entityId, command, _serviceScopeMock.Object);
+            GetService().Create(entityId, command, _serviceScopeMock.Object);
 
             _createConstructorBehaviorMock.Verify(b => b.GetConstructorInfo(typeof(Sloth)), Times.Once);
         }
@@ -256,26 +216,18 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
             var command = new { id = entityId, name = "NewSloth", age = 3 };
 
-            var constructorInfo = typeof(Sloth).GetConstructor(new[] { typeof(Guid), typeof(string), typeof(int) });
-            _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Returns(constructorInfo);
-
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(false);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
+            ConfigureAdditionalMocks(false);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
                 .Returns(_validatorMock.Object);
-
             _serviceScopeMock.Setup(scope => scope.ServiceProvider)
                 .Returns(serviceProviderMock.Object);
 
             _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
                 .Throws(new ConfigurationException("Error getting constructor info"));
 
-            Assert.Throws<ConfigurationException>(() => _service.Create(entityId, command, _serviceScopeMock.Object));
+            Assert.Throws<ConfigurationException>(() => GetService().Create(entityId, command, _serviceScopeMock.Object));
         }
     }
 }
