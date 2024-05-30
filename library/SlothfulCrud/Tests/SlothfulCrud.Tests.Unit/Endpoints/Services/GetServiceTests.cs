@@ -11,29 +11,46 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class GetServiceTests
     {
-        private readonly SlothfulDbContext _dbContext;
-        private readonly GetService<Sloth, SlothfulDbContext> _slothService;
-        private readonly GetService<WildKoala, SlothfulDbContext> _wildKoalaService;
+        private SlothfulDbContext _dbContext;
+        private Mock<IEntityConfigurationProvider> _configurationProviderMock;
 
         public GetServiceTests()
+        {
+            ConfigureDbContext();
+            ConfigureMocks();
+        }
+        
+        private void ConfigureDbContext()
         {
             var options = new DbContextOptionsBuilder<SlothfulDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestGetDatabase")
                 .Options;
 
             _dbContext = new SlothfulDbContext(options);
-            var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+        }
+        
+        private void ConfigureMocks()
+        {
+            _configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            
             var slothEntityConfiguration = new EntityConfiguration();
-            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(slothEntityConfiguration);
 
             var wildKoalaEntityConfiguration = new EntityConfiguration();
-            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
                 .Returns(wildKoalaEntityConfiguration);
-
-            _slothService = new GetService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
-            _wildKoalaService =
-                new GetService<WildKoala, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+        }
+        
+        private GetService<Sloth, SlothfulDbContext> GetSlothService()
+        {
+            return new GetService<Sloth, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object);
+        }
+        
+        private GetService<WildKoala, SlothfulDbContext> GetWildKoalaService()
+        {
+            return 
+                new GetService<WildKoala, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object);
         }
 
         [Fact]
@@ -45,7 +62,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
 
-            var result = _slothService.Get(entity.Id);
+            var result = GetSlothService().Get(entity.Id);
 
             Assert.NotNull(result);
             Assert.Equal(entity.Id, result.Id);
@@ -66,7 +83,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Koalas.Add(entity);
             _dbContext.SaveChanges();
 
-            var result = _wildKoalaService.Get(entity.Id);
+            var result = GetWildKoalaService().Get(entity.Id);
 
             Assert.NotNull(result);
             Assert.Equal(entity.Id, result.Id);
@@ -81,8 +98,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             var nonExistentId = Guid.NewGuid();
 
-            Assert.Throws<NotFoundException>(() => _slothService.Get(nonExistentId));
-            Assert.Throws<NotFoundException>(() => _wildKoalaService.Get(nonExistentId));
+            Assert.Throws<NotFoundException>(() => GetSlothService().Get(nonExistentId));
+            Assert.Throws<NotFoundException>(() => GetWildKoalaService().Get(nonExistentId));
         }
 
         [Fact]
@@ -98,7 +115,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Koalas.Add(entity);
             _dbContext.SaveChanges();
 
-            var result = _wildKoalaService.Get(entity.Id);
+            var result = GetWildKoalaService().Get(entity.Id);
 
             Assert.NotNull(result);
             Assert.Equal(cuisine.Name, result.Cuisine.Name);
@@ -110,7 +127,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             var invalidId = "invalid_id";
 
-            Assert.Throws<ConfigurationException>(() => _slothService.Get(invalidId));
+            Assert.Throws<ConfigurationException>(() => GetSlothService().Get(invalidId));
         }
 
         [Fact]
@@ -127,7 +144,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         [Fact]
         public void Get_ShouldThrowException_WhenIdIsNull()
         {
-            Assert.Throws<ConfigurationException>(() => _slothService.Get(null));
+            Assert.Throws<ConfigurationException>(() => GetSlothService().Get(null));
         }
     }
 }

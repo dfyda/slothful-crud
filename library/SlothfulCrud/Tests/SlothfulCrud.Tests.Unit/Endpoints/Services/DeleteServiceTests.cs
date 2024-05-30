@@ -12,29 +12,41 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class DeleteServiceTests
     {
-        private readonly SlothfulDbContext _dbContext;
-        private readonly DeleteService<Sloth, SlothfulDbContext> _service;
-        private readonly Mock<IGetService<Sloth, SlothfulDbContext>> _getServiceMock;
-        private readonly Mock<IEntityConfigurationProvider> _configurationProviderMock;
+        private SlothfulDbContext _dbContext;
+        private Mock<IGetService<Sloth, SlothfulDbContext>> _getServiceMock;
+        private Mock<IEntityConfigurationProvider> _configurationProviderMock;
 
         public DeleteServiceTests()
+        {
+            ConfigureDbContext();
+            ConfigureMocks();
+        }
+
+        private void ConfigureDbContext()
         {
             var options = new DbContextOptionsBuilder<SlothfulDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
 
             _dbContext = new SlothfulDbContext(options);
+        }
+        
+        private void ConfigureMocks()
+        {
             _getServiceMock = new Mock<IGetService<Sloth, SlothfulDbContext>>();
             
             _configurationProviderMock = new Mock<IEntityConfigurationProvider>();
             var slothEntityConfiguration = new EntityConfiguration();
             _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(slothEntityConfiguration);
-            
-            _service = new DeleteService<Sloth, SlothfulDbContext>(_dbContext, _getServiceMock.Object,
-                _configurationProviderMock.Object);
         }
 
+        private DeleteService<Sloth, SlothfulDbContext> GetService()
+        {
+            return new DeleteService<Sloth, SlothfulDbContext>(_dbContext, _getServiceMock.Object,
+                _configurationProviderMock.Object);
+        }
+        
         [Fact]
         public void Delete_ShouldRemoveEntityFromDbContext()
         {
@@ -49,7 +61,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _getServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
-            _service.Delete(entityId);
+            GetService().Delete(entityId);
 
             var deletedEntity = _dbContext.Sloths.Find(entityId);
             Assert.Null(deletedEntity);
@@ -61,7 +73,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
             _getServiceMock.Setup(s => s.Get(entityId)).Throws(new NotFoundException());
 
-            Assert.Throws<NotFoundException>(() => _service.Delete(entityId));
+            Assert.Throws<NotFoundException>(() => GetService().Delete(entityId));
         }
 
         [Fact]
@@ -78,7 +90,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _getServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
-            _service.Delete(entityId);
+            GetService().Delete(entityId);
 
             _getServiceMock.Verify(s => s.Get(entityId), Times.Once);
         }
@@ -88,7 +100,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             _getServiceMock.Setup(s => s.Get(null)).Throws(new ConfigurationException());
 
-            Assert.Throws<ConfigurationException>(() => _service.Delete(null));
+            Assert.Throws<ConfigurationException>(() => GetService().Delete(null));
         }
     }
 }

@@ -15,53 +15,80 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class UpdateServiceTests
     {
-        private readonly SlothfulDbContext _dbContext;
-        private readonly UpdateService<Sloth, SlothfulDbContext> _slothService;
-        private readonly UpdateService<WildKoala, SlothfulDbContext> _wildKoalaService;
-        private readonly Mock<IGetService<Sloth, SlothfulDbContext>> _slothGetServiceMock;
-        private readonly Mock<IGetService<WildKoala, SlothfulDbContext>> _wildKoalaGetServiceMock;
-        private readonly Mock<IEntityConfigurationProvider> _configurationProviderMock;
-        private readonly Mock<IServiceScope> _serviceScopeMock;
-        private readonly Mock<IValidator<Sloth>> _slothValidatorMock;
-        private readonly Mock<IValidator<WildKoala>> _wildKoalaValidatorMock;
+        private SlothfulDbContext _dbContext;
+        private Mock<IGetService<Sloth, SlothfulDbContext>> _slothGetServiceMock;
+        private Mock<IGetService<WildKoala, SlothfulDbContext>> _wildKoalaGetServiceMock;
+        private Mock<IEntityConfigurationProvider> _configurationProviderMock;
+        private Mock<IServiceScope> _serviceScopeMock;
+        private Mock<IValidator<Sloth>> _slothValidatorMock;
+        private Mock<IValidator<WildKoala>> _wildKoalaValidatorMock;
 
         public UpdateServiceTests()
+        {
+            ConfigureDbContext();
+            ConfigureMocks();
+        }
+        
+        private void ConfigureDbContext()
         {
             var options = new DbContextOptionsBuilder<SlothfulDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestUpdateDatabase")
                 .Options;
 
             _dbContext = new SlothfulDbContext(options);
+        }
+
+        private void ConfigureMocks()
+        {
             _slothGetServiceMock = new Mock<IGetService<Sloth, SlothfulDbContext>>();
             _wildKoalaGetServiceMock = new Mock<IGetService<WildKoala, SlothfulDbContext>>();
             _configurationProviderMock = new Mock<IEntityConfigurationProvider>();
             _serviceScopeMock = new Mock<IServiceScope>();
             _slothValidatorMock = new Mock<IValidator<Sloth>>();
             _wildKoalaValidatorMock = new Mock<IValidator<WildKoala>>();
-
-            // TODO: Refactor tests setup
+            
             var wildKoalaEntityConfiguration = new EntityConfiguration();
             _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
                 .Returns(wildKoalaEntityConfiguration);
-            
-            _slothService = new UpdateService<Sloth, SlothfulDbContext>(
-                _dbContext,
-                _slothGetServiceMock.Object,
-                _configurationProviderMock.Object
-            );
-
-            _wildKoalaService = new UpdateService<WildKoala, SlothfulDbContext>(
-                _dbContext,
-                _wildKoalaGetServiceMock.Object,
-                _configurationProviderMock.Object
-            );
         }
 
+        private void ConfigureAdditionalMocks()
+        {
+            var configuration = new EntityConfiguration();
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(configuration);
+
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
+                .Returns(_slothValidatorMock.Object);
+
+            _serviceScopeMock.Setup(scope => scope.ServiceProvider)
+                .Returns(serviceProviderMock.Object);
+            
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
+                .Returns(configuration);
+            
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<WildKoala>)))
+                .Returns(_wildKoalaValidatorMock.Object);
+
+            _serviceScopeMock.Setup(scope => scope.ServiceProvider)
+                .Returns(serviceProviderMock.Object);
+        }
+        
         private UpdateService<Sloth, SlothfulDbContext> GetSlothService()
         {
             return new UpdateService<Sloth, SlothfulDbContext>(
                 _dbContext,
                 _slothGetServiceMock.Object,
+                _configurationProviderMock.Object
+            );
+        }
+        
+        private UpdateService<WildKoala, SlothfulDbContext> GetWildKoalaService()
+        {
+            return new UpdateService<WildKoala, SlothfulDbContext>(
+                _dbContext,
+                _wildKoalaGetServiceMock.Object,
                 _configurationProviderMock.Object
             );
         }
@@ -73,16 +100,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entity = new Sloth(entityId, "OldSloth", 5);
             var command = new { name = "UpdatedSloth", age = 10 };
 
-            var configuration = new EntityConfiguration();
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
-
-            var serviceProviderMock = new Mock<IServiceProvider>();
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
-                .Returns(_slothValidatorMock.Object);
-
-            _serviceScopeMock.Setup(scope => scope.ServiceProvider)
-                .Returns(serviceProviderMock.Object);
+            ConfigureAdditionalMocks();
 
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
@@ -104,17 +122,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entity = new Sloth(entityId, "OldSloth", 5);
             var command = new { name = "UpdatedSloth", age = 10 };
 
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(true);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(configuration);
-
-            var serviceProviderMock = new Mock<IServiceProvider>();
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
-                .Returns(_slothValidatorMock.Object);
-
-            _serviceScopeMock.Setup(scope => scope.ServiceProvider)
-                .Returns(serviceProviderMock.Object);
+            ConfigureAdditionalMocks();
 
             _slothValidatorMock.Setup(v => v.Validate(It.IsAny<IValidationContext>())).Returns(new ValidationResult());
 
@@ -139,16 +147,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var neighbourId = neighbour.Id;
             var command = new { name = "UpdatedKoala", age = 10, age2 = (int?)null, cuisineId, neighbourId };
 
-            var configuration = new EntityConfiguration();
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
-                .Returns(configuration);
-
-            var serviceProviderMock = new Mock<IServiceProvider>();
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<WildKoala>)))
-                .Returns(_wildKoalaValidatorMock.Object);
-
-            _serviceScopeMock.Setup(scope => scope.ServiceProvider)
-                .Returns(serviceProviderMock.Object);
+            ConfigureAdditionalMocks();
 
             _dbContext.Sloths.Add(cuisine);
             _dbContext.Sloths.Add(neighbour);
@@ -157,7 +156,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _wildKoalaGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
-            _wildKoalaService.Update(entityId, command, _serviceScopeMock.Object);
+            GetWildKoalaService().Update(entityId, command, _serviceScopeMock.Object);
 
             var updatedEntity = _dbContext.Koalas.Find(entityId);
             Assert.NotNull(updatedEntity);
@@ -179,20 +178,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var neighbourId = neighbour.Id;
             var command = new { name = "UpdatedKoala", age = 10, age2 = (int?)null, cuisineId, neighbourId };
 
-            var configuration = new EntityConfiguration();
-            configuration.SetHasValidation(true);
-            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
-                .Returns(configuration);
-
-            var serviceProviderMock = new Mock<IServiceProvider>();
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<WildKoala>)))
-                .Returns(_wildKoalaValidatorMock.Object);
-
-            _serviceScopeMock.Setup(scope => scope.ServiceProvider)
-                .Returns(serviceProviderMock.Object);
-
-            _wildKoalaValidatorMock.Setup(v => v.Validate(It.IsAny<IValidationContext>()))
-                .Returns(new ValidationResult());
+            ConfigureAdditionalMocks();
 
             _dbContext.Sloths.Add(cuisine);
             _dbContext.Sloths.Add(neighbour);
@@ -201,7 +187,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _wildKoalaGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
-            _wildKoalaService.Update(entityId, command, _serviceScopeMock.Object);
+            GetWildKoalaService().Update(entityId, command, _serviceScopeMock.Object);
 
             _wildKoalaValidatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Once);
         }
@@ -218,7 +204,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(configuration);
 
             Assert.Throws<ConfigurationException>(() =>
-                _slothService.Update(invalidId, command, _serviceScopeMock.Object));
+                GetSlothService().Update(invalidId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
@@ -243,7 +229,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(configuration);
 
-            Assert.Throws<ConfigurationException>(() => _slothService.Update(null, command, _serviceScopeMock.Object));
+            Assert.Throws<ConfigurationException>(() => GetSlothService().Update(null, command, _serviceScopeMock.Object));
         }
 
         [Fact]
@@ -264,7 +250,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
             Assert.Throws<ConfigurationException>(() =>
-                _slothService.Update(entityId, command, _serviceScopeMock.Object));
+                GetSlothService().Update(entityId, command, _serviceScopeMock.Object));
         }
     }
 }

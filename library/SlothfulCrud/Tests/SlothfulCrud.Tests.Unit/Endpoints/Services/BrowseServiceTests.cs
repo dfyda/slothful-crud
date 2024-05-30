@@ -12,33 +12,54 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class BrowseServiceTests : IDisposable
     {
-        private readonly SlothfulDbContext _dbContext;
-        private readonly BrowseService<Sloth, SlothfulDbContext> _slothService;
-        private readonly BrowseService<WildKoala, SlothfulDbContext> _wildKoalaService;
+        private SlothfulDbContext _dbContext;
+        private Mock<IEntityConfigurationProvider> _configurationProviderMock;
 
         public BrowseServiceTests()
         {
-            var options = new DbContextOptionsBuilder<SlothfulDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestBrowseDatabase")
-                .Options;
-
-            _dbContext = new SlothfulDbContext(options);
-            var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
-            var entityConfiguration = new EntityConfiguration();
-            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
-                .Returns(entityConfiguration);
-            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
-                .Returns(entityConfiguration);
-
-            _slothService = new BrowseService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
-            _wildKoalaService =
-                new BrowseService<WildKoala, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+            ConfigureDbContext();
+            ConfigureMocks();
         }
 
         public void Dispose()
         {
             _dbContext.Database.EnsureDeleted();
             _dbContext.Dispose();
+        }
+        
+        private void ConfigureDbContext()
+        {
+            var options = new DbContextOptionsBuilder<SlothfulDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestBrowseDatabase")
+                .Options;
+
+            _dbContext = new SlothfulDbContext(options);
+        }
+        
+        private void ConfigureMocks()
+        {
+            _configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            var entityConfiguration = new EntityConfiguration();
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(entityConfiguration);
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
+                .Returns(entityConfiguration);
+        }
+        
+        private BrowseService<Sloth, SlothfulDbContext> GetSlothService()
+        {
+            return new BrowseService<Sloth, SlothfulDbContext>(
+                _dbContext,
+                _configurationProviderMock.Object
+            );
+        }
+        
+        private BrowseService<WildKoala, SlothfulDbContext> GetWildKoalaService()
+        {
+            return new BrowseService<WildKoala, SlothfulDbContext>(
+                _dbContext,
+                _configurationProviderMock.Object
+            );
         }
 
         [Fact]
@@ -60,7 +81,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            var result = _slothService.Browse(1, query);
+            var result = GetSlothService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Contains(entities[0], result.Data);
@@ -87,7 +108,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 Name = "Sloth1"
             };
 
-            var result = _slothService.Browse(1, query);
+            var result = GetSlothService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Single(result.Data);
@@ -113,7 +134,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            var result = _slothService.Browse(1, query);
+            var result = GetSlothService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Equal("Sloth1", result.Data.First().Name);
@@ -139,7 +160,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "desc"
             };
 
-            var result = _slothService.Browse(1, query);
+            var result = GetSlothService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Equal("Sloth2", result.Data.First().Name);
@@ -156,7 +177,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            Assert.Throws<ConfigurationException>(() => _slothService.Browse(1, query));
+            Assert.Throws<ConfigurationException>(() => GetSlothService().Browse(1, query));
         }
 
         [Fact]
@@ -178,7 +199,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            var result = _slothService.Browse(1, query);
+            var result = GetSlothService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Equal(2, result.Data.Count);
@@ -201,7 +222,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            var result = _slothService.Browse(5, query);
+            var result = GetSlothService().Browse(5, query);
 
             Assert.NotNull(result);
             Assert.Equal(1, result.Data.Count);
@@ -225,7 +246,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            var result = _slothService.Browse(1, query);
+            var result = GetSlothService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Equal(15, result.Total);
@@ -241,7 +262,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            var result = _slothService.Browse(1, query);
+            var result = GetSlothService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Empty(result.Data);
@@ -274,7 +295,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 CreatedAtFrom = new DateTime(2023, 1, 15)
             };
 
-            var result = _wildKoalaService.Browse(1, query);
+            var result = GetWildKoalaService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Single(result.Data);
@@ -303,7 +324,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            var result = _wildKoalaService.Browse(1, query);
+            var result = GetWildKoalaService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Equal("Koala1", result.Data.First().Name);
@@ -333,7 +354,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 Name = "Koala1"
             };
 
-            var result = _wildKoalaService.Browse(1, query);
+            var result = GetWildKoalaService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Single(result.Data);
@@ -362,7 +383,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "desc"
             };
 
-            var result = _wildKoalaService.Browse(1, query);
+            var result = GetWildKoalaService().Browse(1, query);
 
             Assert.NotNull(result);
             Assert.Equal("Koala2", result.Data.First().Name);
@@ -388,13 +409,13 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "invalid"
             };
 
-            Assert.Throws<ConfigurationException>(() => _slothService.Browse(1, query));
+            Assert.Throws<ConfigurationException>(() => GetSlothService().Browse(1, query));
         }
 
         [Fact]
         public void Browse_ShouldThrowException_WhenQueryIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => _slothService.Browse(1, null));
+            Assert.Throws<ArgumentNullException>(() => GetSlothService().Browse(1, null));
         }
 
         [Fact]
@@ -416,7 +437,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = "asc"
             };
 
-            Assert.Throws<ConfigurationException>(() => _slothService.Browse(1, query));
+            Assert.Throws<ConfigurationException>(() => GetSlothService().Browse(1, query));
         }
     }
 }
