@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="documentation/slothful-api.jpg" alt="slothful-api logo">
+    <img src="docs/assets/slothful-api.jpg" alt="slothful-api logo">
 </div>
 
 Slothful CRUD
