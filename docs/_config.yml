@@ -3,7 +3,7 @@ description: A library designed to streamline the creation of CRUD endpoints eff
 baseurl: ""
 url: "https://slothful.dev"
 repository: dfyda/slothful-crud
-theme: just-the-docs
+remote_theme: just-the-docs/just-the-docs
 
 #logo: "/assets/slothful-api.jpg"
 
