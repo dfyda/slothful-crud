@@ -195,6 +195,13 @@ Retrieves a paginated list of sloths.
 - **total**: The total number of items (integer).
 - **data**: Array of `SlothDto` objects (nullable).
 
+#### Schema: `SlothDto`
+
+- **id**: UUID of the sloth.
+- **name**: Name of the sloth (nullable).
+- **age**: Age of the sloth (integer).
+- **displayName**: Display name of the sloth (nullable).
+
 ### Browse Selectable Sloths
 
 ##### Endpoint `GET /sloths/selectable-list/{page}`
@@ -218,6 +225,11 @@ Retrieves a paginated list of selectable sloths.
 - **total**: The total number of items (integer).
 - **data**: Array of `BaseEntityDto` objects (nullable).
 
+#### Schema: `BaseEntityDto`
+
+- **id**: UUID of the entity (nullable).
+- **displayName**: Display name of the entity (nullable).
+
 ### Create Sloth
 
 ##### Endpoint `POST /sloths`
@@ -238,9 +250,3 @@ Creates a new sloth.
 - **name**: Name of the new sloth (nullable).
 - **age**: Age of the new sloth (integer).
 
-#### Schema: `SlothDto`
-
-- **id**: UUID of the sloth.
-- **name**: Name of the sloth (nullable).
-- **age**: Age of the sloth (integer).
-- **displayName**: Display name of the sloth (nullable).
