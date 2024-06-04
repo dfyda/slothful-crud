@@ -1,6 +1,7 @@
 ---
 title: Quick start
 layout: home
+nav_order: 1
 ---
 
 <div align="center">
