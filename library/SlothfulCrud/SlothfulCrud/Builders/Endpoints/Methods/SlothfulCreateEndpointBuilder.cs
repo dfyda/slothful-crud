@@ -71,6 +71,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                     return Results.Created($"/{entityType.Name}s/", keyProperty);
                 })
                 .WithName($"Create{entityType.Name}")
+                // TODO: Guid must be replaced with the key type of the entity. Now it can be configurable.
                 .Produces<Guid>(201)
                 .Produces<BadRequestResult>(400);
             

@@ -63,7 +63,6 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                     return resultDto;
                 })
                 .WithName($"Get{entityType.Name}Details")
-                .RequireAuthorization()
                 .Produces(200, typeof(TResultType))
                 .Produces<NotFoundResult>(404)
                 .Produces<BadRequestResult>(400);
