@@ -77,6 +77,8 @@ POST /sloths
 - 400
 
 **Request Parameters:**
+- **Body:**
+
 ```
 {
     "id": "guid",

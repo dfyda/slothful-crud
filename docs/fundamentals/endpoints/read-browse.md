@@ -101,18 +101,20 @@ GET /sloths/list/{page}
 - 400
 
 **Request Parameters:**
+- **Path:**
+
 ```
 page: ushort
 ```
+- **Query:**
+
 ```
-query: {
-    "rows": ushort,
-    "sortDirection": string,
-    "sortBy": string,
-    "name": string,
-    "id": guid?,
-    "age": int?
-}
+"rows": ushort
+"sortDirection": string
+"sortBy": string
+"name": string
+"id": guid?
+"age": int?
 ```
 
 **Return Value:**

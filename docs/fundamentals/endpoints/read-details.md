@@ -70,6 +70,8 @@ GET /sloths/{id}
 - 400
 
 **Request Parameters:**
+- **Path:**
+
 ```
 id: guid
 ```

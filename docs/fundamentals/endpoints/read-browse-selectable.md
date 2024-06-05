@@ -104,16 +104,18 @@ GET /sloths/selectable-list/{page}
 - 400
 
 **Request Parameters:**
+- **Path:**
+
 ```
 page: ushort
 ```
+- **Query:**
+
 ```
-query: {
-    "search": string,
-    "rows": ushort,
-    "sortDirection": string,
-    "sortBy": string
-}
+"search": string
+"rows": ushort
+"sortDirection": string
+"sortBy": string
 ```
 
 **Return Value:**
