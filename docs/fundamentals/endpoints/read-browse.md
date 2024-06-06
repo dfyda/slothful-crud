@@ -13,7 +13,7 @@ nav_order: 2.4.3
 Where `<plural-segment>` is the pluralized name of your domain class, e.g., for the class `Sloth`, the endpoint would be `GET /sloths/list/{page}`. The `{page}` parameter is of type `ushort` and represents the position in the paginated list.
 
 {: .note }
-Refer to the "Advanced topics/Endpoint segments" section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
+Refer to the [Endpoint segments](https://slothful.dev/advanced-topics/endpoint-segments.html) section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
 
 ### Response Codes
 - **200 OK**: Returns a `PagedResults<T>` object containing the paginated list of DTOs.
@@ -32,7 +32,7 @@ The browse endpoint requires the `page` parameter in the path and an `query` par
 **DateTime Fields**: DateTime fields are converted to query parameters `DateFieldFrom` and `DateFieldTo` for filtering (condition: `DateFieldFrom >= DateField && DateFieldTo < DateField.AddDays(1)`).
 
 {: .important }
-**Nested Objects**: For nested objects, you can specify the fields for filtering and sorting in the domain class configuration. More details are available in the "Configurations / Entity Configuration" section.
+**Nested Objects**: For nested objects, you can specify the fields for filtering and sorting in the domain class configuration. More details are available in the [Entity Configuration](https://slothful.dev/fundamentals/configurations/entity-configuration.html) section.
 
 ### Returned Data
 The endpoint returns a `PagedResults<T>` object where `T` is a DTO class created based on the public fields of the domain class.

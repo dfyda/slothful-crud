@@ -13,7 +13,7 @@ nav_order: 2.4.6
 Where `<plural-segment>` is the pluralized name of your domain class, e.g., for the class `Sloth`, the endpoint would be `DELETE /sloths/{id}`. The `{id}` is the identifier of the element, typically of type `Guid`.
 
 {: .note }
-Refer to the "Advanced topics/Endpoint segments" section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
+Refer to the [Endpoint segments](https://slothful.dev/advanced-topics/endpoint-segments.html) section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
 
 ### Response Codes
 - **204 No Content**: Indicates that the deletion was successful.

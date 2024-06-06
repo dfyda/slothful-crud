@@ -12,7 +12,7 @@ nav_order: 2.4.1
 Where `<plural-segment>` is the pluralized name of your domain class, e.g., for the class `Sloth`, the endpoint would be `POST /sloths`.
 
 {: .note }
-Refer to the "Advanced topics/Endpoint segments" section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
+Refer to the [Endpoint segments](https://slothful.dev/advanced-topics/endpoint-segments.html) section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
 
 ### Response Codes
 - **201 Created**: Returns the key property type of the newly created object.
@@ -40,7 +40,7 @@ Nested Objects: If your class contains a nested object and you wish to add it, y
 **Return Value:** The endpoint returns the identifier of the newly created object.
 
 {: .note }
-Refer to the "Advanced topics/Constructor" section for information on specifying a particular constructor. By default, the first constructor with parameters is used.
+Refer to the [Constructors](https://slothful.dev/advanced-topics/constructors.html) section for information on specifying a particular constructor. By default, the first constructor with parameters is used.
 
 **Example Domain Class:**
 

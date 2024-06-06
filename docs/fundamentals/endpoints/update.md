@@ -13,7 +13,7 @@ nav_order: 2.4.5
 Where `<plural-segment>` is the pluralized name of your domain class, e.g., for the class `Sloth`, the endpoint would be `PUT /sloths/{id}`. The `{id}` is the identifier of the element, typically of type `Guid`.
 
 {: .note }
-Refer to the "Advanced topics/Endpoint segments" section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
+Refer to the [Endpoint segments](https://slothful.dev/advanced-topics/endpoint-segments.html) section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
 
 ### Response Codes
 - **204 No Content**: Indicates that the update was successful.
@@ -26,7 +26,7 @@ The Update endpoint requires the `id` parameter in the path, which is the identi
 The request body should contain the command with fields created based on the parameters of the data modification method in the domain class. By default, this is the `Update` method.
 
 {: .important }
-**Configuring the Update Method:** You can configure which method is used for data modification. More details can be found in the "Configurations/Entity Configuration" section.
+**Configuring the Update Method:** You can configure which method is used for data modification. More details can be found in the [Entity Configuration](https://slothful.dev/fundamentals/configurations/entity-configuration.html) section.
 
 **Example:**
 If your domain class `Sloth` has the following `Update` method:

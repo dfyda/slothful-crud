@@ -54,4 +54,4 @@ The problem handling consists of the following key components:
 - **ExceptionHandler:** This service handles the logic for processing exceptions and creating standardized problem responses.
 
 {: .note }
-For additional information on how to replace exception handling with your own implementation, refer to the "Advanced topics/Exceptions" section.
+For additional information on how to replace exception handling with your own implementation, refer to the [Advanced topics/Exceptions](https://slothful.dev/advanced-topics/exceptions.html) section.

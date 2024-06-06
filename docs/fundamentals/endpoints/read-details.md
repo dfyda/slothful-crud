@@ -13,7 +13,7 @@ nav_order: 2.4.2
 Where `<plural-segment>` is the pluralized name of your domain class, e.g., for the class `Sloth`, the endpoint would be `GET /sloths/{id}`. The `{id}` is the identifier of the element, typically of type `Guid`.
 
 {: .note }
-Refer to the "Advanced topics/Endpoint segments" section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
+Refer to the [Endpoint segments](https://slothful.dev/advanced-topics/endpoint-segments.html) section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
 
 ### Response Codes
 - **200 OK**: Returns the DTO representation of the requested object.
@@ -33,7 +33,7 @@ GET /sloths/{id}
 The endpoint returns a DTO class created based on the public fields of the domain class.
 
 {: .important }
-**Nested Objects**: By default, nested objects are transformed into a simple DTO with `Id` and `DisplayName` fields. For more detailed exposure of nested object fields, refer to the "Configurations" section.
+**Nested Objects**: By default, nested objects are transformed into a simple DTO with `Id` and `DisplayName` fields. For more detailed exposure of nested object fields, refer to the [Configurations](https://slothful.dev/fundamentals/configurations) section.
 
 **Example Domain Class:**
 ```csharp

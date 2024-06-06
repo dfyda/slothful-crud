@@ -15,7 +15,7 @@ Where `<plural-segment>` is the pluralized name of your domain class, e.g., for 
 This endpoint is used to support selectable lists in dropdown controls with backend search functionality.
 
 {: .note }
-Refer to the "Advanced topics/Endpoint segments" section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
+Refer to the [Endpoint segments](https://slothful.dev/advanced-topics/endpoint-segments.html) section for information on changing the way the plural segment name is generated for your API types. By default, the pluralization follows standard English rules.
 
 ### Response Codes
 - **200 OK**: Returns a `PagedResults<BaseEntityDto>` object containing the paginated list of selectable DTOs.
@@ -31,7 +31,7 @@ The browse selectable endpoint requires the `page` parameter in the path and an 
 - **SortBy**: (string) Specifies the name of the class property to sort by.
 
 {: .important }
-**Field for Filtering**: You need to configure the field for filtering this type of object, which is compared to the `Search` field from the query. Refer to the "Configurations/Entity Configuration" section for more details.
+**Field for Filtering**: You need to configure the field for filtering this type of object, which is compared to the `Search` field from the query. Refer to the [Entity Configuration](https://slothful.dev/fundamentals/configurations/entity-configuration.html) section for more details.
 
 ### Returned Data
 The endpoint returns a `PagedResults<BaseEntityDto>` object where `BaseEntityDto` is a class containing `Id` and `DisplayName` fields.
