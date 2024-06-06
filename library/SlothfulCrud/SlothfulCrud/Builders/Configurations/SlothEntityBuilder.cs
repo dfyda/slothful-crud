@@ -25,24 +25,45 @@ namespace SlothfulCrud.Builders.Configurations
             EndpointsConfiguration.Entity.SetIsAuthorizationEnable(false);
             return this;
         }
-        
+
         public virtual SlothEntityBuilder<TEntity> RequireAuthorization(params string[] policyNames)
         {
             EndpointsConfiguration.Entity.SetIsAuthorizationEnable(true);
             EndpointsConfiguration.Entity.SetPolicyNames(policyNames);
             return this;
         }
-        
+
         public SlothEntityBuilder<TEntity> SetSortProperty<TProperty>(Expression<Func<TEntity, TProperty>> sortExpression)
         {
-            if (sortExpression.Body is MemberExpression memberExpression)
+            EndpointsConfiguration.Entity.SetSortProperty(GetPropertyName(sortExpression));
+            
+            return this;
+        }
+
+        public SlothEntityBuilder<TEntity> SetFilterProperty<TProperty>(Expression<Func<TEntity, TProperty>> filterExpression)
+        {
+            EndpointsConfiguration.Entity.SetFilterProperty(GetPropertyName(filterExpression));
+            
+            return this;
+        }
+        
+        public SlothEntityBuilder<TEntity> SetKeyProperty<TProperty>(Expression<Func<TEntity, TProperty>> keyExpression)
+        {
+            EndpointsConfiguration.Entity.SetKeyProperty(GetPropertyName(keyExpression));
+
+            return SetKeyPropertyType(keyExpression);
+        }
+        
+        public SlothEntityBuilder<TEntity> SetKeyPropertyType<TProperty>(Expression<Func<TEntity, TProperty>> keyExpression)
+        {
+            if (keyExpression.Body is MemberExpression memberExpression)
             {
-                var sortProperty = memberExpression.Member.Name;
-                EndpointsConfiguration.Entity.SetSortProperty(sortProperty);
+                var keyPropertyType = memberExpression.Member.DeclaringType;
+                EndpointsConfiguration.Entity.SetKeyPropertyType(keyPropertyType);
             }
             else
             {
-                throw new ArgumentException("Argument must be a property", nameof(sortExpression));
+                throw new ArgumentException("Argument must be a property", nameof(keyExpression));
             }
             
             return this;
@@ -60,6 +81,12 @@ namespace SlothfulCrud.Builders.Configurations
             return this;
         }
         
+        public SlothEntityBuilder<TEntity> HasValidation(bool hasValidation = true)
+        {
+            EndpointsConfiguration.Entity.SetHasValidation(hasValidation);
+            return this;
+        }
+        
         public EndpointsConfiguration Build()
         {
             var item = new EndpointsConfiguration(
@@ -71,6 +98,16 @@ namespace SlothfulCrud.Builders.Configurations
                 DeleteEndpoint.Configuration,
                 EndpointsConfiguration.Entity);
             return item;
+        }
+        
+        private string GetPropertyName<TProperty>(Expression<Func<TEntity, TProperty>> expression)
+        {
+            if (expression.Body is MemberExpression memberExpression)
+            {
+                return memberExpression.Member.Name;
+            }
+            
+            throw new ArgumentException("Argument must be a property", nameof(expression));
         }
     }
 }

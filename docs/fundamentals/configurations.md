@@ -8,4 +8,4 @@ has_children: true
 
 # Configurations
 
-> This section is currently under construction. Please check back later for updated information.
+This section provides detailed information on configuring various aspects of the Slothful CRUD library. Here you will find guidance on setting up entity and endpoint configurations to tailor the library to your specific needs.
