@@ -7,4 +7,4 @@ has_children: true
 
 # Advanced topics
 
-> This section is currently under construction. Please check back later for updated information.
+This section provides in-depth information and advanced configurations for using the Slothful CRUD library. Explore the following topics to gain more control and customization over your application.
