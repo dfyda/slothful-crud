@@ -33,8 +33,11 @@ jobs:
           echo "::set-output name=VERSION::$VERSION"
           echo "##[endgroup]"
 
-      - name: Restore dependencies
+      - name: Restore dependencies for library
         run: dotnet restore library/SlothfulCrud/SlothfulCrud/SlothfulCrud.csproj
+
+      - name: Restore dependencies for tests
+        run: dotnet restore library/SlothfulCrud/Tests/SlothfulCrud.Tests.Unit/SlothfulCrud.Tests.Unit.csproj
 
       - name: Build
         run: dotnet build library/SlothfulCrud/SlothfulCrud/SlothfulCrud.csproj --configuration Release --no-restore
