@@ -4,7 +4,7 @@ using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Put
 {
-    public interface IUpdateService<TEntity, TContext> 
+    internal interface IUpdateService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

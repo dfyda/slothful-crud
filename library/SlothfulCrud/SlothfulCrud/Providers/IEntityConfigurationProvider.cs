@@ -2,7 +2,7 @@
 
 namespace SlothfulCrud.Providers
 {
-    public interface IEntityConfigurationProvider
+    internal interface IEntityConfigurationProvider
     {
         void Register(Type type, EntityConfiguration configuration);
         EntityConfiguration GetConfiguration(Type type);

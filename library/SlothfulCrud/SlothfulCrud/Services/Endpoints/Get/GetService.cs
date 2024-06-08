@@ -5,7 +5,7 @@ using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public class GetService<TEntity, TContext> : BaseEndpointService<TEntity>, IGetService<TEntity, TContext> 
+    internal class GetService<TEntity, TContext> : BaseEndpointService<TEntity>, IGetService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

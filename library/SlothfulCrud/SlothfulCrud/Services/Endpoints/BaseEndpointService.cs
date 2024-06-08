@@ -6,7 +6,7 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints
 {
-    public abstract class BaseEndpointService<TEntity>
+    internal abstract class BaseEndpointService<TEntity>
         where TEntity : class, ISlothfulEntity, new()
     {
         protected readonly EntityConfiguration EntityConfiguration;

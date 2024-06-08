@@ -13,7 +13,7 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulBrowseSelectableEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity> 
+    internal class SlothfulBrowseSelectableEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity> 
         where TEntity : class, ISlothfulEntity
     {
         public SlothfulBrowseSelectableEndpointBuilder(

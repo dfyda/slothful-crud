@@ -6,7 +6,7 @@ using SlothfulCrud.Extensions;
 
 namespace SlothfulCrud.Exceptions.Handlers
 {
-    public class ExceptionHandler : IExceptionHandler
+    internal class ExceptionHandler : IExceptionHandler
     {
         private readonly ILogger<ExceptionHandler> _logger;
 

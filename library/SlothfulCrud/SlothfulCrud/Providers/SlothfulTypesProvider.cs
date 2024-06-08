@@ -6,7 +6,7 @@ using SlothfulCrud.Services;
 
 namespace SlothfulCrud.Providers
 {
-    public static class SlothfulTypesProvider
+    internal static class SlothfulTypesProvider
     {
         public static IEnumerable<Type> GetSlothfulEntityTypes(Assembly assembly)
         {

@@ -4,7 +4,7 @@ using SlothfulCrud.Builders.Abstract;
 
 namespace SlothfulCrud.Builders.Dynamic
 {
-    public class DynamicTypeBuilder : AbstractFunctionalBuilder<TypeBuilder, DynamicTypeBuilder>
+    internal class DynamicTypeBuilder : AbstractFunctionalBuilder<TypeBuilder, DynamicTypeBuilder>
     {
         private static readonly AssemblyName AssemblyName = new AssemblyName("DynamicAssembly");
         private static readonly AssemblyBuilder AssemblyBuilder =

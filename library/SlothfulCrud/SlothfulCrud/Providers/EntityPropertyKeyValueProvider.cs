@@ -4,7 +4,7 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Providers
 {
-    public class EntityPropertyKeyValueProvider<TEntity> : IEntityPropertyKeyValueProvider<TEntity>
+    internal class EntityPropertyKeyValueProvider<TEntity> : IEntityPropertyKeyValueProvider<TEntity>
         where TEntity : class, ISlothfulEntity
     {
         public object GetNextValue(EntityConfiguration configuration)

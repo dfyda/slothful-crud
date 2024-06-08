@@ -12,7 +12,7 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulGetEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity>
+    internal class SlothfulGetEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity>
         where TEntity : class, ISlothfulEntity
     {
         public SlothfulGetEndpointBuilder(

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace SlothfulCrud.Extensions
 {
-    public static class ObjectExtensions
+    internal static class ObjectExtensions
     {
         public static IDictionary<string, object> GetProperties(this object obj)
         {

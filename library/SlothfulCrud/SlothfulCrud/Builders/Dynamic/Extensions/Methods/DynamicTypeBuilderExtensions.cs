@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 
 namespace SlothfulCrud.Builders.Dynamic.Extensions.Methods
 {
-    public static class DynamicTypeBuilderExtensions
+    internal static class DynamicTypeBuilderExtensions
     {
         public static DynamicTypeBuilder AddFakeTryParse(this DynamicTypeBuilder dynamicTypeBuilder)
         {

@@ -1,6 +1,6 @@
 ﻿namespace SlothfulCrud.Extensions
 {
-    public static class TypeExtensions
+    internal static class TypeExtensions
     {
         public static bool IsNullable(this Type type)
         {

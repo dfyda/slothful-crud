@@ -9,7 +9,7 @@ using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Managers
 {
-    public class SlothfulCrudManager : ISlothfulCrudManager
+    internal class SlothfulCrudManager : ISlothfulCrudManager
     {
         private readonly IApiSegmentProvider _apiSegmentProvider;
         private readonly ICreateConstructorBehavior _createConstructorBehavior;

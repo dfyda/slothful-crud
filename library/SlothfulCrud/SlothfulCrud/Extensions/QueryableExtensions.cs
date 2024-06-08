@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SlothfulCrud.Extensions
 {
-    public static class QueryableExtensions
+    internal static class QueryableExtensions
     {
         public static IQueryable<T> IncludeAllFirstLevelDependencies<T>(this IQueryable<T> query) where T : class
         {

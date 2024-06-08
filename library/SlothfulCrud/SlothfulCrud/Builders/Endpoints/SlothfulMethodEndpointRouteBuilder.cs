@@ -7,7 +7,7 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Builders.Endpoints
 {
-    public abstract class SlothfulMethodEndpointRouteBuilder<TEntity> : SlothfulEndpointRouteBuilder<TEntity> 
+    internal abstract class SlothfulMethodEndpointRouteBuilder<TEntity> : SlothfulEndpointRouteBuilder<TEntity> 
         where TEntity : class, ISlothfulEntity
     {
         protected RouteHandlerBuilder ConventionBuilder { get; set; }

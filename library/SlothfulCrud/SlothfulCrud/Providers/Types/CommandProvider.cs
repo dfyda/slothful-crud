@@ -4,7 +4,7 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Providers.Types
 {
-    public static class CommandProvider
+    internal static class CommandProvider
     {
         public static Type PrepareCreateCommand(ConstructorInfo constructor, Type entityType)
         {

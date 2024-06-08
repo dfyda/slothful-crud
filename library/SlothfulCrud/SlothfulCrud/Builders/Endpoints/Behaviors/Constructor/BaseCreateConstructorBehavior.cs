@@ -2,7 +2,7 @@
 
 namespace SlothfulCrud.Builders.Endpoints.Behaviors.Constructor
 {
-    public class BaseCreateConstructorBehavior : ICreateConstructorBehavior
+    internal class BaseCreateConstructorBehavior : ICreateConstructorBehavior
     {
         public ConstructorInfo GetConstructorInfo(Type entityType)
         {

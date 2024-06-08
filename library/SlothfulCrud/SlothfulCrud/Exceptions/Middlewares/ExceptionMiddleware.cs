@@ -4,7 +4,7 @@ using SlothfulCrud.Exceptions.Handlers;
 
 namespace SlothfulCrud.Exceptions.Middlewares
 {
-    public class ExceptionMiddleware
+    internal class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly IExceptionHandler _exceptionHandler;

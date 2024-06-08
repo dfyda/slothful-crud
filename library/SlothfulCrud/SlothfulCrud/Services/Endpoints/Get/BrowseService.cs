@@ -6,7 +6,7 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public class BrowseService<TEntity, TContext> : BaseBrowseEndpointService<TEntity, TContext>, IBrowseService<TEntity, TContext> 
+    internal class BrowseService<TEntity, TContext> : BaseBrowseEndpointService<TEntity, TContext>, IBrowseService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

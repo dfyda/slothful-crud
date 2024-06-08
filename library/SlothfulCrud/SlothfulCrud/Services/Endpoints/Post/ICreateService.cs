@@ -4,7 +4,7 @@ using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Post
 {
-    public interface ICreateService<TEntity, TContext> 
+    internal interface ICreateService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

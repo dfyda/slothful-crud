@@ -3,7 +3,7 @@ using SlothfulCrud.Exceptions;
 
 namespace SlothfulCrud.Extensions
 {
-    public static class QueryExtensions
+    internal static class QueryExtensions
     {
         private const string DefaultCode = "not_found";
         private const string DefaultMessage = "Object not found";

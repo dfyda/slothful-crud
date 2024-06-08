@@ -6,7 +6,7 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Builders.Endpoints
 {
-    public class SlothfulEndpointRouteBuilder<TEntity> where TEntity : class, ISlothfulEntity
+    internal class SlothfulEndpointRouteBuilder<TEntity> where TEntity : class, ISlothfulEntity
     {
         private readonly SlothEntityBuilder<TEntity> _configurationBuilder;
         protected SlothfulBuilderParams BuilderParams { get; set; }

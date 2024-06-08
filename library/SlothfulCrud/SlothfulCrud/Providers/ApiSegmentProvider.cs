@@ -2,7 +2,7 @@
 
 namespace SlothfulCrud.Providers
 {
-    public class ApiSegmentProvider : IApiSegmentProvider
+    internal class ApiSegmentProvider : IApiSegmentProvider
     {
         public string GetApiSegment(string entityName)
         {

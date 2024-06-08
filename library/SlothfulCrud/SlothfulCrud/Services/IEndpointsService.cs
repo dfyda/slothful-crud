@@ -6,7 +6,7 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services
 {
-    public interface IEndpointsService<TEntity, TDbContext> 
+    internal interface IEndpointsService<TEntity, TDbContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TDbContext : DbContext
     {

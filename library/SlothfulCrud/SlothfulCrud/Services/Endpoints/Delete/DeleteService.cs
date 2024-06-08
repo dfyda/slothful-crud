@@ -5,7 +5,7 @@ using SlothfulCrud.Services.Endpoints.Get;
 
 namespace SlothfulCrud.Services.Endpoints.Delete
 {
-    public class DeleteService<TEntity, TContext> : BaseEndpointService<TEntity>, IDeleteService<TEntity, TContext> 
+    internal class DeleteService<TEntity, TContext> : BaseEndpointService<TEntity>, IDeleteService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

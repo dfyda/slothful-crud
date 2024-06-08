@@ -4,7 +4,7 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public interface IBrowseService<TEntity, TContext> 
+    internal interface IBrowseService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

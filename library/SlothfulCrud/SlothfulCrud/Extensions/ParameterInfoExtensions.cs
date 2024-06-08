@@ -5,7 +5,7 @@ using SlothfulCrud.Exceptions;
 
 namespace SlothfulCrud.Extensions
 {
-    public static class ParameterInfoExtensions
+    internal static class ParameterInfoExtensions
     {
         public static object GetDomainMethodParam<TContext>(this ParameterInfo param, object command, TContext dbContext)
             where TContext : DbContext

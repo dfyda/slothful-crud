@@ -3,7 +3,7 @@ using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public interface IGetService<TEntity, TContext> 
+    internal interface IGetService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

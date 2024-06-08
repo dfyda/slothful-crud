@@ -2,7 +2,7 @@
 
 namespace SlothfulCrud.Providers
 {
-    public class EntityConfigurationProvider : IEntityConfigurationProvider
+    internal class EntityConfigurationProvider : IEntityConfigurationProvider
     {
         private readonly Dictionary<string, EntityConfiguration> _configurations = new();
         

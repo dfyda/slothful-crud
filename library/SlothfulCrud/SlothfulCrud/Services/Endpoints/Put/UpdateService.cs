@@ -10,7 +10,7 @@ using FluentValidation;
 
 namespace SlothfulCrud.Services.Endpoints.Put
 {
-    public class UpdateService<TEntity, TContext> : BaseEndpointService<TEntity>, IUpdateService<TEntity, TContext> 
+    internal class UpdateService<TEntity, TContext> : BaseEndpointService<TEntity>, IUpdateService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

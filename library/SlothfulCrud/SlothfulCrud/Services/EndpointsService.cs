@@ -10,7 +10,7 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services
 {
-    public class EndpointsService<TEntity, TContext> : IEndpointsService<TEntity, TContext> 
+    internal class EndpointsService<TEntity, TContext> : IEndpointsService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

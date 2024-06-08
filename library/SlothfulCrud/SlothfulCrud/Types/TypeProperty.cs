@@ -1,6 +1,6 @@
 ﻿namespace SlothfulCrud.Types
 {
-    public class TypeProperty
+    internal class TypeProperty
     {
         public string Name { get; private set; }
         public Type Type { get; private set; }

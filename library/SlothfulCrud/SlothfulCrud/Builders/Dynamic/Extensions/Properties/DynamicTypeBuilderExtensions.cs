@@ -4,7 +4,7 @@ using SlothfulCrud.Types;
 
 namespace SlothfulCrud.Builders.Dynamic.Extensions.Properties
 {
-    public static class DynamicTypeBuilderExtensions
+    internal static class DynamicTypeBuilderExtensions
     {
         public static DynamicTypeBuilder AddProperty(
             this DynamicTypeBuilder dynamicTypeBuilder,

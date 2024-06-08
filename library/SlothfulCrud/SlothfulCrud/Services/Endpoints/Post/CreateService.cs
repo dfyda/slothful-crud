@@ -10,7 +10,7 @@ using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Services.Endpoints.Post
 {
-    public class CreateService<TEntity, TContext> : BaseEndpointService<TEntity>, ICreateService<TEntity, TContext> 
+    internal class CreateService<TEntity, TContext> : BaseEndpointService<TEntity>, ICreateService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

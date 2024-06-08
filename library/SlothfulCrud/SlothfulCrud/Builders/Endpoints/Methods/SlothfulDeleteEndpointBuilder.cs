@@ -11,7 +11,7 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Builders.Endpoints.Methods
 {
-    public class SlothfulDeleteEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity>
+    internal class SlothfulDeleteEndpointBuilder<TEntity> : SlothfulMethodEndpointRouteBuilder<TEntity>
         where TEntity : class, ISlothfulEntity
     {
         public SlothfulDeleteEndpointBuilder(

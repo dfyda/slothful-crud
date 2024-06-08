@@ -5,7 +5,7 @@ using SlothfulCrud.Extensions;
 
 namespace SlothfulCrud.Providers
 {
-    public static class QueryObjectProvider
+    internal static class QueryObjectProvider
     {
         public static T PrepareQueryObject<T>(HttpContext context) where T : new()
         {

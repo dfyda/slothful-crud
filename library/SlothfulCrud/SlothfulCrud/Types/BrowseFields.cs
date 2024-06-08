@@ -1,6 +1,6 @@
 ﻿namespace SlothfulCrud.Types
 {
-    public static class BrowseFields
+    internal static class BrowseFields
     {
         public static readonly IDictionary<string, Type> Fields = new Dictionary<string, Type>
         {

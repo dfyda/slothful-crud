@@ -6,7 +6,7 @@ using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Services.Endpoints
 {
-    public abstract class BaseBrowseEndpointService<TEntity, TContext> : BaseEndpointService<TEntity>
+    internal abstract class BaseBrowseEndpointService<TEntity, TContext> : BaseEndpointService<TEntity>
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {

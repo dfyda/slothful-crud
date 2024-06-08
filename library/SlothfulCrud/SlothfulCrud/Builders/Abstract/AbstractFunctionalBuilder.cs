@@ -1,6 +1,6 @@
 ﻿namespace SlothfulCrud.Builders.Abstract
 {
-    public class AbstractFunctionalBuilder<TSubject, TSelf> : IAbstractFunctionalBuilder<TSubject, TSelf>
+    internal class AbstractFunctionalBuilder<TSubject, TSelf> : IAbstractFunctionalBuilder<TSubject, TSelf>
         where TSelf : AbstractFunctionalBuilder<TSubject, TSelf>
         where TSubject : class
     {

@@ -3,7 +3,7 @@ using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Builders.Configurations
 {
-    public class SlothConfigurationBuilder
+    internal class SlothConfigurationBuilder
     {
         private readonly ICollection<object> _builders = new List<object>();
 

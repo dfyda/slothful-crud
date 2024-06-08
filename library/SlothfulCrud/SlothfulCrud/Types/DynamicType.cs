@@ -6,7 +6,7 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Types
 {
-    public class DynamicType
+    internal class DynamicType
     {
         public static Type NewDynamicType(
             ParameterInfo[] parameters,

@@ -7,7 +7,7 @@ using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
-    public class BrowseSelectableService<TEntity, TContext> : BaseBrowseEndpointService<TEntity, TContext>, IBrowseSelectableService<TEntity, TContext> 
+    internal class BrowseSelectableService<TEntity, TContext> : BaseBrowseEndpointService<TEntity, TContext>, IBrowseSelectableService<TEntity, TContext> 
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
