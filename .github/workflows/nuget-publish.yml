@@ -34,7 +34,7 @@ jobs:
           echo "##[endgroup]"
 
       - name: Restore dependencies
-        run: dotnet restore library/SlothfulCrud/SlothfulCrud.csproj
+        run: dotnet restore library/SlothfulCrud/SlothfulCrud/SlothfulCrud.csproj
 
       - name: Build
         run: dotnet build library/SlothfulCrud/SlothfulCrud.csproj --configuration Release --no-restore
@@ -43,7 +43,7 @@ jobs:
         run: dotnet test library/SlothfulCrud/Tests/SlothfulCrud.Tests.Unit/SlothfulCrud.Tests.Unit.csproj --no-restore --verbosity normal
 
       - name: Pack NuGet package
-        run: dotnet pack library/SlothfulCrud/SlothfulCrud.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+        run: dotnet pack library/SlothfulCrud/SlothfulCrud/SlothfulCrud.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
 
       - name: Publish NuGet package
         env:
