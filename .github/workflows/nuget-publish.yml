@@ -1,0 +1,51 @@
+name: Build and Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - 'release_v*.rc*'
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          echo "##[group]Extract version from tag"
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          if [[ "$TAG_NAME" =~ ^release_v ]]; then
+            VERSION=${TAG_NAME#release_v}
+          else
+            VERSION=$TAG_NAME
+          fi
+          echo "Version: $VERSION"
+          echo "::set-output name=VERSION::$VERSION"
+          echo "##[endgroup]"
+
+      - name: Restore dependencies
+        run: dotnet restore library/SlothfulCrud/SlothfulCrud.csproj
+
+      - name: Build
+        run: dotnet build library/SlothfulCrud/SlothfulCrud.csproj --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test library/SlothfulCrud/Tests/SlothfulCrud.Tests.Unit/SlothfulCrud.Tests.Unit.csproj --no-restore --verbosity normal
+
+      - name: Pack NuGet package
+        run: dotnet pack library/SlothfulCrud/SlothfulCrud.csproj --configuration Release --no-build --output ./nupkg /p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+
+      - name: Publish NuGet package
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push ./nupkg/*.nupkg -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json
