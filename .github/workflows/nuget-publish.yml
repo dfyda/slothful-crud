@@ -3,7 +3,7 @@ name: Build and Publish NuGet Package
 on:
   push:
     tags:
-      - 'release_v*.rc*'
+      - 'release_v*-rc*'
       - 'v*'
 
 jobs:
