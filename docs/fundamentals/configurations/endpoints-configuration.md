@@ -10,12 +10,6 @@ nav_order: 2.2.2
 
 The following configuration options are available for customizing the behavior of your endpoints in the Slothful CRUD library:
 
-- **HasEndpoint (bool):** Enables or disables the endpoint.
-- **ExposeAllNestedProperties (bool):** Set to `true` to expose all nested properties via the API. This is useful for debugging or gaining granular control over nested data.
-- **IsAuthorizationEnable (bool):** Determines whether authorization checks are enabled. If set to `true`, the policies listed in `PolicyNames` are applied.
-- **PolicyNames (string[]):** An array of policy names to apply for authorization.
-
-### Methods
 - **HasEndpoint:** Enables or disables the endpoint.
 - **AllowAnonymous:** Disables authorization checks for the endpoint.
 - **RequireAuthorization:** Enables authorization checks and applies the specified policies.

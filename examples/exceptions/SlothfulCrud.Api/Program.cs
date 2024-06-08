@@ -2,7 +2,9 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Api.EF;
+using SlothfulCrud.Api.Slothful.Exceptions;
 using SlothfulCrud.Api.Validators;
+using SlothfulCrud.Exceptions.Handlers;
 using SlothfulCrud.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,8 +25,12 @@ builder.Services.AddAuthentication(options =>
         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     })
     .AddCookie();
+
 builder.Services.AddValidatorsFromAssemblyContaining<SlothValidator>();
+
 builder.Services.AddSlothfulCrud<SlothfulDbContext>();
+builder.Services.AddTransient<IExceptionHandler, CustomExceptionHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,7 +40,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseSlothfulCrud<SlothfulDbContext>();
+app.UseSlothfulCrud<SlothfulDbContext>(options => options.UseSlothfulProblemHandling = true);
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
