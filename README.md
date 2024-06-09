@@ -48,3 +48,6 @@ Provides settings specific to entity management:
 - **KeyPropertyType** (`Type`): Indicates the type of the primary key property (e.g., `int`, `string`).
 - **UpdateMethod** (`string`): Specifies the method used to update entities.
 - **HasValidation** (`bool`): Enables or disables validation for entities to ensure compliance with business rules.
+
+## NuGet Packages
+You can find the Slothful CRUD NuGet packages [here](https://www.nuget.org/packages/slothful-crud).

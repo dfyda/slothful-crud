@@ -22,6 +22,8 @@ back_to_top_text: "Back to top"
 nav_external_links:
   - title: Slothful CRUD on GitHub
     url: https://github.com/dfyda/slothful-crud
+  - title: Slothful CRUD on NuGet
+    url: https://www.nuget.org/packages/slothful-crud
 
 callouts_level: quiet # or loud
 callouts:
