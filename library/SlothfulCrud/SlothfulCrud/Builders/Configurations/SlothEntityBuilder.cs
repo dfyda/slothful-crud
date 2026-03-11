@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
+using System.Reflection;
 using SlothfulCrud.Builders.Configurations.Methods;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Types.Configurations;
@@ -58,7 +59,12 @@ namespace SlothfulCrud.Builders.Configurations
         {
             if (keyExpression.Body is MemberExpression memberExpression)
             {
-                var keyPropertyType = memberExpression.Member.DeclaringType;
+                if (memberExpression.Member is not PropertyInfo propertyInfo)
+                {
+                    throw new ArgumentException("Argument must be a property", nameof(keyExpression));
+                }
+
+                var keyPropertyType = propertyInfo.PropertyType;
                 EndpointsConfiguration.Entity.SetKeyPropertyType(keyPropertyType);
             }
             else

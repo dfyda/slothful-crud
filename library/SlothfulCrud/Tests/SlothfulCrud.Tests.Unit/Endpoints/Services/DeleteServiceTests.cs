@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Providers;
@@ -10,7 +10,7 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
-    public class DeleteServiceTests
+    public class DeleteServiceTests : IDisposable
     {
         private SlothfulDbContext _dbContext;
         private Mock<IGetService<Sloth, SlothfulDbContext>> _getServiceMock;
@@ -22,10 +22,16 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ConfigureMocks();
         }
 
+        public void Dispose()
+        {
+            _dbContext.Database.EnsureDeleted();
+            _dbContext.Dispose();
+        }
+
         private void ConfigureDbContext()
         {
             var options = new DbContextOptionsBuilder<SlothfulDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDatabase")
+                .UseInMemoryDatabase(databaseName: $"DeleteServiceTests_{Guid.NewGuid()}")
                 .Options;
 
             _dbContext = new SlothfulDbContext(options);
@@ -46,60 +52,66 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             return new DeleteService<Sloth, SlothfulDbContext>(_dbContext, _getServiceMock.Object,
                 _configurationProviderMock.Object);
         }
-        
-        [Fact]
-        public void Delete_ShouldRemoveEntityFromDbContext()
+
+        private Sloth SeedSloth(Guid entityId)
         {
-            var entityId = Guid.NewGuid();
             var entity = new Sloth(entityId, "Test", 5);
-
-            _dbContext.Sloths.RemoveRange(_dbContext.Sloths);
-            _dbContext.SaveChanges();
-
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
+            return entity;
+        }
+        
+        [Fact]
+        public void Delete_ShouldRemoveEntity_WhenEntityExists()
+        {
+            // Arrange
+            var entityId = Guid.NewGuid();
+            var entity = SeedSloth(entityId);
 
             _getServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
+            // Act
             GetService().Delete(entityId);
 
+            // Assert
             var deletedEntity = _dbContext.Sloths.Find(entityId);
             Assert.Null(deletedEntity);
         }
 
         [Fact]
-        public void Delete_ShouldThrowException_WhenEntityNotFound()
+        public void Delete_ShouldThrowNotFoundException_WhenEntityDoesNotExist()
         {
+            // Arrange
             var entityId = Guid.NewGuid();
             _getServiceMock.Setup(s => s.Get(entityId)).Throws(new NotFoundException());
 
+            // Act + Assert
             Assert.Throws<NotFoundException>(() => GetService().Delete(entityId));
         }
 
         [Fact]
-        public void Delete_ShouldCallGetService()
+        public void Delete_ShouldCallGetService_WhenEntityExists()
         {
+            // Arrange
             var entityId = Guid.NewGuid();
-            var entity = new Sloth(entityId, "Test", 5);
-
-            _dbContext.Sloths.RemoveRange(_dbContext.Sloths);
-            _dbContext.SaveChanges();
-
-            _dbContext.Sloths.Add(entity);
-            _dbContext.SaveChanges();
+            var entity = SeedSloth(entityId);
 
             _getServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
+            // Act
             GetService().Delete(entityId);
 
+            // Assert
             _getServiceMock.Verify(s => s.Get(entityId), Times.Once);
         }
 
         [Fact]
-        public void Delete_ShouldThrowException_WhenKeyPropertyIsNull()
+        public void Delete_ShouldThrowConfigurationException_WhenKeyIsNull()
         {
+            // Arrange
             _getServiceMock.Setup(s => s.Get(null)).Throws(new ConfigurationException());
 
+            // Act + Assert
             Assert.Throws<ConfigurationException>(() => GetService().Delete(null));
         }
     }

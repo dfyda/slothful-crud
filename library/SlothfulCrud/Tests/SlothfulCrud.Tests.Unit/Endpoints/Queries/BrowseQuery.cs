@@ -1,4 +1,4 @@
-﻿namespace SlothfulCrud.Tests.Unit.Endpoints.Queries
+namespace SlothfulCrud.Tests.Unit.Endpoints.Queries
 {
     public class BrowseQuery
     {
@@ -7,6 +7,7 @@
         public string SortDirection { get; set; }
         public string Name { get; set; }
         public DateTime? CreatedAtFrom { get; set; }
+        public DateTime? CreatedAtTo { get; set; }
         public int? Age { get; set; }
     }
 }

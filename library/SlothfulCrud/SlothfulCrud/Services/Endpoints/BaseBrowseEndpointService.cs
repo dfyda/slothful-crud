@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
@@ -61,7 +61,9 @@ namespace SlothfulCrud.Services.Endpoints
             if (sortProperty.PropertyType.IsClass && sortProperty.PropertyType != typeof(string))
             {
                 var nestedSortProperty = GetEntitySortProperty(sortProperty.PropertyType);
-                queryObject = queryObject.OrderByNestedProperty($"{sortBy}.{nestedSortProperty}", (string)query.SortDirection == "asc");
+                queryObject = queryObject.OrderByNestedProperty(
+                    $"{sortBy}.{nestedSortProperty}",
+                    ((string)query.SortDirection).Equals("desc", StringComparison.CurrentCultureIgnoreCase));
                 return queryObject;
             }
             

@@ -1,4 +1,4 @@
-﻿using SlothfulCrud.Builders.Configurations;
+using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Tests.Api.Domain;
 
 namespace SlothfulCrud.Tests.Api.Slothful.EntityConfigurations
@@ -10,12 +10,12 @@ namespace SlothfulCrud.Tests.Api.Slothful.EntityConfigurations
             builder
                 .SetSortProperty(x => x.DisplayName)
                 .SetUpdateMethodName("Update");
-            
+
             builder.GetEndpoint
                 .HasEndpoint(false)
                 .ExposeAllNestedProperties()
                 .AllowAnonymous();
-            
+
             builder.BrowseEndpoint
                 .HasEndpoint(false)
                 .ExposeAllNestedProperties()

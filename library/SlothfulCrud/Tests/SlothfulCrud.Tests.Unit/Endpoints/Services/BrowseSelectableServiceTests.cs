@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services.Endpoints.Get;
@@ -11,13 +11,23 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class BrowseSelectableServiceTests : IDisposable
     {
+        private const string SortFieldName = "Name";
+        private const string SortDirectionAsc = "asc";
+        private const string SortDirectionDesc = "desc";
+        private const string NonExistingPropertyName = "MissingProperty";
+        private const ushort FirstPage = 1;
+        private const ushort ZeroPage = 0;
+        private const int DefaultRows = 10;
+        private const int PaginationRows = 5;
+        private const int ZeroRows = 0;
+
         private readonly SlothfulDbContext _dbContext;
         private readonly BrowseSelectableService<Sloth, SlothfulDbContext> _service;
 
         public BrowseSelectableServiceTests()
         {
             var options = new DbContextOptionsBuilder<SlothfulDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestBrowseSelectableDatabase")
+                .UseInMemoryDatabase(databaseName: $"BrowseSelectableServiceTests_{Guid.NewGuid()}")
                 .Options;
 
             _dbContext = new SlothfulDbContext(options);
@@ -36,27 +46,43 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Dispose();
         }
 
-        [Fact]
-        public void BrowseSelectable_ShouldReturnPagedResults()
+        private void SeedSloths(IEnumerable<Sloth> entities)
         {
+            _dbContext.Sloths.AddRange(entities);
+            _dbContext.SaveChanges();
+        }
+
+        private static BrowseSelectableQuery CreateQuery(
+            int rows = DefaultRows,
+            string sortBy = SortFieldName,
+            string sortDirection = SortDirectionAsc,
+            string search = null)
+        {
+            return new BrowseSelectableQuery
+            {
+                Rows = rows,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                Search = search
+            };
+        }
+
+        [Fact]
+        public void BrowseSelectable_ShouldReturnPagedResults_WhenEntitiesExist()
+        {
+            // Arrange
             var entities = new List<Sloth>
             {
                 new Sloth(Guid.NewGuid(), "Sloth1", 5),
                 new Sloth(Guid.NewGuid(), "Sloth2", 6)
             };
+            SeedSloths(entities);
+            var query = CreateQuery();
 
-            _dbContext.Sloths.AddRange(entities);
-            _dbContext.SaveChanges();
+            // Act
+            var result = _service.Browse(FirstPage, query);
 
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 10,
-                SortBy = "Name",
-                SortDirection = "asc"
-            };
-
-            var result = _service.Browse(1, query);
-
+            // Assert
             Assert.NotNull(result);
             Assert.Contains(entities[0].Id, result.Data.Select(x => x.Id));
             Assert.Contains(entities[0].DisplayName, result.Data.Select(x => x.DisplayName));
@@ -65,122 +91,99 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldFilterByStringField()
+        public void BrowseSelectable_ShouldFilterBySearchPhrase_WhenSearchProvided()
         {
+            // Arrange
             var entities = new List<Sloth>
             {
                 new Sloth(Guid.NewGuid(), "Sloth1", 5),
                 new Sloth(Guid.NewGuid(), "Sloth2", 6)
             };
+            SeedSloths(entities);
+            var query = CreateQuery(search: "Sloth1");
 
-            _dbContext.Sloths.AddRange(entities);
-            _dbContext.SaveChanges();
+            // Act
+            var result = _service.Browse(FirstPage, query);
 
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 10,
-                SortBy = "Name",
-                SortDirection = "asc",
-                Search = "Sloth1"
-            };
-
-            var result = _service.Browse(1, query);
-
+            // Assert
             Assert.NotNull(result);
             Assert.Single(result.Data);
             Assert.Equal("Sloth1", result.Data.First().DisplayName);
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldSortByStringFieldAscending()
+        public void BrowseSelectable_ShouldSortByNameAscending_WhenSortDirectionIsAsc()
         {
+            // Arrange
             var entities = new List<Sloth>
             {
                 new Sloth(Guid.NewGuid(), "Sloth2", 6),
                 new Sloth(Guid.NewGuid(), "Sloth1", 5)
             };
+            SeedSloths(entities);
+            var query = CreateQuery(sortDirection: SortDirectionAsc);
 
-            _dbContext.Sloths.AddRange(entities);
-            _dbContext.SaveChanges();
+            // Act
+            var result = _service.Browse(FirstPage, query);
 
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 10,
-                SortBy = "Name",
-                SortDirection = "asc"
-            };
-
-            var result = _service.Browse(1, query);
-
+            // Assert
             Assert.NotNull(result);
             Assert.Equal("Sloth1", result.Data.First().DisplayName);
             Assert.Equal("Sloth2", result.Data.Last().DisplayName);
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldSortByStringFieldDescending()
+        public void BrowseSelectable_ShouldSortByNameDescending_WhenSortDirectionIsDesc()
         {
+            // Arrange
             var entities = new List<Sloth>
             {
                 new Sloth(Guid.NewGuid(), "Sloth1", 5),
                 new Sloth(Guid.NewGuid(), "Sloth2", 6)
             };
+            SeedSloths(entities);
+            var query = CreateQuery(sortDirection: SortDirectionDesc);
 
-            _dbContext.Sloths.AddRange(entities);
-            _dbContext.SaveChanges();
+            // Act
+            var result = _service.Browse(FirstPage, query);
 
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 10,
-                SortBy = "Name",
-                SortDirection = "desc"
-            };
-
-            var result = _service.Browse(1, query);
-
+            // Assert
             Assert.NotNull(result);
             Assert.Equal("Sloth2", result.Data.First().DisplayName);
             Assert.Equal("Sloth1", result.Data.Last().DisplayName);
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldHandleEmptyResult()
+        public void BrowseSelectable_ShouldReturnEmptyResult_WhenNoEntitiesExist()
         {
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 10,
-                SortBy = "Name",
-                SortDirection = "asc"
-            };
+            // Arrange
+            var query = CreateQuery();
 
-            var result = _service.Browse(1, query);
+            // Act
+            var result = _service.Browse(FirstPage, query);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Empty(result.Data);
             Assert.Equal(0, result.Total);
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldHandleNullSortByField()
+        public void BrowseSelectable_ShouldReturnDataWithoutSorting_WhenSortByIsNull()
         {
+            // Arrange
             var entities = new List<Sloth>
             {
                 new Sloth(Guid.NewGuid(), "Sloth2", 6),
                 new Sloth(Guid.NewGuid(), "Sloth1", 5)
             };
+            SeedSloths(entities);
+            var query = CreateQuery(sortBy: null);
 
-            _dbContext.Sloths.AddRange(entities);
-            _dbContext.SaveChanges();
+            // Act
+            var result = _service.Browse(FirstPage, query);
 
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 10,
-                SortBy = null,
-                SortDirection = "asc"
-            };
-
-            var result = _service.Browse(1, query);
-
+            // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Data.Count);
         }
@@ -197,9 +200,9 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             var query = new BrowseSelectableQuery
             {
-                Rows = 5,
-                SortBy = "Name",
-                SortDirection = "asc"
+                Rows = PaginationRows,
+                SortBy = SortFieldName,
+                SortDirection = SortDirectionAsc
             };
 
             var result = _service.Browse(3, query);
@@ -221,12 +224,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             var query = new BrowseSelectableQuery
             {
-                Rows = 5,
-                SortBy = "Name",
-                SortDirection = "asc"
+                Rows = PaginationRows,
+                SortBy = SortFieldName,
+                SortDirection = SortDirectionAsc
             };
 
-            var result = _service.Browse(1, query);
+            var result = _service.Browse(FirstPage, query);
 
             Assert.NotNull(result);
             Assert.Equal(15, result.Total);
@@ -246,12 +249,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             var query = new BrowseSelectableQuery
             {
-                Rows = 10,
-                SortBy = "Name",
-                SortDirection = "asc"
+                Rows = DefaultRows,
+                SortBy = SortFieldName,
+                SortDirection = SortDirectionAsc
             };
 
-            var result = _service.Browse(1, query);
+            var result = _service.Browse(FirstPage, query);
 
             Assert.NotNull(result);
             Assert.Contains(entities[0].Id, result.Data.Select(x => x.Id));
@@ -261,14 +264,16 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldHandleNullQuery()
+        public void BrowseSelectable_ShouldThrowArgumentNullException_WhenQueryIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => _service.Browse(1, null));
+            // Act + Assert
+            Assert.Throws<ArgumentNullException>(() => _service.Browse(FirstPage, null));
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldFilterAndSortByMultipleFields()
+        public void BrowseSelectable_ShouldFilterAndSort_WhenSearchAndSortingAreProvided()
         {
+            // Arrange
             var entities = new List<Sloth>
             {
                 new Sloth(Guid.NewGuid(), "Sloth3", 5),
@@ -276,19 +281,13 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 new Sloth(Guid.NewGuid(), "Sloth1", 5)
             };
 
-            _dbContext.Sloths.AddRange(entities);
-            _dbContext.SaveChanges();
+            SeedSloths(entities);
+            var query = CreateQuery(search: "Sloth");
 
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 10,
-                SortBy = "Name",
-                SortDirection = "asc",
-                Search = "Sloth"
-            };
+            // Act
+            var result = _service.Browse(FirstPage, query);
 
-            var result = _service.Browse(1, query);
-
+            // Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Data.Count);
             Assert.Equal("Sloth1", result.Data.First().DisplayName);
@@ -296,8 +295,9 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldHandleComplexQueries()
+        public void BrowseSelectable_ShouldReturnSecondPage_WhenComplexQueryIsProvided()
         {
+            // Arrange
             var entities = new List<Sloth>
             {
                 new Sloth(Guid.NewGuid(), "Sloth1", 5),
@@ -305,40 +305,35 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 new Sloth(Guid.NewGuid(), "Sloth3", 7)
             };
 
-            _dbContext.Sloths.AddRange(entities);
-            _dbContext.SaveChanges();
+            SeedSloths(entities);
+            var query = CreateQuery(rows: 1, search: "Sloth");
 
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 1,
-                SortBy = "Name",
-                SortDirection = "asc",
-                Search = "Sloth"
-            };
-
+            // Act
             var result = _service.Browse(2, query);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Single(result.Data);
             Assert.Equal("Sloth2", result.Data.First().DisplayName);
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldSortByNestedProperty()
+        public void BrowseSelectable_ShouldSortByNestedProperty_WhenSortByTargetsNavigationProperty()
         {
+            // Arrange
             var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
-            var neighbour1 = new Sloth(Guid.NewGuid(), "NeighbourSloth1", 4);
-            var neighbour2 = new Sloth(Guid.NewGuid(), "NeighbourSloth2", 5);
+            var neighbourA = new Sloth(Guid.NewGuid(), "NeighbourA", 4);
+            var neighbourB = new Sloth(Guid.NewGuid(), "NeighbourB", 5);
 
             var entities = new List<WildKoala>
             {
-                new WildKoala(Guid.NewGuid(), "Koala1", 5, cuisine, neighbour1),
-                new WildKoala(Guid.NewGuid(), "Koala2", 6, cuisine, neighbour2)
+                new WildKoala(Guid.NewGuid(), "KoalaNeighbourA", 5, cuisine, neighbourA),
+                new WildKoala(Guid.NewGuid(), "KoalaNeighbourB", 6, cuisine, neighbourB)
             };
 
             _dbContext.Sloths.Add(cuisine);
-            _dbContext.Sloths.Add(neighbour1);
-            _dbContext.Sloths.Add(neighbour2);
+            _dbContext.Sloths.Add(neighbourA);
+            _dbContext.Sloths.Add(neighbourB);
             _dbContext.Koalas.AddRange(entities);
             _dbContext.SaveChanges();
 
@@ -353,19 +348,72 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var service =
                 new BrowseSelectableService<WildKoala, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
 
-            var query = new BrowseSelectableQuery
-            {
-                Rows = 10,
-                SortBy = "Neighbour",
-                SortDirection = "desc"
-            };
+            var query = CreateQuery(sortBy: "Neighbour", sortDirection: SortDirectionDesc);
 
-            var result = service.Browse(1, query);
+            // Act
+            var result = service.Browse(FirstPage, query);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Data.Count);
-            Assert.Equal(entities[0].DisplayName, result.Data.First().DisplayName);
-            Assert.Equal(entities[1].DisplayName, result.Data.Last().DisplayName);
+            Assert.Equal("KoalaNeighbourB", result.Data.First().DisplayName);
+            Assert.Equal("KoalaNeighbourA", result.Data.Last().DisplayName);
+        }
+
+        [Fact]
+        public void BrowseSelectable_ShouldThrowInvalidOperationException_WhenFilterPropertyIsInvalid()
+        {
+            // Arrange
+            var entityConfiguration = new EntityConfiguration();
+            entityConfiguration.SetFilterProperty(NonExistingPropertyName);
+
+            var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(entityConfiguration);
+
+            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+            var query = CreateQuery(search: "Sloth");
+
+            // Act + Assert
+            Assert.Throws<InvalidOperationException>(() => service.Browse(FirstPage, query));
+        }
+
+        [Fact]
+        public void BrowseSelectable_ShouldReturnEmptyData_WhenRowsIsZero()
+        {
+            // Arrange
+            _dbContext.Sloths.Add(new Sloth(Guid.NewGuid(), "Sloth1", 5));
+            _dbContext.SaveChanges();
+
+            var query = CreateQuery(rows: ZeroRows);
+
+            // Act
+            var result = _service.Browse(FirstPage, query);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result.Data);
+            Assert.Equal(1, result.Total);
+        }
+
+        [Fact]
+        public void BrowseSelectable_ShouldNotSkipResults_WhenPageIsZero()
+        {
+            // Arrange
+            _dbContext.Sloths.AddRange(
+                new Sloth(Guid.NewGuid(), "Sloth1", 5),
+                new Sloth(Guid.NewGuid(), "Sloth2", 6));
+            _dbContext.SaveChanges();
+
+            var query = CreateQuery(rows: 1);
+
+            // Act
+            var result = _service.Browse(ZeroPage, query);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Data);
+            Assert.Equal("Sloth1", result.Data.First().DisplayName);
         }
     }
 }

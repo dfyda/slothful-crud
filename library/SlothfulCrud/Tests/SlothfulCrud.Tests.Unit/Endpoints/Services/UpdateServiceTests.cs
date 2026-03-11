@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,8 +13,14 @@ using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
-    public class UpdateServiceTests
+    public class UpdateServiceTests : IDisposable
     {
+        private const string InvalidIdValue = "invalid_id";
+        private const string UpdateMethodName = "Update";
+
+        private sealed record UpdateSlothCommand(string name, int age);
+        private sealed record UpdateWildKoalaCommand(string name, int age, int? age2, Guid cuisineId, Guid neighbourId);
+
         private SlothfulDbContext _dbContext;
         private Mock<IGetService<Sloth, SlothfulDbContext>> _slothGetServiceMock;
         private Mock<IGetService<WildKoala, SlothfulDbContext>> _wildKoalaGetServiceMock;
@@ -28,11 +34,17 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ConfigureDbContext();
             ConfigureMocks();
         }
+
+        public void Dispose()
+        {
+            _dbContext.Database.EnsureDeleted();
+            _dbContext.Dispose();
+        }
         
         private void ConfigureDbContext()
         {
             var options = new DbContextOptionsBuilder<SlothfulDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestUpdateDatabase")
+                .UseInMemoryDatabase(databaseName: $"UpdateServiceTests_{Guid.NewGuid()}")
                 .Options;
 
             _dbContext = new SlothfulDbContext(options);
@@ -74,6 +86,25 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _serviceScopeMock.Setup(scope => scope.ServiceProvider)
                 .Returns(serviceProviderMock.Object);
         }
+
+        private static UpdateSlothCommand CreateSlothUpdateCommand()
+        {
+            return new UpdateSlothCommand("UpdatedSloth", 10);
+        }
+
+        private static UpdateWildKoalaCommand CreateWildKoalaUpdateCommand(Guid cuisineId, Guid neighbourId)
+        {
+            return new UpdateWildKoalaCommand("UpdatedKoala", 10, null, cuisineId, neighbourId);
+        }
+
+        private void ArrangeSlothValidator(IValidator<Sloth> validator = null)
+        {
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IValidator<Sloth>)))
+                .Returns(validator ?? _slothValidatorMock.Object);
+            _serviceScopeMock.Setup(scope => scope.ServiceProvider)
+                .Returns(serviceProviderMock.Object);
+        }
         
         private UpdateService<Sloth, SlothfulDbContext> GetSlothService()
         {
@@ -94,11 +125,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Update_ShouldInvokeModifyMethod()
+        public void Update_ShouldModifySloth_WhenCommandIsValid()
         {
+            // Arrange
             var entityId = Guid.NewGuid();
             var entity = new Sloth(entityId, "OldSloth", 5);
-            var command = new { name = "UpdatedSloth", age = 10 };
+            var command = CreateSlothUpdateCommand();
 
             ConfigureAdditionalMocks();
 
@@ -107,8 +139,10 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
+            // Act
             GetSlothService().Update(entityId, command, _serviceScopeMock.Object);
 
+            // Assert
             var updatedEntity = _dbContext.Sloths.Find(entityId);
             Assert.NotNull(updatedEntity);
             Assert.Equal("UpdatedSloth", updatedEntity.Name);
@@ -118,9 +152,10 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         [Fact]
         public void Update_ShouldValidateEntity_WhenValidationEnabled()
         {
+            // Arrange
             var entityId = Guid.NewGuid();
             var entity = new Sloth(entityId, "OldSloth", 5);
-            var command = new { name = "UpdatedSloth", age = 10 };
+            var command = CreateSlothUpdateCommand();
 
             ConfigureAdditionalMocks();
 
@@ -131,21 +166,24 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
+            // Act
             GetSlothService().Update(entityId, command, _serviceScopeMock.Object);
 
+            // Assert
             _slothValidatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Once);
         }
 
         [Fact]
-        public void Update_WildKoala_ShouldUpdateEntityInDbContext()
+        public void Update_ShouldModifyWildKoala_WhenCommandIsValid()
         {
+            // Arrange
             var entityId = Guid.NewGuid();
             var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
             var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
             var entity = new WildKoala(entityId, "OldKoala", 5, cuisine, neighbour);
             var cuisineId = cuisine.Id;
             var neighbourId = neighbour.Id;
-            var command = new { name = "UpdatedKoala", age = 10, age2 = (int?)null, cuisineId, neighbourId };
+            var command = CreateWildKoalaUpdateCommand(cuisineId, neighbourId);
 
             ConfigureAdditionalMocks();
 
@@ -156,8 +194,10 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _wildKoalaGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
+            // Act
             GetWildKoalaService().Update(entityId, command, _serviceScopeMock.Object);
 
+            // Assert
             var updatedEntity = _dbContext.Koalas.Find(entityId);
             Assert.NotNull(updatedEntity);
             Assert.Equal("UpdatedKoala", updatedEntity.Name);
@@ -168,15 +208,16 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Update_WildKoala_ShouldValidateEntity_WhenValidationEnabled()
+        public void Update_ShouldValidateWildKoala_WhenValidationEnabled()
         {
+            // Arrange
             var entityId = Guid.NewGuid();
             var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
             var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
             var entity = new WildKoala(entityId, "OldKoala", 5, cuisine, neighbour);
             var cuisineId = cuisine.Id;
             var neighbourId = neighbour.Id;
-            var command = new { name = "UpdatedKoala", age = 10, age2 = (int?)null, cuisineId, neighbourId };
+            var command = CreateWildKoalaUpdateCommand(cuisineId, neighbourId);
 
             ConfigureAdditionalMocks();
 
@@ -187,57 +228,66 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _wildKoalaGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
+            // Act
             GetWildKoalaService().Update(entityId, command, _serviceScopeMock.Object);
 
+            // Assert
             _wildKoalaValidatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Once);
         }
 
         [Fact]
-        public void Update_ShouldThrowException_ForInvalidIdType()
+        public void Update_ShouldThrowConfigurationException_WhenIdTypeIsInvalid()
         {
-            var invalidId = "invalid_id";
-            var command = new { name = "UpdatedSloth", age = 10 };
+            // Arrange
+            var invalidId = InvalidIdValue;
+            var command = CreateSlothUpdateCommand();
 
             var configuration = new EntityConfiguration();
-            configuration.SetUpdateMethod("Update");
+            configuration.SetUpdateMethod(UpdateMethodName);
             _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(configuration);
 
+            // Act + Assert
             Assert.Throws<ConfigurationException>(() =>
                 GetSlothService().Update(invalidId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Update_ShouldThrowException_WhenConfigurationNotFound()
+        public void Update_ShouldThrowConfigurationException_WhenEntityConfigurationIsMissing()
         {
+            // Arrange
             var nonConfiguredService = new UpdateService<Sloth, SlothfulDbContext>(_dbContext,
                 _slothGetServiceMock.Object, new Mock<IEntityConfigurationProvider>().Object);
             var entityId = Guid.NewGuid();
-            var command = new { name = "UpdatedSloth", age = 10 };
+            var command = CreateSlothUpdateCommand();
 
+            // Act + Assert
             Assert.Throws<ConfigurationException>(() =>
                 nonConfiguredService.Update(entityId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Update_ShouldThrowException_WhenIdIsNull()
+        public void Update_ShouldThrowConfigurationException_WhenIdIsNull()
         {
-            var command = new { name = "UpdatedSloth", age = 10 };
+            // Arrange
+            var command = CreateSlothUpdateCommand();
 
             var configuration = new EntityConfiguration();
-            configuration.SetUpdateMethod("Update");
+            configuration.SetUpdateMethod(UpdateMethodName);
             _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(configuration);
 
+            // Act + Assert
             Assert.Throws<ConfigurationException>(() => GetSlothService().Update(null, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Update_ShouldThrowException_WhenUpdateMethodNotFound()
+        public void Update_ShouldThrowConfigurationException_WhenUpdateMethodIsMissing()
         {
+            // Arrange
             var entityId = Guid.NewGuid();
             var entity = new Sloth(entityId, "OldSloth", 5);
-            var command = new { name = "UpdatedSloth", age = 10 };
+            var command = CreateSlothUpdateCommand();
 
             var configuration = new EntityConfiguration();
             configuration.SetUpdateMethod("NotExistingMethod");
@@ -249,7 +299,31 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
 
+            // Act + Assert
             Assert.Throws<ConfigurationException>(() =>
+                GetSlothService().Update(entityId, command, _serviceScopeMock.Object));
+        }
+
+        [Fact]
+        public void Update_ShouldThrowValidationException_WhenValidationFails()
+        {
+            // Arrange
+            var entityId = Guid.NewGuid();
+            var entity = new Sloth(entityId, "OldSloth", 5);
+            var command = CreateSlothUpdateCommand();
+            var validator = new InlineValidator<Sloth>();
+            validator.RuleFor(x => x.Name).Equal("ValidName");
+
+            ConfigureAdditionalMocks();
+            ArrangeSlothValidator(validator);
+
+            _dbContext.Sloths.Add(entity);
+            _dbContext.SaveChanges();
+
+            _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+
+            // Act + Assert
+            Assert.Throws<ValidationException>(() =>
                 GetSlothService().Update(entityId, command, _serviceScopeMock.Object));
         }
     }

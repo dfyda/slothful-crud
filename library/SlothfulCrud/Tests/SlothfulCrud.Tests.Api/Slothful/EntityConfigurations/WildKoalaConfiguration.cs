@@ -1,4 +1,4 @@
-﻿using SlothfulCrud.Builders.Configurations;
+using SlothfulCrud.Builders.Configurations;
 using SlothfulCrud.Tests.Api.Domain;
 
 namespace SlothfulCrud.Tests.Api.Slothful.EntityConfigurations

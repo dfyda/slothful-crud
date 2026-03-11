@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +34,9 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                 return this;
 
             var mapMethod = GetGenericMapTypedMethod(nameof(MapTypedPost));
-            ConventionBuilder = (RouteHandlerBuilder)mapMethod.MakeGenericMethod(inputType).Invoke(this, [BuilderParams.EntityType]);
+            ConventionBuilder = (RouteHandlerBuilder)mapMethod
+                .MakeGenericMethod(EndpointsConfiguration.Entity.KeyPropertyType, inputType)
+                .Invoke(this, [BuilderParams.EntityType]);
 
             return this;
         }
@@ -58,7 +60,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             return true;
         }
 
-        public IEndpointConventionBuilder MapTypedPost<TCommandType>(Type entityType)
+        public IEndpointConventionBuilder MapTypedPost<TKeyType, TCommandType>(Type entityType)
         {
             var endpoint = BuilderParams.WebApplication.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), 
                     ([FromBody] TCommandType command) =>
@@ -71,8 +73,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                     return Results.Created($"/{entityType.Name}s/", keyProperty);
                 })
                 .WithName($"Create{entityType.Name}")
-                // TODO: Guid must be replaced with the key type of the entity. Now it can be configurable.
-                .Produces<Guid>(201)
+                .Produces<TKeyType>(201)
                 .Produces<BadRequestResult>(400);
             
             if (EndpointsConfiguration.Create.IsAuthorizationEnable)

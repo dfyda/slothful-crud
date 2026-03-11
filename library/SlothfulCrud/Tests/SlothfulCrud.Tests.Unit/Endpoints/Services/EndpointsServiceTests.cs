@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using SlothfulCrud.Services;
 using SlothfulCrud.Services.Endpoints.Delete;
@@ -12,6 +12,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class EndpointsServiceTests
     {
+        private const ushort FirstPage = 1;
+
         private readonly Mock<IGetService<Sloth, SlothfulDbContext>> _getServiceMock;
         private readonly Mock<IDeleteService<Sloth, SlothfulDbContext>> _deleteServiceMock;
         private readonly Mock<ICreateService<Sloth, SlothfulDbContext>> _createServiceMock;
@@ -39,61 +41,92 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             );
         }
 
-        [Fact]
-        public void Get_ShouldCallGetService()
+        private static IServiceScope CreateServiceScope()
         {
+            return new Mock<IServiceScope>().Object;
+        }
+
+        [Fact]
+        public void Get_ShouldDelegateCall_ToGetService()
+        {
+            // Arrange
             var id = Guid.NewGuid();
+
+            // Act
             _service.Get(id);
+
+            // Assert
             _getServiceMock.Verify(s => s.Get(id), Times.Once);
         }
 
         [Fact]
-        public void Delete_ShouldCallDeleteService()
+        public void Delete_ShouldDelegateCall_ToDeleteService()
         {
+            // Arrange
             var id = Guid.NewGuid();
+
+            // Act
             _service.Delete(id);
+
+            // Assert
             _deleteServiceMock.Verify(s => s.Delete(id), Times.Once);
         }
 
         [Fact]
-        public void Create_ShouldCallCreateService()
+        public void Create_ShouldDelegateCall_ToCreateService()
         {
+            // Arrange
             var id = Guid.NewGuid();
             var command = new { Name = "Test", Age = 5 };
-            var serviceScopeMock = new Mock<IServiceScope>();
+            var scope = CreateServiceScope();
 
-            _service.Create(id, command, serviceScopeMock.Object);
-            _createServiceMock.Verify(s => s.Create(id, command, serviceScopeMock.Object), Times.Once);
+            // Act
+            _service.Create(id, command, scope);
+
+            // Assert
+            _createServiceMock.Verify(s => s.Create(id, command, scope), Times.Once);
         }
 
         [Fact]
-        public void Update_ShouldCallUpdateService()
+        public void Update_ShouldDelegateCall_ToUpdateService()
         {
+            // Arrange
             var id = Guid.NewGuid();
             var command = new { Name = "Test", Age = 5 };
-            var serviceScopeMock = new Mock<IServiceScope>();
+            var scope = CreateServiceScope();
 
-            _service.Update(id, command, serviceScopeMock.Object);
-            _updateServiceMock.Verify(s => s.Update(id, command, serviceScopeMock.Object), Times.Once);
+            // Act
+            _service.Update(id, command, scope);
+
+            // Assert
+            _updateServiceMock.Verify(s => s.Update(id, command, scope), Times.Once);
         }
 
         [Fact]
-        public void Browse_ShouldCallBrowseService()
+        public void Browse_ShouldDelegateCall_ToBrowseService()
         {
-            ushort page = 1;
+            // Arrange
+            ushort page = FirstPage;
             var query = new { Search = "Test" };
 
+            // Act
             _service.Browse(page, query);
+
+            // Assert
             _browseServiceMock.Verify(s => s.Browse(page, query), Times.Once);
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldCallBrowseSelectableService()
+        public void BrowseSelectable_ShouldDelegateCall_ToBrowseSelectableService()
         {
-            ushort page = 1;
+            // Arrange
+            ushort page = FirstPage;
             var query = new { Search = "Test" };
 
+            // Act
             _service.BrowseSelectable(page, query);
+
+            // Assert
             _browseSelectableServiceMock.Verify(s => s.Browse(page, query), Times.Once);
         }
     }
