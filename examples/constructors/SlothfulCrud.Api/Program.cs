@@ -45,7 +45,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapGet("/", () => "SlothfulCrud.Api")
-    .WithName("Get")
-    .WithOpenApi();
+    .WithName("Get");
 
 app.Run();
