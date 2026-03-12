@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +31,7 @@ namespace SlothfulCrud.Services.Endpoints.Post
             CheckEntityKey(typeof(TEntity), keyProperty);
 
             var constructor = GetEntityConstructor();
-            var constructorArgs = PrepareConstructorArguments(keyProperty, command, constructor);
+            var constructorArgs = BuildCreateConstructorArgumentsWithGeneratedKey(keyProperty, command, constructor);
 
             var item = (TEntity)constructor.Invoke(constructorArgs);
             
@@ -46,17 +46,21 @@ namespace SlothfulCrud.Services.Endpoints.Post
             return keyProperty;
         }
 
-        private object[] PrepareConstructorArguments(object keyProperty, dynamic command, ConstructorInfo constructor)
+        private object[] BuildCreateConstructorArgumentsWithGeneratedKey(object generatedKey, dynamic command,
+            ConstructorInfo constructor)
         {
-            var constructorArgs = constructor.GetParameters().ToArray()
-                .Select(param => param.GetDomainMethodParam((object)command, DbContext))
-                .ToArray()
-                .OrFail($"{typeof(TEntity).Name}ConstructorArgs",
-                    $"Constructor arguments for '{typeof(TEntity).Name}' not found.");
+            var parameters = constructor.GetParameters().ToArray();
+            var constructorArgs = new object[parameters.Length];
+            constructorArgs[0] = generatedKey;
 
-            // Key property must be the first argument in the constructor
-            constructorArgs[0] = keyProperty;
-            return constructorArgs;
+            for (var index = 1; index < parameters.Length; index++)
+            {
+                constructorArgs[index] = parameters[index].GetDomainMethodParam((object)command, DbContext);
+            }
+
+            return constructorArgs.OrFail(
+                $"{typeof(TEntity).Name}ConstructorArgs",
+                $"Constructor arguments for '{typeof(TEntity).Name}' not found.");
         }
 
         private ConstructorInfo GetEntityConstructor()

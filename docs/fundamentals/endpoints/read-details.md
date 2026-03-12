@@ -3,7 +3,7 @@ title: Read - details
 layout: home
 parent: Endpoints
 grand_parent: Fundamentals
-nav_order: 2.4.2
+nav_order: 2.1.2
 ---
 
 # Read - details
@@ -30,10 +30,10 @@ GET /sloths/{id}
 ```
 
 ### Returned Data
-The endpoint returns a DTO class created based on the public fields of the domain class.
+The endpoint returns a DTO class created based on the public properties of the domain class.
 
 {: .important }
-**Nested Objects**: By default, nested objects are transformed into a simple DTO with `Id` and `DisplayName` fields. For more detailed exposure of nested object fields, refer to the [Configurations](https://slothful.dev/fundamentals/configurations) section.
+**Nested Objects**: By default, nested objects are transformed into a simple DTO with `Id` and `DisplayName` properties. For more detailed exposure of nested object fields, refer to the [Configurations](https://slothful.dev/fundamentals/configurations.html) section.
 
 **Example Domain Class:**
 ```csharp

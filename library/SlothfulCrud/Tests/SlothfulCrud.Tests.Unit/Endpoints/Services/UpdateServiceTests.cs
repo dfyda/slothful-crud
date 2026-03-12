@@ -17,6 +17,18 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
     {
         private const string InvalidIdValue = "invalid_id";
         private const string UpdateMethodName = "Update";
+        private const string NotExistingMethodName = "NotExistingMethod";
+        private const string OldSlothName = "OldSloth";
+        private const string OldKoalaName = "OldKoala";
+        private const string UpdatedSlothName = "UpdatedSloth";
+        private const string UpdatedKoalaName = "UpdatedKoala";
+        private const string CuisineSlothName = "CuisineSloth";
+        private const string NeighbourSlothName = "NeighbourSloth";
+        private const string ValidName = "ValidName";
+        private const int InitialAge = 5;
+        private const int UpdatedAge = 10;
+        private const int CuisineAge = 3;
+        private const int NeighbourAge = 4;
 
         private sealed record UpdateSlothCommand(string name, int age);
         private sealed record UpdateWildKoalaCommand(string name, int age, int? age2, Guid cuisineId, Guid neighbourId);
@@ -89,12 +101,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
         private static UpdateSlothCommand CreateSlothUpdateCommand()
         {
-            return new UpdateSlothCommand("UpdatedSloth", 10);
+            return new UpdateSlothCommand(UpdatedSlothName, UpdatedAge);
         }
 
         private static UpdateWildKoalaCommand CreateWildKoalaUpdateCommand(Guid cuisineId, Guid neighbourId)
         {
-            return new UpdateWildKoalaCommand("UpdatedKoala", 10, null, cuisineId, neighbourId);
+            return new UpdateWildKoalaCommand(UpdatedKoalaName, UpdatedAge, null, cuisineId, neighbourId);
         }
 
         private void ArrangeSlothValidator(IValidator<Sloth> validator = null)
@@ -129,7 +141,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var entityId = Guid.NewGuid();
-            var entity = new Sloth(entityId, "OldSloth", 5);
+            var entity = new Sloth(entityId, OldSlothName, InitialAge);
             var command = CreateSlothUpdateCommand();
 
             ConfigureAdditionalMocks();
@@ -145,8 +157,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Assert
             var updatedEntity = _dbContext.Sloths.Find(entityId);
             Assert.NotNull(updatedEntity);
-            Assert.Equal("UpdatedSloth", updatedEntity.Name);
-            Assert.Equal(10, updatedEntity.Age);
+            Assert.Equal(UpdatedSlothName, updatedEntity.Name);
+            Assert.Equal(UpdatedAge, updatedEntity.Age);
         }
 
         [Fact]
@@ -154,7 +166,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var entityId = Guid.NewGuid();
-            var entity = new Sloth(entityId, "OldSloth", 5);
+            var entity = new Sloth(entityId, OldSlothName, InitialAge);
             var command = CreateSlothUpdateCommand();
 
             ConfigureAdditionalMocks();
@@ -178,9 +190,9 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var entityId = Guid.NewGuid();
-            var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
-            var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
-            var entity = new WildKoala(entityId, "OldKoala", 5, cuisine, neighbour);
+            var cuisine = new Sloth(Guid.NewGuid(), CuisineSlothName, CuisineAge);
+            var neighbour = new Sloth(Guid.NewGuid(), NeighbourSlothName, NeighbourAge);
+            var entity = new WildKoala(entityId, OldKoalaName, InitialAge, cuisine, neighbour);
             var cuisineId = cuisine.Id;
             var neighbourId = neighbour.Id;
             var command = CreateWildKoalaUpdateCommand(cuisineId, neighbourId);
@@ -200,8 +212,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Assert
             var updatedEntity = _dbContext.Koalas.Find(entityId);
             Assert.NotNull(updatedEntity);
-            Assert.Equal("UpdatedKoala", updatedEntity.Name);
-            Assert.Equal(10, updatedEntity.Age);
+            Assert.Equal(UpdatedKoalaName, updatedEntity.Name);
+            Assert.Equal(UpdatedAge, updatedEntity.Age);
             Assert.Null(updatedEntity.Age2);
             Assert.Equal(cuisine.Id, updatedEntity.CuisineId);
             Assert.Equal(neighbour.Id, updatedEntity.NeighbourId);
@@ -212,9 +224,9 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var entityId = Guid.NewGuid();
-            var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
-            var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
-            var entity = new WildKoala(entityId, "OldKoala", 5, cuisine, neighbour);
+            var cuisine = new Sloth(Guid.NewGuid(), CuisineSlothName, CuisineAge);
+            var neighbour = new Sloth(Guid.NewGuid(), NeighbourSlothName, NeighbourAge);
+            var entity = new WildKoala(entityId, OldKoalaName, InitialAge, cuisine, neighbour);
             var cuisineId = cuisine.Id;
             var neighbourId = neighbour.Id;
             var command = CreateWildKoalaUpdateCommand(cuisineId, neighbourId);
@@ -286,11 +298,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var entityId = Guid.NewGuid();
-            var entity = new Sloth(entityId, "OldSloth", 5);
+            var entity = new Sloth(entityId, OldSlothName, InitialAge);
             var command = CreateSlothUpdateCommand();
 
             var configuration = new EntityConfiguration();
-            configuration.SetUpdateMethod("NotExistingMethod");
+            configuration.SetUpdateMethod(NotExistingMethodName);
             _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(configuration);
 
@@ -309,10 +321,10 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var entityId = Guid.NewGuid();
-            var entity = new Sloth(entityId, "OldSloth", 5);
+            var entity = new Sloth(entityId, OldSlothName, InitialAge);
             var command = CreateSlothUpdateCommand();
             var validator = new InlineValidator<Sloth>();
-            validator.RuleFor(x => x.Name).Equal("ValidName");
+            validator.RuleFor(x => x.Name).Equal(ValidName);
 
             ConfigureAdditionalMocks();
             ArrangeSlothValidator(validator);

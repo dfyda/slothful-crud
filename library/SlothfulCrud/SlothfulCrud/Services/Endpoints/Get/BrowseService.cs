@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
@@ -39,7 +39,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             var data = resultQuery.ToList();
             var total = totalQuery.Count();
             
-            return new PagedResults<TEntity>(skip, total, page, data);
+            return new PagedResults<TEntity>(skip, total, query.Rows, data);
         }
 
         private IQueryable<TEntity> FilterQuery(dynamic query, dynamic properties, IQueryable<TEntity> queryObject)

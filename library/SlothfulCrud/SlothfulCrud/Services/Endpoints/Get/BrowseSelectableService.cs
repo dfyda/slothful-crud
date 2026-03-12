@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
@@ -38,7 +38,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             var data = GetBaseEntities(resultQuery);
             var total = baseQuery.Count();
             
-            return new PagedResults<BaseEntityDto>(skip, total, page, data.ToList());
+            return new PagedResults<BaseEntityDto>(skip, total, query.Rows, data.ToList());
         }
 
         private IQueryable<TEntity> FilterQuery(string search, IQueryable<TEntity> queryObject)

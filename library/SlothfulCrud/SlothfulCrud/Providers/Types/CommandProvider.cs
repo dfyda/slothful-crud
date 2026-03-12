@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+using System.Reflection;
+using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Types;
 
@@ -8,7 +9,7 @@ namespace SlothfulCrud.Providers.Types
     {
         public static Type PrepareCreateCommand(ConstructorInfo constructor, Type entityType)
         {
-            var parameters = constructor.GetParameters();
+            var parameters = GetCreatePayloadParametersWithoutGeneratedKey(constructor, entityType);
             return NewCommandType(entityType, parameters, "Create");
         }
         
@@ -16,6 +17,21 @@ namespace SlothfulCrud.Providers.Types
         {
             var parameters = methodInfo.GetParameters();
             return NewCommandType(entityType, parameters, "Update");
+        }
+
+        private static ParameterInfo[] GetCreatePayloadParametersWithoutGeneratedKey(ConstructorInfo constructor,
+            Type entityType)
+        {
+            var constructorParameters = constructor.GetParameters();
+            if (constructorParameters.Length == 0)
+            {
+                throw new ConfigurationException(
+                    $"Create constructor for '{entityType.Name}' must contain generated key as first parameter.");
+            }
+
+            return constructorParameters
+                .Skip(1)
+                .ToArray();
         }
 
         private static Type NewCommandType(Type entityType, ParameterInfo[] parameters, string methodName)

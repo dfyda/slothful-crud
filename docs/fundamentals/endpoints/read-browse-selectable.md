@@ -3,7 +3,7 @@ title: Read - browse selectable
 layout: home
 parent: Endpoints
 grand_parent: Fundamentals
-nav_order: 2.4.4
+nav_order: 2.1.4
 ---
 
 # Read - browse selectable
@@ -19,14 +19,13 @@ Refer to the [Endpoint segments](https://slothful.dev/advanced-topics/endpoint-s
 
 ### Response Codes
 - **200 OK**: Returns a `PagedResults<BaseEntityDto>` object containing the paginated list of selectable DTOs.
-- **404 Not Found**: Returns a `NotFoundResult` if no items are found.
 - **400 Bad Request**: Returns a `BadRequestResult` if the request is invalid.
 
 ### Request Parameters
-The browse selectable endpoint requires the `page` parameter in the path and an `query` parameter containing fields used for filtering and sorting the browsed list of objects. The query parameter includes:
+The browse selectable endpoint requires the `page` parameter in the path and a `query` parameter containing fields used for filtering and sorting the browsed list of objects. The query parameter includes:
 
 - **Search**: Specific field for filtering the objects.
-- **Rows**: (ushort) Specifies the number of items on the paginated page.
+- **Rows**: (ushort) Specifies the requested page size used by pagination (`Skip/Take`).
 - **SortDirection**: (string) Specifies the sorting direction (accepted values: `asc`, `desc`).
 - **SortBy**: (string) Specifies the name of the class property to sort by.
 
@@ -65,7 +64,7 @@ public class BaseEntityDto
 ```
 
 - **First:** Number of skipped items.
-- **Rows:** Number of fetched items.
+- **Rows:** Number of rows requested for a single page.
 - **Total:** Total number of items of the specified type in the system.
 - **Data:** List of BaseEntityDto.
 
@@ -100,7 +99,6 @@ GET /sloths/selectable-list/{page}
 
 **Response Codes:**
 - 200
-- 404
 - 400
 
 **Request Parameters:**

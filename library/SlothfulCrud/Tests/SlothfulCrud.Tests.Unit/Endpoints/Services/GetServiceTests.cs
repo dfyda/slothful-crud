@@ -12,6 +12,17 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
     public class GetServiceTests : IDisposable
     {
         private const string InvalidIdValue = "invalid_id";
+        private const string TestName = "Test";
+        private const string FirstEntityName = "First";
+        private const string SecondEntityName = "Second";
+        private const string CuisineSlothName = "CuisineSloth";
+        private const string NeighbourSlothName = "NeighbourSloth";
+        private const string SpeedyKoalaName = "SpeedyKoala";
+        private const string UnknownKeyPropertyName = "UnknownKey";
+        private const int SlothAge = 5;
+        private const int SecondSlothAge = 6;
+        private const int CuisineAge = 3;
+        private const int NeighbourAge = 4;
 
         private SlothfulDbContext _dbContext;
         private Mock<IEntityConfigurationProvider> _configurationProviderMock;
@@ -66,7 +77,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var entityId = Guid.NewGuid();
-            var entity = new Sloth(entityId, "Test", 5);
+            var entity = new Sloth(entityId, TestName, SlothAge);
 
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
@@ -85,10 +96,10 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         public void Get_ShouldReturnWildKoala_WhenEntityExists()
         {
             // Arrange
-            var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
-            var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
+            var cuisine = new Sloth(Guid.NewGuid(), CuisineSlothName, CuisineAge);
+            var neighbour = new Sloth(Guid.NewGuid(), NeighbourSlothName, NeighbourAge);
             var entityId = Guid.NewGuid();
-            var entity = new WildKoala(entityId, "SpeedyKoala", 5, cuisine, neighbour);
+            var entity = new WildKoala(entityId, SpeedyKoalaName, SlothAge, cuisine, neighbour);
 
             _dbContext.Sloths.Add(cuisine);
             _dbContext.Sloths.Add(neighbour);
@@ -122,10 +133,10 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         public void Get_ShouldIncludeDependencies_WhenEntityIsWildKoala()
         {
             // Arrange
-            var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
-            var neighbour = new Sloth(Guid.NewGuid(), "NeighbourSloth", 4);
+            var cuisine = new Sloth(Guid.NewGuid(), CuisineSlothName, CuisineAge);
+            var neighbour = new Sloth(Guid.NewGuid(), NeighbourSlothName, NeighbourAge);
             var entityId = Guid.NewGuid();
-            var entity = new WildKoala(entityId, "SpeedyKoala", 5, cuisine, neighbour);
+            var entity = new WildKoala(entityId, SpeedyKoalaName, SlothAge, cuisine, neighbour);
 
             _dbContext.Sloths.Add(cuisine);
             _dbContext.Sloths.Add(neighbour);
@@ -169,6 +180,45 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Act + Assert
             Assert.Throws<ConfigurationException>(() => GetSlothService().Get(null));
+        }
+
+        [Fact]
+        public void Get_ShouldReturnEntity_WhenNonDefaultKeyPropertyAndTypeAreConfigured()
+        {
+            // Arrange
+            var firstEntity = new Sloth(Guid.NewGuid(), FirstEntityName, SlothAge);
+            var secondEntity = new Sloth(Guid.NewGuid(), SecondEntityName, SecondSlothAge);
+            _dbContext.Sloths.AddRange(firstEntity, secondEntity);
+            _dbContext.SaveChanges();
+
+            var configuration = new EntityConfiguration();
+            configuration.SetKeyProperty(nameof(Sloth.Age));
+            configuration.SetKeyPropertyType(typeof(int));
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(configuration);
+
+            // Act
+            var result = GetSlothService().Get(SecondSlothAge);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(secondEntity.Id, result.Id);
+            Assert.Equal(SecondEntityName, result.Name);
+            Assert.Equal(SecondSlothAge, result.Age);
+        }
+
+        [Fact]
+        public void Get_ShouldThrowConfigurationException_WhenConfiguredKeyPropertyDoesNotExist()
+        {
+            // Arrange
+            var configuration = new EntityConfiguration();
+            configuration.SetKeyProperty(UnknownKeyPropertyName);
+            configuration.SetKeyPropertyType(typeof(Guid));
+            _configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(configuration);
+
+            // Act + Assert
+            Assert.Throws<ConfigurationException>(() => GetSlothService().Get(Guid.NewGuid()));
         }
     }
 }

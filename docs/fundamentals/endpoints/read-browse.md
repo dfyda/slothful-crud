@@ -3,7 +3,7 @@ title: Read - browse
 layout: home
 parent: Endpoints
 grand_parent: Fundamentals
-nav_order: 2.4.3
+nav_order: 2.1.3
 ---
 
 # Read - browse
@@ -17,14 +17,13 @@ Refer to the [Endpoint segments](https://slothful.dev/advanced-topics/endpoint-s
 
 ### Response Codes
 - **200 OK**: Returns a `PagedResults<T>` object containing the paginated list of DTOs.
-- **404 Not Found**: Returns a `NotFoundResult` if no items are found.
 - **400 Bad Request**: Returns a `BadRequestResult` if the request is invalid.
 
 ### Request Parameters
-The browse endpoint requires the `page` parameter in the path and an `query` parameter containing fields used for filtering the browsed list of objects. These fields are public properties of the domain class in a nullable form.
+The browse endpoint requires the `page` parameter in the path and a `query` parameter containing values used for filtering the browsed list of objects. These values map to public properties of the domain class in a nullable form.
 
 ### Additional Fields in Query Parameter
-- **Rows**: (ushort) Specifies the number of items on the paginated page.
+- **Rows**: (ushort) Specifies the requested page size used by pagination (`Skip/Take`).
 - **SortDirection**: (string) Specifies the sorting direction (accepted values: `asc`, `desc`).
 - **SortBy**: (string) Specifies the name of the class property to sort by.
 
@@ -32,10 +31,10 @@ The browse endpoint requires the `page` parameter in the path and an `query` par
 **DateTime Fields**: DateTime fields are converted to query parameters `DateFieldFrom` and `DateFieldTo` for filtering (condition: `DateFieldFrom >= DateField && DateFieldTo < DateField.AddDays(1)`).
 
 {: .important }
-**Nested Objects**: For nested objects, you can specify the fields for filtering and sorting in the domain class configuration. More details are available in the [Entity Configuration](https://slothful.dev/fundamentals/configurations/entity-configuration.html) section.
+**Nested Objects**: Sorting by nested objects is supported (based on the nested type sort property). Filtering by nested object properties is not generated in the browse query by default.
 
 ### Returned Data
-The endpoint returns a `PagedResults<T>` object where `T` is a DTO class created based on the public fields of the domain class.
+The endpoint returns a `PagedResults<T>` object where `T` is a DTO class created based on the public properties of the domain class.
 
 ### PagedResults<T> Class
 ```csharp
@@ -57,11 +56,11 @@ public class PagedResults<T> where T : new()
 ```
 
 - **First:** Number of skipped items.
-- **Rows:** Number of fetched items.
+- **Rows:** Number of rows requested for a single page.
 - **Total:** Total number of items of the specified type in the system.
 - **Data:** List of DTOs.
 
-where `T` is a DTO class created based on the public fields of the domain class. It includes only the public fields of the domain class.
+where `T` is a DTO class created based on the public properties of the domain class. It includes only the public properties of the domain class.
 
 {: .important }
 Nested Objects: By default, nested objects are transformed into a simple DTO with `Id` and `DisplayName` fields. For more detailed exposure of nested object fields, refer to the "Configurations" section.
@@ -97,7 +96,6 @@ GET /sloths/list/{page}
 
 **Response Codes:**
 - 200
-- 404
 - 400
 
 **Request Parameters:**

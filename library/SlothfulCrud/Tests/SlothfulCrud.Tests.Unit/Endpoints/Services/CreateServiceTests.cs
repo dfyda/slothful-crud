@@ -15,6 +15,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class CreateServiceTests : IDisposable
     {
+        private const string NewSlothName = "NewSloth";
+        private const string ValidName = "ValidName";
+        private const string ConstructorErrorMessage = "Error getting constructor info";
+        private const int NewSlothAge = 3;
+
         private sealed record CreateSlothCommand(Guid id, string name, int age);
         private sealed record CreateSlothCommandWithoutId(string name, int age);
 
@@ -81,12 +86,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
         private static CreateSlothCommand CreateValidCommand(Guid entityId)
         {
-            return new CreateSlothCommand(entityId, "NewSloth", 3);
+            return new CreateSlothCommand(entityId, NewSlothName, NewSlothAge);
         }
 
         private static CreateSlothCommandWithoutId CreateCommandWithoutId()
         {
-            return new CreateSlothCommandWithoutId("NewSloth", 3);
+            return new CreateSlothCommandWithoutId(NewSlothName, NewSlothAge);
         }
 
         private void ArrangeValidatorResolution(IValidator<Sloth> validator = null)
@@ -114,8 +119,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var createdEntity = _dbContext.Sloths.Find(entityId);
             Assert.NotNull(createdEntity);
             Assert.Equal(entityId, createdEntity.Id);
-            Assert.Equal("NewSloth", createdEntity.Name);
-            Assert.Equal(3, createdEntity.Age);
+            Assert.Equal(NewSlothName, createdEntity.Name);
+            Assert.Equal(NewSlothAge, createdEntity.Age);
         }
 
         [Fact]
@@ -141,6 +146,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var entityId = Guid.NewGuid();
             var command = CreateValidCommand(entityId);
+            ArrangeValidatorResolution();
 
             _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
                 .Returns((System.Reflection.ConstructorInfo)null);
@@ -200,6 +206,26 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
+        public void Create_ShouldAddEntityToDbContext_WhenCommandDoesNotContainId()
+        {
+            // Arrange
+            var entityId = Guid.NewGuid();
+            var command = CreateCommandWithoutId();
+            ConfigureAdditionalMocks(false);
+            ArrangeValidatorResolution();
+
+            // Act
+            GetService().Create(entityId, command, _serviceScopeMock.Object);
+
+            // Assert
+            var createdEntity = _dbContext.Sloths.Find(entityId);
+            Assert.NotNull(createdEntity);
+            Assert.Equal(entityId, createdEntity.Id);
+            Assert.Equal(NewSlothName, createdEntity.Name);
+            Assert.Equal(NewSlothAge, createdEntity.Age);
+        }
+
+        [Fact]
         public void Create_ShouldReturnKeyProperty_WhenCommandIsValid()
         {
             // Arrange
@@ -245,7 +271,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution();
 
             _createConstructorBehaviorMock.Setup(b => b.GetConstructorInfo(typeof(Sloth)))
-                .Throws(new ConfigurationException("Error getting constructor info"));
+                .Throws(new ConfigurationException(ConstructorErrorMessage));
 
             // Act + Assert
             Assert.Throws<ConfigurationException>(() => GetService().Create(entityId, command, _serviceScopeMock.Object));
@@ -258,7 +284,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
             var command = CreateValidCommand(entityId);
             var validator = new InlineValidator<Sloth>();
-            validator.RuleFor(x => x.Name).Equal("ValidName");
+            validator.RuleFor(x => x.Name).Equal(ValidName);
 
             ConfigureAdditionalMocks(true);
             ArrangeValidatorResolution(validator);

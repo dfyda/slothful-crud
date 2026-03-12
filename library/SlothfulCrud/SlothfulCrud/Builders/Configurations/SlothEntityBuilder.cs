@@ -77,6 +77,11 @@ namespace SlothfulCrud.Builders.Configurations
         
         public SlothEntityBuilder<TEntity> SetUpdateMethodName(string updateMethodName)
         {
+            if (string.IsNullOrWhiteSpace(updateMethodName))
+            {
+                throw new ArgumentException("Update method name cannot be null or whitespace.", nameof(updateMethodName));
+            }
+
             EndpointsConfiguration.Entity.SetUpdateMethod(updateMethodName);
             return this;
         }

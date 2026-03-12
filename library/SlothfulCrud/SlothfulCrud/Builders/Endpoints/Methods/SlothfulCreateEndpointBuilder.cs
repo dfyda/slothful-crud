@@ -62,7 +62,8 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
 
         public IEndpointConventionBuilder MapTypedPost<TKeyType, TCommandType>(Type entityType)
         {
-            var endpoint = BuilderParams.WebApplication.MapPost(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name), 
+            var apiSegment = BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name);
+            var endpoint = BuilderParams.WebApplication.MapPost(apiSegment, 
                     ([FromBody] TCommandType command) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
@@ -70,7 +71,7 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
                     var keyProperty = (object)entityPropertyKeyValueProvider.GetNextValue(EndpointsConfiguration.Entity);
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
                     service.Create(keyProperty, command, serviceScope);
-                    return Results.Created($"/{entityType.Name}s/", keyProperty);
+                    return Results.Created(BuildCreatedLocation(apiSegment, keyProperty), keyProperty);
                 })
                 .WithName($"Create{entityType.Name}")
                 .Produces<TKeyType>(201)
@@ -82,6 +83,22 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
             }
 
             return endpoint;
+        }
+
+        internal static string BuildCreatedLocation(string apiSegment, object keyProperty)
+        {
+            if (string.IsNullOrWhiteSpace(apiSegment))
+            {
+                throw new ArgumentException("API segment cannot be null or whitespace.", nameof(apiSegment));
+            }
+
+            if (keyProperty is null)
+            {
+                throw new ArgumentNullException(nameof(keyProperty));
+            }
+
+            var normalizedSegment = apiSegment.StartsWith("/") ? apiSegment : $"/{apiSegment}";
+            return $"{normalizedSegment}/{keyProperty}";
         }
     }
 }

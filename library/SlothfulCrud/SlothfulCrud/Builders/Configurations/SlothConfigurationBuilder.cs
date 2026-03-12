@@ -1,5 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 using SlothfulCrud.Domain;
+using SlothfulCrud.Exceptions;
 
 namespace SlothfulCrud.Builders.Configurations
 {
@@ -34,7 +35,19 @@ namespace SlothfulCrud.Builders.Configurations
                     var genericApplyConfigurationMethod = applyEntityConfigurationMethod
                         .MakeGenericMethod(configurationInterface.GetGenericArguments()[0]);
 
-                    genericApplyConfigurationMethod.Invoke(this, new[] { Activator.CreateInstance(type) });
+                    object configurationInstance;
+                    try
+                    {
+                        configurationInstance = Activator.CreateInstance(type) ?? throw new ConfigurationException(
+                            $"Cannot create configuration instance for '{type.Name}'.");
+                    }
+                    catch (MissingMethodException)
+                    {
+                        throw new ConfigurationException(
+                            $"Configuration '{type.Name}' must have a public parameterless constructor.");
+                    }
+
+                    genericApplyConfigurationMethod.Invoke(this, [configurationInstance]);
                 }
             }
 
@@ -44,6 +57,12 @@ namespace SlothfulCrud.Builders.Configurations
         public SlothConfigurationBuilder ApplyConfiguration<TEntity>(ISlothEntityConfiguration<TEntity> configuration)
             where TEntity : class, ISlothfulEntity
         {
+            if (_builders.Any(builder => builder is SlothEntityBuilder<TEntity>))
+            {
+                throw new ConfigurationException(
+                    $"Configuration for entity '{typeof(TEntity).Name}' is already registered.");
+            }
+
             var builder = new SlothEntityBuilder<TEntity>();
             configuration.Configure(builder);
             _builders.Add(builder);

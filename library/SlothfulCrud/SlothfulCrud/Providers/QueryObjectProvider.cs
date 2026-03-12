@@ -1,7 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using SlothfulCrud.Exceptions;
-using SlothfulCrud.Extensions;
 
 namespace SlothfulCrud.Providers
 {
@@ -19,45 +18,42 @@ namespace SlothfulCrud.Providers
                     continue;
                 }
 
-                var parsedValue = ParseQueryParam<T>(context, propertyInfo);
+                var parsedValue = ParseQueryParam(context, propertyInfo);
                 propertyInfo.SetValue(query, parsedValue);
             }
 
             return query;
         }
 
-        private static dynamic ParseQueryParam<T>(HttpContext context, PropertyInfo propertyInfo) where T : new()
+        private static object ParseQueryParam(HttpContext context, PropertyInfo propertyInfo)
         {
-            var baseType = GetBaseType(propertyInfo);
-            
-            var parseMethod = baseType
-                .PropertyType
-                .GetMethods()
-                .FirstOrDefault(x => x.Name == "Parse");
-                
             var queryParam = context.Request.Query[propertyInfo.Name].ToString();
+            var propertyType = propertyInfo.PropertyType;
+            var nullableType = Nullable.GetUnderlyingType(propertyType);
+            var targetType = nullableType ?? propertyType;
+            var isNullable = nullableType is not null;
+
+            if (targetType == typeof(string))
+            {
+                return queryParam;
+            }
+
+            if (string.IsNullOrWhiteSpace(queryParam) && isNullable)
+            {
+                return null;
+            }
+
+            var parseMethod = targetType
+                .GetMethods()
+                .FirstOrDefault(x => x.Name == "Parse" && x.GetParameters().Length == 1
+                                                         && x.GetParameters()[0].ParameterType == typeof(string));
 
             return parseMethod switch
             {
-                null when propertyInfo.PropertyType == typeof(string) => queryParam,
                 null => throw new ConfigurationException(
                     $"Parse method not found for type '{propertyInfo.PropertyType.Name}'."),
                 _ => parseMethod.Invoke(null, [queryParam])
             };
-        }
-
-        private static PropertyInfo GetBaseType(PropertyInfo propertyInfo)
-        {
-            if (propertyInfo.PropertyType == typeof(string))
-            {
-                return propertyInfo;
-            }
-            
-            return propertyInfo.PropertyType
-                .GetProperties()
-                .FirstOrDefault(x => x.Name == "Value")
-                .OrFail("PropertyValueNotFound",
-                    $"Property 'Value' not found on type '{propertyInfo.PropertyType.Name}'.");
         }
     }
 }

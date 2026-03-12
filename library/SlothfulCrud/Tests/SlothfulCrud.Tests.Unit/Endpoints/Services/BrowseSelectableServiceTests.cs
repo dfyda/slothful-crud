@@ -15,8 +15,18 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         private const string SortDirectionAsc = "asc";
         private const string SortDirectionDesc = "desc";
         private const string NonExistingPropertyName = "MissingProperty";
+        private const string Sloth1Name = "Sloth1";
+        private const string Sloth2Name = "Sloth2";
+        private const string Sloth3Name = "Sloth3";
+        private const string KoalaNeighbourAName = "KoalaNeighbourA";
+        private const string KoalaNeighbourBName = "KoalaNeighbourB";
+        private const string SearchSlothPrefix = "Sloth";
+        private const string NeighbourSortProperty = "Neighbour";
         private const ushort FirstPage = 1;
+        private const ushort SecondPage = 2;
+        private const ushort ThirdPage = 3;
         private const ushort ZeroPage = 0;
+        private const int OneRow = 1;
         private const int DefaultRows = 10;
         private const int PaginationRows = 5;
         private const int ZeroRows = 0;
@@ -73,8 +83,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var entities = new List<Sloth>
             {
-                new Sloth(Guid.NewGuid(), "Sloth1", 5),
-                new Sloth(Guid.NewGuid(), "Sloth2", 6)
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5),
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6)
             };
             SeedSloths(entities);
             var query = CreateQuery();
@@ -84,6 +94,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             // Assert
             Assert.NotNull(result);
+            Assert.Equal(DefaultRows, result.Rows);
             Assert.Contains(entities[0].Id, result.Data.Select(x => x.Id));
             Assert.Contains(entities[0].DisplayName, result.Data.Select(x => x.DisplayName));
             Assert.Contains(entities[1].Id, result.Data.Select(x => x.Id));
@@ -96,11 +107,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var entities = new List<Sloth>
             {
-                new Sloth(Guid.NewGuid(), "Sloth1", 5),
-                new Sloth(Guid.NewGuid(), "Sloth2", 6)
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5),
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6)
             };
             SeedSloths(entities);
-            var query = CreateQuery(search: "Sloth1");
+            var query = CreateQuery(search: Sloth1Name);
 
             // Act
             var result = _service.Browse(FirstPage, query);
@@ -108,7 +119,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Assert
             Assert.NotNull(result);
             Assert.Single(result.Data);
-            Assert.Equal("Sloth1", result.Data.First().DisplayName);
+            Assert.Equal(Sloth1Name, result.Data.First().DisplayName);
         }
 
         [Fact]
@@ -117,8 +128,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var entities = new List<Sloth>
             {
-                new Sloth(Guid.NewGuid(), "Sloth2", 6),
-                new Sloth(Guid.NewGuid(), "Sloth1", 5)
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6),
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5)
             };
             SeedSloths(entities);
             var query = CreateQuery(sortDirection: SortDirectionAsc);
@@ -128,8 +139,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("Sloth1", result.Data.First().DisplayName);
-            Assert.Equal("Sloth2", result.Data.Last().DisplayName);
+            Assert.Equal(Sloth1Name, result.Data.First().DisplayName);
+            Assert.Equal(Sloth2Name, result.Data.Last().DisplayName);
         }
 
         [Fact]
@@ -138,8 +149,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var entities = new List<Sloth>
             {
-                new Sloth(Guid.NewGuid(), "Sloth1", 5),
-                new Sloth(Guid.NewGuid(), "Sloth2", 6)
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5),
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6)
             };
             SeedSloths(entities);
             var query = CreateQuery(sortDirection: SortDirectionDesc);
@@ -149,8 +160,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal("Sloth2", result.Data.First().DisplayName);
-            Assert.Equal("Sloth1", result.Data.Last().DisplayName);
+            Assert.Equal(Sloth2Name, result.Data.First().DisplayName);
+            Assert.Equal(Sloth1Name, result.Data.Last().DisplayName);
         }
 
         [Fact]
@@ -174,8 +185,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var entities = new List<Sloth>
             {
-                new Sloth(Guid.NewGuid(), "Sloth2", 6),
-                new Sloth(Guid.NewGuid(), "Sloth1", 5)
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6),
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5)
             };
             SeedSloths(entities);
             var query = CreateQuery(sortBy: null);
@@ -205,10 +216,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = SortDirectionAsc
             };
 
-            var result = _service.Browse(3, query);
+            var result = _service.Browse(ThirdPage, query);
 
             Assert.NotNull(result);
-            Assert.Equal(5, result.Data.Count);
+            Assert.Equal(PaginationRows, result.Rows);
+            Assert.Equal(PaginationRows, result.Data.Count);
             Assert.Equal("Sloth19", result.Data.First().DisplayName);
         }
 
@@ -240,8 +252,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             var entities = new List<Sloth>
             {
-                new Sloth(Guid.NewGuid(), "Sloth1", 5),
-                new Sloth(Guid.NewGuid(), "Sloth2", 6)
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5),
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6)
             };
 
             _dbContext.Sloths.AddRange(entities);
@@ -276,13 +288,13 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var entities = new List<Sloth>
             {
-                new Sloth(Guid.NewGuid(), "Sloth3", 5),
-                new Sloth(Guid.NewGuid(), "Sloth2", 6),
-                new Sloth(Guid.NewGuid(), "Sloth1", 5)
+                new Sloth(Guid.NewGuid(), Sloth3Name, 5),
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6),
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5)
             };
 
             SeedSloths(entities);
-            var query = CreateQuery(search: "Sloth");
+            var query = CreateQuery(search: SearchSlothPrefix);
 
             // Act
             var result = _service.Browse(FirstPage, query);
@@ -290,8 +302,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Data.Count);
-            Assert.Equal("Sloth1", result.Data.First().DisplayName);
-            Assert.Equal("Sloth3", result.Data.Last().DisplayName);
+            Assert.Equal(Sloth1Name, result.Data.First().DisplayName);
+            Assert.Equal(Sloth3Name, result.Data.Last().DisplayName);
         }
 
         [Fact]
@@ -300,21 +312,21 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var entities = new List<Sloth>
             {
-                new Sloth(Guid.NewGuid(), "Sloth1", 5),
-                new Sloth(Guid.NewGuid(), "Sloth2", 6),
-                new Sloth(Guid.NewGuid(), "Sloth3", 7)
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5),
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6),
+                new Sloth(Guid.NewGuid(), Sloth3Name, 7)
             };
 
             SeedSloths(entities);
-            var query = CreateQuery(rows: 1, search: "Sloth");
+            var query = CreateQuery(rows: OneRow, search: SearchSlothPrefix);
 
             // Act
-            var result = _service.Browse(2, query);
+            var result = _service.Browse(SecondPage, query);
 
             // Assert
             Assert.NotNull(result);
             Assert.Single(result.Data);
-            Assert.Equal("Sloth2", result.Data.First().DisplayName);
+            Assert.Equal(Sloth2Name, result.Data.First().DisplayName);
         }
 
         [Fact]
@@ -327,8 +339,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             var entities = new List<WildKoala>
             {
-                new WildKoala(Guid.NewGuid(), "KoalaNeighbourA", 5, cuisine, neighbourA),
-                new WildKoala(Guid.NewGuid(), "KoalaNeighbourB", 6, cuisine, neighbourB)
+                new WildKoala(Guid.NewGuid(), KoalaNeighbourAName, 5, cuisine, neighbourA),
+                new WildKoala(Guid.NewGuid(), KoalaNeighbourBName, 6, cuisine, neighbourB)
             };
 
             _dbContext.Sloths.Add(cuisine);
@@ -339,7 +351,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
             var entityConfiguration = new EntityConfiguration();
-            entityConfiguration.SetSortProperty("Neighbour");
+            entityConfiguration.SetSortProperty(NeighbourSortProperty);
             configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(WildKoala)))
                 .Returns(entityConfiguration);
             configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
@@ -348,7 +360,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var service =
                 new BrowseSelectableService<WildKoala, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
 
-            var query = CreateQuery(sortBy: "Neighbour", sortDirection: SortDirectionDesc);
+            var query = CreateQuery(sortBy: NeighbourSortProperty, sortDirection: SortDirectionDesc);
 
             // Act
             var result = service.Browse(FirstPage, query);
@@ -356,8 +368,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Data.Count);
-            Assert.Equal("KoalaNeighbourB", result.Data.First().DisplayName);
-            Assert.Equal("KoalaNeighbourA", result.Data.Last().DisplayName);
+            Assert.Equal(KoalaNeighbourBName, result.Data.First().DisplayName);
+            Assert.Equal(KoalaNeighbourAName, result.Data.Last().DisplayName);
         }
 
         [Fact]
@@ -372,7 +384,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(entityConfiguration);
 
             var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
-            var query = CreateQuery(search: "Sloth");
+            var query = CreateQuery(search: SearchSlothPrefix);
 
             // Act + Assert
             Assert.Throws<InvalidOperationException>(() => service.Browse(FirstPage, query));
@@ -382,7 +394,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         public void BrowseSelectable_ShouldReturnEmptyData_WhenRowsIsZero()
         {
             // Arrange
-            _dbContext.Sloths.Add(new Sloth(Guid.NewGuid(), "Sloth1", 5));
+            _dbContext.Sloths.Add(new Sloth(Guid.NewGuid(), Sloth1Name, 5));
             _dbContext.SaveChanges();
 
             var query = CreateQuery(rows: ZeroRows);
@@ -401,11 +413,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             _dbContext.Sloths.AddRange(
-                new Sloth(Guid.NewGuid(), "Sloth1", 5),
-                new Sloth(Guid.NewGuid(), "Sloth2", 6));
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5),
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6));
             _dbContext.SaveChanges();
 
-            var query = CreateQuery(rows: 1);
+            var query = CreateQuery(rows: OneRow);
 
             // Act
             var result = _service.Browse(ZeroPage, query);
@@ -413,7 +425,36 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Assert
             Assert.NotNull(result);
             Assert.Single(result.Data);
-            Assert.Equal("Sloth1", result.Data.First().DisplayName);
+            Assert.Equal(Sloth1Name, result.Data.First().DisplayName);
+        }
+
+        [Fact]
+        public void BrowseSelectable_ShouldUseConfiguredNonDefaultKeyProperty_ForBaseEntityDtoId()
+        {
+            // Arrange
+            var entities = new List<Sloth>
+            {
+                new Sloth(Guid.NewGuid(), Sloth1Name, 5),
+                new Sloth(Guid.NewGuid(), Sloth2Name, 6)
+            };
+            SeedSloths(entities);
+
+            var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            var entityConfiguration = new EntityConfiguration();
+            entityConfiguration.SetKeyProperty(nameof(Sloth.Age));
+            entityConfiguration.SetKeyPropertyType(typeof(int));
+            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(entityConfiguration);
+
+            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+            var query = CreateQuery();
+
+            // Act
+            var result = service.Browse(FirstPage, query);
+
+            // Assert
+            Assert.Contains(5, result.Data.Select(x => x.Id));
+            Assert.Contains(6, result.Data.Select(x => x.Id));
         }
     }
 }

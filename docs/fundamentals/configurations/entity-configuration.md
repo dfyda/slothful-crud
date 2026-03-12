@@ -22,6 +22,17 @@ The following configuration options are available for customizing the behavior o
 {: .important }
 Calling `SetKeyProperty` also invokes `SetKeyPropertyType` to ensure consistency.
 
+### How configuration is discovered
+
+Entity configurations are discovered automatically from the entry assembly when `UseSlothfulCrud<TDbContext>()` is executed.
+
+The following rules apply:
+
+- Configuration classes must implement `ISlothEntityConfiguration<TEntity>`.
+- Configuration classes must have a public parameterless constructor.
+- Only one configuration can be registered per entity type. Registering another one for the same entity results in a configuration exception.
+- If no configuration is found for an entity, default configuration values are used.
+
 ### Example Usage
 
 Below is an example configuration using default values:

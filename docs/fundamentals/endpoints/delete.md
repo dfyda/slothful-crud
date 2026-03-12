@@ -3,7 +3,7 @@ title: Delete
 layout: home
 parent: Endpoints
 grand_parent: Fundamentals
-nav_order: 2.4.6
+nav_order: 2.1.6
 ---
 
 # Delete

@@ -20,9 +20,9 @@ The following configuration options are available for customizing the behavior o
 Below is an example configuration using default values:
 
 ```csharp
-public class SlothEndpointConfiguration : ISlothEndpointConfiguration<Sloth>
+public class SlothConfiguration : ISlothEntityConfiguration<Sloth>
 {
-    public void Configure(SlothEndpointBuilder<Sloth> builder)
+    public void Configure(SlothEntityBuilder<Sloth> builder)
     {
         builder.GetEndpoint
             .HasEndpoint(true)                     // Default value
@@ -60,9 +60,9 @@ public class SlothEndpointConfiguration : ISlothEndpointConfiguration<Sloth>
 These settings illustrate the use of default values for the endpoint configuration in Slothful CRUD. This is equivalent to:
 
 ```csharp
-public class SlothEndpointConfiguration : ISlothEndpointConfiguration<Sloth>
+public class SlothConfiguration : ISlothEntityConfiguration<Sloth>
 {
-    public void Configure(SlothEndpointBuilder<Sloth> builder)
+    public void Configure(SlothEntityBuilder<Sloth> builder)
     {
     }
 }

@@ -13,6 +13,9 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
     public class EndpointsServiceTests
     {
         private const ushort FirstPage = 1;
+        private const string TestName = "Test";
+        private const string SearchTerm = "Test";
+        private const int TestAge = 5;
 
         private readonly Mock<IGetService<Sloth, SlothfulDbContext>> _getServiceMock;
         private readonly Mock<IDeleteService<Sloth, SlothfulDbContext>> _deleteServiceMock;
@@ -77,7 +80,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var id = Guid.NewGuid();
-            var command = new { Name = "Test", Age = 5 };
+            var command = new { Name = TestName, Age = TestAge };
             var scope = CreateServiceScope();
 
             // Act
@@ -92,7 +95,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var id = Guid.NewGuid();
-            var command = new { Name = "Test", Age = 5 };
+            var command = new { Name = TestName, Age = TestAge };
             var scope = CreateServiceScope();
 
             // Act
@@ -107,7 +110,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             ushort page = FirstPage;
-            var query = new { Search = "Test" };
+            var query = new { Search = SearchTerm };
 
             // Act
             _service.Browse(page, query);
@@ -121,7 +124,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             ushort page = FirstPage;
-            var query = new { Search = "Test" };
+            var query = new { Search = SearchTerm };
 
             // Act
             _service.BrowseSelectable(page, query);

@@ -3,7 +3,7 @@ title: Update
 layout: home
 parent: Endpoints
 grand_parent: Fundamentals
-nav_order: 2.4.5
+nav_order: 2.1.5
 ---
 
 # Update

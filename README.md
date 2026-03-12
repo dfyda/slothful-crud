@@ -2,52 +2,106 @@
     <img src="docs/assets/slothful-api.jpg" alt="slothful-api logo">
 </div>
 
-Slothful CRUD
-===========
-Slothful CRUD is a library designed to streamline the creation of CRUD endpoints effortlessly. By implementing the necessary interfaces in domain classes, you can quickly register the library and generate RESTful endpoints. Simplify your API development with Slothful CRUD.
+# Slothful CRUD
+
+Slothful CRUD helps you generate CRUD API endpoints for your entities with minimal setup.  
+Implement `ISlothfulEntity`, register the library, and expose REST endpoints backed by your `DbContext`.
 
 ## Documentation
 
-Get started by [reading through the documentation](https://slothful.dev/).
+Full documentation is available at [slothful.dev](https://slothful.dev/).
 
-## Getting Started
+## Quick Start
 
-Follow these steps to integrate Slothful CRUD into your project:
+1. Install package:
 
-1. **Configure Your Domain Classes:**
+```bash
+dotnet add package slothful-crud
+```
 
-Create domain classes representing your data entities.
-Implement the appropriate interfaces for CRUD operations.
+2. Register services and endpoint generation:
 
-2. **Register the Library:**
+```csharp
+using SlothfulCrud.Extensions;
 
-Integrate Slothful API by registering it in your application.
+var builder = WebApplication.CreateBuilder(args);
 
-3. **Run Your Application:**
+builder.Services.AddDbContext<SlothfulDbContext>(options =>
+    options.UseInMemoryDatabase("AppDb"));
+builder.Services.AddSlothfulCrud<SlothfulDbContext>();
 
-Start your application to automatically generate RESTful endpoints based on your domain classes.
+var app = builder.Build();
+app.UseSlothfulCrud<SlothfulDbContext>();
 
-## Configuration
-The base configuration class that defines shared settings for all other configuration classes:
+app.Run();
+```
 
-- **ExposeAllNestedProperties** (`bool`): Set to `true` to expose all nested properties via the API. Useful for debugging or gaining granular control over nested data.
-- **IsAuthorizationEnable** (`bool`): Determines whether authorization checks are enabled. If set to `true`, the policies listed in `PolicyNames` are applied.
-- **PolicyNames** (`string[]`): An array of policy names to apply for authorization.
+3. Implement `ISlothfulEntity` on your domain type:
 
-### `EndpointConfiguration` (inherits `Configuration`)
-Defines properties specific to API endpoints:
+```csharp
+using SlothfulCrud.Domain;
 
-- **IsEnable** (`bool`): Determines if the endpoint is enabled.
+public class Sloth : ISlothfulEntity
+{
+    public Guid Id { get; private set; }
+    public string Name { get; private set; }
+    public int Age { get; private set; }
+    public string DisplayName => Name;
 
-### `EntityConfiguration` (inherits `Configuration`)
-Provides settings specific to entity management:
+    public Sloth(Guid id, string name, int age)
+    {
+        Id = id;
+        Name = name;
+        Age = age;
+    }
 
-- **SortProperty** (`string`): Specifies the property name used to sort entities.
-- **FilterProperty** (`string`): Identifies the property name used to filter entities.
-- **KeyProperty** (`string`): Defines the primary key property name for identifying entities.
-- **KeyPropertyType** (`Type`): Indicates the type of the primary key property (e.g., `int`, `string`).
-- **UpdateMethod** (`string`): Specifies the method used to update entities.
-- **HasValidation** (`bool`): Enables or disables validation for entities to ensure compliance with business rules.
+    public void Update(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+}
+```
 
-## NuGet Packages
-You can find the Slothful CRUD NuGet packages [here](https://www.nuget.org/packages/slothful-crud).
+## Generated Endpoints
+
+By default, the following endpoints are generated per entity:
+
+- `GET /{segment}/{id}` - details
+- `GET /{segment}/list/{page}` - browse
+- `GET /{segment}/selectable-list/{page}` - browse selectable
+- `POST /{segment}` - create
+- `PUT /{segment}/{id}` - update
+- `DELETE /{segment}/{id}` - delete
+
+## Important Notes
+
+- `POST create` request body does not include `id`; the key is generated server-side.
+- `201 Created` includes `Location: /{segment}/{id}` and uses `IApiSegmentProvider`.
+- Validation is enabled by default (`HasValidation = true`). Register validators, e.g.:
+
+```csharp
+builder.Services.AddValidatorsFromAssemblyContaining<YourValidator>();
+```
+
+## Common Customizations
+
+- Endpoint segment strategy (`IApiSegmentProvider`)
+- Key generation strategy (`IEntityPropertyKeyValueProvider<TEntity>`)
+- Create constructor selection (`ICreateConstructorBehavior`)
+- Entity and endpoint configuration (`ISlothEntityConfiguration<T>`)
+- Problem handling (`UseSlothfulProblemHandling`)
+
+See details in docs:
+
+- [Quick start](https://slothful.dev/)
+- [Endpoints](https://slothful.dev/fundamentals/endpoints.html)
+- [Entity configuration](https://slothful.dev/fundamentals/configurations/entity-configuration.html)
+- [Validators](https://slothful.dev/fundamentals/validators.html)
+- [Problem handling](https://slothful.dev/fundamentals/problem-handling.html)
+- [Advanced topics](https://slothful.dev/advanced-topics.html)
+
+## Package and License
+
+- NuGet: [slothful-crud](https://www.nuget.org/packages/slothful-crud)
+- License: [MIT](https://github.com/dfyda/slothful-crud/blob/main/LICENSE.txt)

@@ -7,6 +7,9 @@ namespace SlothfulCrud.Tests.Unit.Providers
 {
     public class EntityPropertyKeyValueProviderTests
     {
+        private const string GuidEntityDisplayName = "GuidEntity";
+        private const string LongEntityDisplayName = "LongEntity";
+
         [Fact]
         public void GetNextValue_ShouldReturnGuid_WhenKeyTypeIsGuid()
         {
@@ -38,13 +41,13 @@ namespace SlothfulCrud.Tests.Unit.Providers
         private class GuidEntity : ISlothfulEntity
         {
             public Guid Id { get; init; }
-            public string DisplayName => "GuidEntity";
+            public string DisplayName => GuidEntityDisplayName;
         }
 
         private class LongEntity : ISlothfulEntity
         {
             public long Id { get; init; }
-            public string DisplayName => "LongEntity";
+            public string DisplayName => LongEntityDisplayName;
         }
     }
 }

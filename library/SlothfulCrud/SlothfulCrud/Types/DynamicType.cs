@@ -1,7 +1,8 @@
-﻿using System.Reflection;
+using System.Reflection;
 using SlothfulCrud.Builders.Dynamic;
 using SlothfulCrud.Builders.Dynamic.Extensions.Methods;
 using SlothfulCrud.Builders.Dynamic.Extensions.Properties;
+using SlothfulCrud.Extensions;
 using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Types
@@ -175,10 +176,10 @@ namespace SlothfulCrud.Types
             var elements = item.Data;
             foreach (var element in elements)
             {
-                var propertyKeyValue = element.GetKeyPropertyValue(keyPropertyType);
+                var propertyKeyValue = ((object)element).GetKeyPropertyValue(keyPropertyType);
                 var instance = new BaseEntityDto()
                 {
-                    Id = element.propertyKeyValue,
+                    Id = propertyKeyValue,
                     DisplayName = element.DisplayName
                 };
 

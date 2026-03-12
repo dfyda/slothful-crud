@@ -12,6 +12,9 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 {
     public class DeleteServiceTests : IDisposable
     {
+        private const string TestName = "Test";
+        private const int TestAge = 5;
+
         private SlothfulDbContext _dbContext;
         private Mock<IGetService<Sloth, SlothfulDbContext>> _getServiceMock;
         private Mock<IEntityConfigurationProvider> _configurationProviderMock;
@@ -55,7 +58,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
         private Sloth SeedSloth(Guid entityId)
         {
-            var entity = new Sloth(entityId, "Test", 5);
+            var entity = new Sloth(entityId, TestName, TestAge);
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
             return entity;

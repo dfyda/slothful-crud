@@ -52,6 +52,10 @@ app.UseSlothfulCrud<SlothfulDbContext>();
 app.Run();
 ```
 
+{: .important }
+Use the generic overload `UseSlothfulCrud<TDbContext>()` to register generated endpoints.  
+The non-generic overload `UseSlothfulCrud()` does not register endpoints.
+
 ### Define `DbContext`
 Ensure you have defined your database context `DbContext` like this:
 
@@ -186,13 +190,12 @@ Retrieves a paginated list of sloths.
 
 #### Responses
 - `200`: Success, returns `SlothDtoPagedResults`.
-- `404`: Not Found.
 - `400`: Bad Request.
 
 #### Response Schema: `SlothDtoPagedResults`
 
 - **first**: The first item index in the current page (integer).
-- **rows**: The number of rows per page (integer).
+- **rows**: Number of rows requested for a single page.
 - **total**: The total number of items (integer).
 - **data**: Array of `SlothDto` objects (nullable).
 
@@ -216,13 +219,12 @@ Retrieves a paginated list of selectable sloths.
 
 #### Responses
 - `200`: Success, returns `BaseEntityDtoPagedResults`.
-- `404`: Not Found.
 - `400`: Bad Request.
 
 #### Response Schema: `BaseEntityDtoPagedResults`
 
 - **first**: The first item index in the current page (integer).
-- **rows**: The number of rows per page (integer).
+- **rows**: Number of rows requested for a single page.
 - **total**: The total number of items (integer).
 - **data**: Array of `BaseEntityDto` objects (nullable).
 
@@ -245,9 +247,12 @@ Creates a new sloth.
 - `201`: Created, returns the UUID of the newly created sloth.
 - `400`: Bad Request.
 
+On `201`, the `Location` header points to the created resource details path: `/{segment}/{id}` (segment is resolved by `IApiSegmentProvider`).
+
 #### Request Schema: `CreateSloth`
 
-- **id**: UUID of the new sloth.
 - **name**: Name of the new sloth (nullable).
 - **age**: Age of the new sloth (integer).
+
+`id` is generated server-side by the configured key value provider and is not part of the create request body.
 

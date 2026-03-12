@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Reflection.Emit;
 using SlothfulCrud.Builders.Abstract;
 
@@ -10,6 +10,7 @@ namespace SlothfulCrud.Builders.Dynamic
         private static readonly AssemblyBuilder AssemblyBuilder =
             AssemblyBuilder.DefineDynamicAssembly(AssemblyName, AssemblyBuilderAccess.Run);
         private static readonly ModuleBuilder ModuleBuilder = AssemblyBuilder.DefineDynamicModule("DynamicModule");
+        private static readonly object BuildLock = new();
         private string TypeName { get; set; }
         
         public DynamicTypeBuilder DefineType(string typeName) {
@@ -19,9 +20,18 @@ namespace SlothfulCrud.Builders.Dynamic
 
         public Type Build()
         {
-            return Actions
-                .Aggregate(ModuleBuilder.DefineType(TypeName, TypeAttributes.Public), (builder, action) => action(builder))
-                .CreateType();
+            lock (BuildLock)
+            {
+                var existingType = AssemblyBuilder.GetType(TypeName, false, false);
+                if (existingType is not null)
+                {
+                    return existingType;
+                }
+
+                return Actions
+                    .Aggregate(ModuleBuilder.DefineType(TypeName, TypeAttributes.Public), (builder, action) => action(builder))
+                    .CreateType();
+            }
         }
     }
 }
