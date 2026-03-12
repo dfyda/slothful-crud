@@ -38,12 +38,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapGet("/", () => "SlothfulCrud.Tests.Api")
-    .WithName("GetApiName")
-    .WithOpenApi();
+    .WithName("GetApiName");
 
 app.MapGet("/db/test", (SlothfulDbContext context) => context.Koalas.ToList())
-    .WithName("GetKoalas")
-    .WithOpenApi();
+    .WithName("GetKoalas");
 
 app.UseSlothfulCrud<SlothfulDbContext>(options => options.UseSlothfulProblemHandling = true);
 app.UseAuthentication();
