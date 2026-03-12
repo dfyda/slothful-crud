@@ -26,6 +26,8 @@ jobs:
           TAG_NAME=${GITHUB_REF#refs/tags/}
           if [[ "$TAG_NAME" =~ ^release_v ]]; then
             VERSION=${TAG_NAME#release_v}
+          elif [[ "$TAG_NAME" =~ ^v ]]; then
+            VERSION=${TAG_NAME#v}
           else
             VERSION=$TAG_NAME
           fi
