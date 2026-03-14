@@ -122,6 +122,20 @@ In this example:
 
 Slothful CRUD automatically generates several endpoints for managing your entities. Below is a summary of the 6 endpoints generated for the `Sloth` entity:
 
+## Performance Benchmarking
+
+Slothful CRUD includes BenchmarkDotNet benchmarks for regression detection and performance validation.
+
+Run benchmarks locally:
+
+```bash
+dotnet run -c Release --project library/SlothfulCrud/Tests/SlothfulCrud.Benchmarks -- --filter "*"
+```
+
+Artifacts are generated in:
+
+`library/SlothfulCrud/Tests/SlothfulCrud.Benchmarks/BenchmarkDotNet.Artifacts/results/`
+
 ### Get Sloth Details
 
 ##### Endpoint `GET /sloths/{id}`

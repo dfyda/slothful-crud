@@ -38,10 +38,16 @@ namespace SlothfulCrud.Benchmarks
             return DynamicType.MapToPagedResultsDto(_pagedResults, typeof(Sloth), _dtoType, false, "Id");
         }
 
+        /// <summary>
+        /// Measures the cache-hit path — the real production scenario where the type
+        /// already exists in the dynamic assembly. Creating a unique type per iteration
+        /// causes O(n²) degradation because AssemblyBuilder.GetType() scans all emitted
+        /// types and Reflection.Emit types are never collected.
+        /// </summary>
         [Benchmark]
-        public Type CreateDtoType()
+        public Type CreateDtoType_CacheHit()
         {
-            return DynamicType.NewDynamicTypeDto(typeof(Sloth), $"SlothBench_{Guid.NewGuid():N}", false);
+            return DynamicType.NewDynamicTypeDto(typeof(Sloth), "SlothBenchDto_Cached", false);
         }
     }
 }

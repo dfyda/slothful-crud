@@ -95,6 +95,20 @@ builder.Services.AddValidatorsFromAssemblyContaining<YourValidator>();
 - Problem handling (`UseSlothfulProblemHandling`)
 - Query customization (`QueryCustomizer` in `SlothfulOptions`)
 
+## Performance Benchmarking
+
+BenchmarkDotNet benchmarks are included to track performance regressions and compare internal changes.
+
+Run all benchmarks:
+
+```bash
+dotnet run -c Release --project library/SlothfulCrud/Tests/SlothfulCrud.Benchmarks -- --filter "*"
+```
+
+Results are exported to:
+
+`library/SlothfulCrud/Tests/SlothfulCrud.Benchmarks/BenchmarkDotNet.Artifacts/results/`
+
 See details in docs:
 
 - [Quick start](https://slothful.dev/)
