@@ -104,7 +104,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Create_ShouldAddEntityToDbContext_WhenCommandIsValid()
+        public async Task Create_ShouldAddEntityToDbContext_WhenCommandIsValid()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -113,7 +113,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution();
 
             // Act
-            GetService().Create(entityId, command, _serviceScopeMock.Object);
+            await GetService().CreateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             var createdEntity = _dbContext.Sloths.Find(entityId);
@@ -124,7 +124,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Create_ShouldValidateEntity_WhenValidationEnabled()
+        public async Task Create_ShouldValidateEntity_WhenValidationEnabled()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -134,14 +134,14 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _validatorMock.Setup(v => v.Validate(It.IsAny<IValidationContext>())).Returns(new ValidationResult());
 
             // Act
-            GetService().Create(entityId, command, _serviceScopeMock.Object);
+            await GetService().CreateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             _validatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Once);
         }
 
         [Fact]
-        public void Create_ShouldThrowConfigurationException_WhenConstructorIsMissing()
+        public async Task Create_ShouldThrowConfigurationException_WhenConstructorIsMissing()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -156,11 +156,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(configuration);
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetService().Create(entityId, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetService().CreateAsync(entityId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Create_ShouldCallConstructorBehavior_WhenCommandIsValid()
+        public async Task Create_ShouldCallConstructorBehavior_WhenCommandIsValid()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -169,7 +169,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution();
 
             // Act
-            GetService().Create(entityId, command, _serviceScopeMock.Object);
+            await GetService().CreateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             _createConstructorBehaviorMock.Verify(b => b.GetConstructorInfo(typeof(Sloth)), Times.Once);
@@ -177,7 +177,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
 
         [Fact]
-        public void Create_ShouldNotValidateEntity_WhenValidationDisabled()
+        public async Task Create_ShouldNotValidateEntity_WhenValidationDisabled()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -187,14 +187,14 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution();
 
             // Act
-            GetService().Create(entityId, command, _serviceScopeMock.Object);
+            await GetService().CreateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             _validatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Never);
         }
 
         [Fact]
-        public void Create_ShouldThrowConfigurationException_WhenKeyIsNull()
+        public async Task Create_ShouldThrowConfigurationException_WhenKeyIsNull()
         {
             // Arrange
             var command = CreateCommandWithoutId();
@@ -202,11 +202,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution();
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetService().Create(null, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetService().CreateAsync(null, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Create_ShouldAddEntityToDbContext_WhenCommandDoesNotContainId()
+        public async Task Create_ShouldAddEntityToDbContext_WhenCommandDoesNotContainId()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -215,7 +215,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution();
 
             // Act
-            GetService().Create(entityId, command, _serviceScopeMock.Object);
+            await GetService().CreateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             var createdEntity = _dbContext.Sloths.Find(entityId);
@@ -226,7 +226,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Create_ShouldReturnKeyProperty_WhenCommandIsValid()
+        public async Task Create_ShouldReturnKeyProperty_WhenCommandIsValid()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -236,7 +236,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution();
 
             // Act
-            var result = GetService().Create(entityId, command, _serviceScopeMock.Object);
+            var result = await GetService().CreateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             Assert.Equal(entityId, result);
@@ -244,7 +244,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
 
         [Fact]
-        public void Create_ShouldCallGetConstructorInfo_WhenCommandIsValid()
+        public async Task Create_ShouldCallGetConstructorInfo_WhenCommandIsValid()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -254,14 +254,14 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution();
 
             // Act
-            GetService().Create(entityId, command, _serviceScopeMock.Object);
+            await GetService().CreateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             _createConstructorBehaviorMock.Verify(b => b.GetConstructorInfo(typeof(Sloth)), Times.Once);
         }
 
         [Fact]
-        public void Create_ShouldThrowConfigurationException_WhenConstructorBehaviorFails()
+        public async Task Create_ShouldThrowConfigurationException_WhenConstructorBehaviorFails()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -274,11 +274,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Throws(new ConfigurationException(ConstructorErrorMessage));
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetService().Create(entityId, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetService().CreateAsync(entityId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Create_ShouldThrowValidationException_WhenValidationFails()
+        public async Task Create_ShouldThrowValidationException_WhenValidationFails()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -290,7 +290,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             ArrangeValidatorResolution(validator);
 
             // Act + Assert
-            Assert.Throws<ValidationException>(() => GetService().Create(entityId, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ValidationException>(() => GetService().CreateAsync(entityId, command, _serviceScopeMock.Object));
         }
     }
 }

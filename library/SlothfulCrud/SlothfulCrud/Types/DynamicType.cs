@@ -3,6 +3,7 @@ using SlothfulCrud.Builders.Dynamic;
 using SlothfulCrud.Builders.Dynamic.Extensions.Methods;
 using SlothfulCrud.Builders.Dynamic.Extensions.Properties;
 using SlothfulCrud.Extensions;
+using SlothfulCrud.Providers;
 using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Types
@@ -111,7 +112,7 @@ namespace SlothfulCrud.Types
         public static Type NewDynamicTypeDto(Type entityType, string typeName, bool exposeAll)
         {
             var propertiesToAdd = new List<TypeProperty>();
-            var properties = entityType.GetProperties();
+            var properties = ReflectionCache.GetProperties(entityType);
             if (exposeAll)
             {
                 propertiesToAdd.AddRange(properties.Select(x => new TypeProperty(x.Name, x.PropertyType)));
@@ -119,11 +120,9 @@ namespace SlothfulCrud.Types
             else
             {
                 var primitiveProperties = properties
-                    .Where(x => !x.PropertyType.IsClass || x.PropertyType == typeof(string))
-                    .ToList();
+                    .Where(x => !x.PropertyType.IsClass || x.PropertyType == typeof(string));
                 var nestedProperties = properties
-                    .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
-                    .ToList();
+                    .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string));
                 
                 propertiesToAdd.AddRange(primitiveProperties.Select(x => new TypeProperty(x.Name, x.PropertyType)));
                 propertiesToAdd.AddRange(nestedProperties.Select(x => new TypeProperty(x.Name, typeof(BaseEntityDto))));
@@ -139,10 +138,8 @@ namespace SlothfulCrud.Types
 
         public static dynamic MapToDto(dynamic item, Type entityType, Type dtoType, bool exposeAll, string keyPropertyType)
         {
-            var properties = entityType.GetProperties();
-            var nestedProperties = entityType.GetProperties()
-                .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
-                .ToList();
+            var properties = ReflectionCache.GetProperties(entityType);
+            var nestedProperties = ReflectionCache.GetNavigationProperties(entityType);
             
             var instance = Activator.CreateInstance(dtoType);
             FlatNestedEntities(item, dtoType, properties, nestedProperties, instance, exposeAll, keyPropertyType);
@@ -152,10 +149,8 @@ namespace SlothfulCrud.Types
 
         public static dynamic MapToPagedResultsDto(dynamic item, Type entityType, Type dtoType, bool exposeAll, string keyPropertyType)
         {
-            var properties = entityType.GetProperties();
-            var nestedProperties = entityType.GetProperties()
-                .Where(x => x.PropertyType.IsClass && x.PropertyType != typeof(string))
-                .ToList();
+            var properties = ReflectionCache.GetProperties(entityType);
+            var nestedProperties = ReflectionCache.GetNavigationProperties(entityType);
             
             var instances = new List<object>();
             var elements = item.Data;
@@ -193,26 +188,30 @@ namespace SlothfulCrud.Types
             dynamic item,
             Type dtoType,
             PropertyInfo[] properties,
-            List<PropertyInfo> nestedProperties,
+            PropertyInfo[] nestedProperties,
             object instance,
             bool exposeAll,
             string keyPropertyType)
         {
+            var nestedSet = new HashSet<PropertyInfo>(nestedProperties);
+            
             foreach (var property in properties)
             {
                 var value = property.GetValue(item);
-                if (!exposeAll && nestedProperties.Contains(property) && value != null)
+                var dtoProp = ReflectionCache.GetProperty(dtoType, property.Name);
+                
+                if (!exposeAll && nestedSet.Contains(property) && value != null)
                 {
                     var nestedDto = new BaseEntityDto()
                     {
-                        Id = property.PropertyType.GetProperty(keyPropertyType).GetValue(value),
-                        DisplayName = (string)property.PropertyType.GetProperty("DisplayName").GetValue(value)
+                        Id = ReflectionCache.GetProperty(property.PropertyType, keyPropertyType)?.GetValue(value),
+                        DisplayName = (string)ReflectionCache.GetProperty(property.PropertyType, "DisplayName")?.GetValue(value)
                     };
-                    dtoType.GetProperty(property.Name).SetValue(instance, nestedDto);
+                    dtoProp?.SetValue(instance, nestedDto);
                 }
                 else
                 {
-                    dtoType.GetProperty(property.Name).SetValue(instance, value);
+                    dtoProp?.SetValue(instance, value);
                 }
             }
         }

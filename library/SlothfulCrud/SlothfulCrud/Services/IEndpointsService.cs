@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Types;
@@ -10,12 +10,11 @@ namespace SlothfulCrud.Services
         where TEntity : class, ISlothfulEntity, new() 
         where TDbContext : DbContext
     {
-        TEntity Get(object id);
-        void Delete(object id);
-        object Create(object id, dynamic command, IServiceScope serviceScope);
-        void Update(object id, dynamic command, IServiceScope serviceScope);
-        PagedResults<TEntity> Browse(ushort page, dynamic query);
-        PagedResults<BaseEntityDto> BrowseSelectable(ushort page, dynamic query);
+        Task<TEntity> GetAsync(object id);
+        Task DeleteAsync(object id);
+        Task<object> CreateAsync(object id, dynamic command, IServiceScope serviceScope);
+        Task UpdateAsync(object id, dynamic command, IServiceScope serviceScope);
+        Task<PagedResults<TEntity>> BrowseAsync(ushort page, dynamic query);
+        Task<PagedResults<BaseEntityDto>> BrowseSelectableAsync(ushort page, dynamic query);
     }
 }
-

@@ -3,6 +3,7 @@ using SlothfulCrud.Domain;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
+using System.Reflection;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
@@ -17,43 +18,44 @@ namespace SlothfulCrud.Services.Endpoints.Get
             DbContext = dbContext;
         }
         
-        public PagedResults<TEntity> Browse(ushort page, dynamic query)
+        public async Task<PagedResults<TEntity>> BrowseAsync(ushort page, dynamic query)
         {
             if (query is null)
             {
                 throw new ArgumentNullException(nameof(query));
             }
             
-            var baseQuery = DbContext.Set<TEntity>().AsQueryable().IncludeAllFirstLevelDependencies();
-            var properties = query.GetType().GetProperties();
+            var baseQuery = DbContext.Set<TEntity>()
+                .AsNoTracking()
+                .AsQueryable()
+                .IncludeAllFirstLevelDependencies();
+            var properties = ReflectionCache.GetProperties(query.GetType());
 
             var resultQuery = FilterQuery(query, properties, baseQuery) as IQueryable<TEntity>;
             resultQuery = SortQuery(query, resultQuery);
 
-            var totalQuery = baseQuery;
+            var total = await resultQuery.CountAsync();
             var skip = CalculateSkip(page, query);
-            resultQuery = resultQuery
+            var data = await resultQuery
                 .Skip((int)skip)
-                .Take((int)query.Rows);
-
-            var data = resultQuery.ToList();
-            var total = totalQuery.Count();
+                .Take((int)query.Rows)
+                .ToListAsync();
             
             return new PagedResults<TEntity>(skip, total, query.Rows, data);
         }
 
-        private IQueryable<TEntity> FilterQuery(dynamic query, dynamic properties, IQueryable<TEntity> queryObject)
+        private IQueryable<TEntity> FilterQuery(dynamic query, PropertyInfo[] properties, IQueryable<TEntity> queryObject)
         {
             foreach (var propertyInfo in properties)
             {
                 string propertyName = propertyInfo.Name;
-                var propertyValue = (object)propertyInfo.GetValue(query);
+                var propertyValue = propertyInfo.GetValue(query);
                 if (propertyValue is null || BrowseFields.Fields.ContainsKey(propertyName))
                 {
                     continue;
                 }
                 
-                var propertyType = propertyInfo.PropertyType as Type;
+                var propertyType = propertyInfo.PropertyType;
                 
                 if (propertyType == typeof(string))
                 {

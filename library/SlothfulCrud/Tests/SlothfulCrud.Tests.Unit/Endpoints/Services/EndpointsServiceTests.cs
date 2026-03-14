@@ -50,48 +50,33 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Get_ShouldDelegateCall_ToGetService()
+        public async Task Get_ShouldDelegateCall_ToGetService()
         {
             // Arrange
             var id = Guid.NewGuid();
 
             // Act
-            _service.Get(id);
+            await _service.GetAsync(id);
 
             // Assert
-            _getServiceMock.Verify(s => s.Get(id), Times.Once);
+            _getServiceMock.Verify(s => s.GetAsync(id), Times.Once);
         }
 
         [Fact]
-        public void Delete_ShouldDelegateCall_ToDeleteService()
+        public async Task Delete_ShouldDelegateCall_ToDeleteService()
         {
             // Arrange
             var id = Guid.NewGuid();
 
             // Act
-            _service.Delete(id);
+            await _service.DeleteAsync(id);
 
             // Assert
-            _deleteServiceMock.Verify(s => s.Delete(id), Times.Once);
+            _deleteServiceMock.Verify(s => s.DeleteAsync(id), Times.Once);
         }
 
         [Fact]
-        public void Create_ShouldDelegateCall_ToCreateService()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            var command = new { Name = TestName, Age = TestAge };
-            var scope = CreateServiceScope();
-
-            // Act
-            _service.Create(id, command, scope);
-
-            // Assert
-            _createServiceMock.Verify(s => s.Create(id, command, scope), Times.Once);
-        }
-
-        [Fact]
-        public void Update_ShouldDelegateCall_ToUpdateService()
+        public async Task Create_ShouldDelegateCall_ToCreateService()
         {
             // Arrange
             var id = Guid.NewGuid();
@@ -99,38 +84,53 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var scope = CreateServiceScope();
 
             // Act
-            _service.Update(id, command, scope);
+            await _service.CreateAsync(id, command, scope);
 
             // Assert
-            _updateServiceMock.Verify(s => s.Update(id, command, scope), Times.Once);
+            _createServiceMock.Verify(s => s.CreateAsync(id, command, scope), Times.Once);
         }
 
         [Fact]
-        public void Browse_ShouldDelegateCall_ToBrowseService()
+        public async Task Update_ShouldDelegateCall_ToUpdateService()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var command = new { Name = TestName, Age = TestAge };
+            var scope = CreateServiceScope();
+
+            // Act
+            await _service.UpdateAsync(id, command, scope);
+
+            // Assert
+            _updateServiceMock.Verify(s => s.UpdateAsync(id, command, scope), Times.Once);
+        }
+
+        [Fact]
+        public async Task Browse_ShouldDelegateCall_ToBrowseService()
         {
             // Arrange
             ushort page = FirstPage;
             var query = new { Search = SearchTerm };
 
             // Act
-            _service.Browse(page, query);
+            await _service.BrowseAsync(page, query);
 
             // Assert
-            _browseServiceMock.Verify(s => s.Browse(page, query), Times.Once);
+            _browseServiceMock.Verify(s => s.BrowseAsync(page, query), Times.Once);
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldDelegateCall_ToBrowseSelectableService()
+        public async Task BrowseSelectable_ShouldDelegateCall_ToBrowseSelectableService()
         {
             // Arrange
             ushort page = FirstPage;
             var query = new { Search = SearchTerm };
 
             // Act
-            _service.BrowseSelectable(page, query);
+            await _service.BrowseSelectableAsync(page, query);
 
             // Assert
-            _browseSelectableServiceMock.Verify(s => s.Browse(page, query), Times.Once);
+            _browseSelectableServiceMock.Verify(s => s.BrowseAsync(page, query), Times.Once);
         }
     }
 }

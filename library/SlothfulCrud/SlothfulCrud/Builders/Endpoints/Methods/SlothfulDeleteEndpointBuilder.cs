@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -45,12 +45,12 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         public IEndpointConventionBuilder MapTypedDelete<TKeyType>(Type entityType)
         {
             var endpoint = BuilderParams.WebApplication.MapDelete(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", 
-                    (TKeyType id) =>
+                    async (TKeyType id) =>
                     {
                         using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                         var service =
                             SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                        service.Delete(id);
+                        await service.DeleteAsync(id);
                         return Results.NoContent();
                     })
                 .WithName($"Delete{entityType.Name}")

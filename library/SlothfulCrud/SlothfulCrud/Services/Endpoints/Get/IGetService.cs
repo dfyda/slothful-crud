@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Get
@@ -7,6 +7,6 @@ namespace SlothfulCrud.Services.Endpoints.Get
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        TEntity Get(object keyProperty);
+        Task<TEntity> GetAsync(object keyProperty);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -63,11 +63,11 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         public IEndpointConventionBuilder MapTypedPut<TKeyType, TCommand>(Type entityType)
         {
             var endpoint = BuilderParams.WebApplication.MapPut(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", 
-                    ([FromRoute] TKeyType id, [FromBody] TCommand command) =>
+                    async ([FromRoute] TKeyType id, [FromBody] TCommand command) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    service.Update(id, command, serviceScope);
+                    await service.UpdateAsync(id, command, serviceScope);
                     return Results.NoContent();
                 })
                 .WithName($"Update{entityType.Name}")

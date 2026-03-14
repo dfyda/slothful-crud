@@ -18,27 +18,27 @@ namespace SlothfulCrud.Services.Endpoints.Get
             DbContext = dbContext;
         }
         
-        public PagedResults<BaseEntityDto> Browse(ushort page, dynamic query)
+        public async Task<PagedResults<BaseEntityDto>> BrowseAsync(ushort page, dynamic query)
         {
             if (query is null)
             {
                 throw new ArgumentNullException(nameof(query));
             }
             
-            var baseQuery = DbContext.Set<TEntity>().AsQueryable();
+            var baseQuery = DbContext.Set<TEntity>().AsNoTracking().AsQueryable();
 
             var resultQuery = FilterQuery(query.Search, baseQuery) as IQueryable<TEntity>;
             resultQuery = SortQuery(query, resultQuery);
 
+            var total = await resultQuery.CountAsync();
             var skip = CalculateSkip(page, query);
-            resultQuery = resultQuery
+            var pagedQuery = resultQuery
                 .Skip((int)skip)
                 .Take((int)query.Rows);
 
-            var data = GetBaseEntities(resultQuery);
-            var total = baseQuery.Count();
+            var data = await GetBaseEntitiesAsync(pagedQuery);
             
-            return new PagedResults<BaseEntityDto>(skip, total, query.Rows, data.ToList());
+            return new PagedResults<BaseEntityDto>(skip, total, query.Rows, data);
         }
 
         private IQueryable<TEntity> FilterQuery(string search, IQueryable<TEntity> queryObject)
@@ -52,18 +52,20 @@ namespace SlothfulCrud.Services.Endpoints.Get
             return queryObject;
         }
         
-        private IEnumerable<BaseEntityDto> GetBaseEntities(IQueryable<TEntity> resultQuery)
+        private async Task<List<BaseEntityDto>> GetBaseEntitiesAsync(IQueryable<TEntity> resultQuery)
         {
-            var items = resultQuery.ToList();
+            var items = await resultQuery.ToListAsync();
+            var result = new List<BaseEntityDto>(items.Count);
             foreach (var item in items)
             {
                 var propertyKeyValue = item.GetKeyPropertyValue(EntityConfiguration.KeyProperty);
-                yield return new BaseEntityDto
+                result.Add(new BaseEntityDto
                 {
                     Id = propertyKeyValue,
                     DisplayName = item.DisplayName
-                };
+                });
             }
+            return result;
         }
     }
 }

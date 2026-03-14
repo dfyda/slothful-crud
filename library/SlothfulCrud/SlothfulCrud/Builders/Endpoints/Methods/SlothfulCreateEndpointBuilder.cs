@@ -64,13 +64,13 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         {
             var apiSegment = BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name);
             var endpoint = BuilderParams.WebApplication.MapPost(apiSegment, 
-                    ([FromBody] TCommandType command) =>
+                    async ([FromBody] TCommandType command) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var entityPropertyKeyValueProvider = SlothfulTypesProvider.GetEntityPropertyKeyValueProvider(entityType, serviceScope);
                     var keyProperty = (object)entityPropertyKeyValueProvider.GetNextValue(EndpointsConfiguration.Entity);
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    service.Create(keyProperty, command, serviceScope);
+                    await service.CreateAsync(keyProperty, command, serviceScope);
                     return Results.Created(BuildCreatedLocation(apiSegment, keyProperty), keyProperty);
                 })
                 .WithName($"Create{entityType.Name}")

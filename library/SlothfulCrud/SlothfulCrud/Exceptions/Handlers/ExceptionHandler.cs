@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Security.Authentication;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -42,7 +42,16 @@ namespace SlothfulCrud.Exceptions.Handlers
 
         private void HandleResponse(SlothProblemDetails response, Exception exception)
         {
-            _logger.LogCritical(exception, "An error occurred for ProblemId: '{ProblemId}', message: '{Message}'", response.ProblemId, exception.Message);
+            var logLevel = response.Status switch
+            {
+                (int)HttpStatusCode.NotFound => LogLevel.Warning,
+                (int)HttpStatusCode.BadRequest => LogLevel.Warning,
+                (int)HttpStatusCode.Unauthorized => LogLevel.Warning,
+                (int)HttpStatusCode.Forbidden => LogLevel.Warning,
+                _ => LogLevel.Error
+            };
+            
+            _logger.Log(logLevel, exception, "Request failed with status '{Status}',  ProblemId: '{ProblemId}', message: '{Message}'", response.Status, response.ProblemId, exception.Message);
         }
 
         private SlothProblemDetails HandleNotFoundException(NotFoundException exception, Guid problemId)

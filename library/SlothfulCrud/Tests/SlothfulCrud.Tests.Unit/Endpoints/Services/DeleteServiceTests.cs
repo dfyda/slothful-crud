@@ -65,16 +65,16 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
         
         [Fact]
-        public void Delete_ShouldRemoveEntity_WhenEntityExists()
+        public async Task Delete_ShouldRemoveEntity_WhenEntityExists()
         {
             // Arrange
             var entityId = Guid.NewGuid();
             var entity = SeedSloth(entityId);
 
-            _getServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+            _getServiceMock.Setup(s => s.GetAsync(entityId)).ReturnsAsync(entity);
 
             // Act
-            GetService().Delete(entityId);
+            await GetService().DeleteAsync(entityId);
 
             // Assert
             var deletedEntity = _dbContext.Sloths.Find(entityId);
@@ -82,40 +82,40 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Delete_ShouldThrowNotFoundException_WhenEntityDoesNotExist()
+        public async Task Delete_ShouldThrowNotFoundException_WhenEntityDoesNotExist()
         {
             // Arrange
             var entityId = Guid.NewGuid();
-            _getServiceMock.Setup(s => s.Get(entityId)).Throws(new NotFoundException());
+            _getServiceMock.Setup(s => s.GetAsync(entityId)).ThrowsAsync(new NotFoundException());
 
             // Act + Assert
-            Assert.Throws<NotFoundException>(() => GetService().Delete(entityId));
+            await Assert.ThrowsAsync<NotFoundException>(() => GetService().DeleteAsync(entityId));
         }
 
         [Fact]
-        public void Delete_ShouldCallGetService_WhenEntityExists()
+        public async Task Delete_ShouldCallGetService_WhenEntityExists()
         {
             // Arrange
             var entityId = Guid.NewGuid();
             var entity = SeedSloth(entityId);
 
-            _getServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+            _getServiceMock.Setup(s => s.GetAsync(entityId)).ReturnsAsync(entity);
 
             // Act
-            GetService().Delete(entityId);
+            await GetService().DeleteAsync(entityId);
 
             // Assert
-            _getServiceMock.Verify(s => s.Get(entityId), Times.Once);
+            _getServiceMock.Verify(s => s.GetAsync(entityId), Times.Once);
         }
 
         [Fact]
-        public void Delete_ShouldThrowConfigurationException_WhenKeyIsNull()
+        public async Task Delete_ShouldThrowConfigurationException_WhenKeyIsNull()
         {
             // Arrange
-            _getServiceMock.Setup(s => s.Get(null)).Throws(new ConfigurationException());
+            _getServiceMock.Setup(s => s.GetAsync(null)).ThrowsAsync(new ConfigurationException());
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetService().Delete(null));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetService().DeleteAsync(null));
         }
     }
 }

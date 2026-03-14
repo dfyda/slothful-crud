@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("SlothfulCrud.Tests.Unit")]
-[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")] 
+[assembly: InternalsVisibleTo("SlothfulCrud.Benchmarks")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

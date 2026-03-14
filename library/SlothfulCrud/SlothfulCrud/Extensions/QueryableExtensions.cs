@@ -1,5 +1,6 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Extensions
 {
@@ -7,11 +8,9 @@ namespace SlothfulCrud.Extensions
     {
         public static IQueryable<T> IncludeAllFirstLevelDependencies<T>(this IQueryable<T> query) where T : class
         {
-            var entityType = typeof(T);
-            var properties = entityType.GetProperties()
-                .Where(p => p.PropertyType.IsClass && p.PropertyType != typeof(string));
+            var navigationProperties = ReflectionCache.GetNavigationProperties(typeof(T));
 
-            foreach (var property in properties)
+            foreach (var property in navigationProperties)
             {
                 query = query.Include(property.Name);
             }
@@ -40,8 +39,7 @@ namespace SlothfulCrud.Extensions
             var lambda = Expression.Lambda(lambdaType, body, parameter);
 
             var methodName = descending ? "OrderByDescending" : "OrderBy";
-            var method = typeof(Queryable).GetMethods()
-                .First(m => m.Name == methodName && m.GetParameters().Length == 2)
+            var method = ReflectionCache.GetQueryableMethod(methodName, 2)
                 .MakeGenericMethod(typeof(TSource), body.Type);
 
             var resultExpression = Expression.Call(method, source.Expression, lambda);

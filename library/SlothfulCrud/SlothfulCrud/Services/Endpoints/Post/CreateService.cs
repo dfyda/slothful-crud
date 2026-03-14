@@ -26,7 +26,7 @@ namespace SlothfulCrud.Services.Endpoints.Post
             _createConstructorBehavior = createConstructorBehavior;
         }
         
-        public object Create(object keyProperty, dynamic command, IServiceScope serviceScope)
+        public async Task<object> CreateAsync(object keyProperty, dynamic command, IServiceScope serviceScope)
         {
             CheckEntityKey(typeof(TEntity), keyProperty);
 
@@ -41,7 +41,7 @@ namespace SlothfulCrud.Services.Endpoints.Post
             }
             
             DbContext.Set<TEntity>().Add(item);
-            DbContext.SaveChanges();
+            await DbContext.SaveChangesAsync();
             
             return keyProperty;
         }

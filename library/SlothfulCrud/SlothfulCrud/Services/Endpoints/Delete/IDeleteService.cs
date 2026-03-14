@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 
 namespace SlothfulCrud.Services.Endpoints.Delete
@@ -7,6 +7,6 @@ namespace SlothfulCrud.Services.Endpoints.Delete
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        void Delete(object keyProperty);
+        Task DeleteAsync(object keyProperty);
     }
 }

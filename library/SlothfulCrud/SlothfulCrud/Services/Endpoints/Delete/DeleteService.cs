@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services.Endpoints.Get;
@@ -21,14 +21,14 @@ namespace SlothfulCrud.Services.Endpoints.Delete
             _getService = getService;
         }
         
-        public void Delete(object keyProperty)
+        public async Task DeleteAsync(object keyProperty)
         {            
             CheckEntityKey(typeof(TEntity), keyProperty);
 
-            var item = _getService.Get(keyProperty);
+            var item = await _getService.GetAsync(keyProperty);
             
             DbContext.Set<TEntity>().Remove(item);
-            DbContext.SaveChanges();
+            await DbContext.SaveChangesAsync();
         }
     }
 }

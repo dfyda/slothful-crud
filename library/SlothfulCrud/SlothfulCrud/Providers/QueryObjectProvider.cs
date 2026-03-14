@@ -10,7 +10,7 @@ namespace SlothfulCrud.Providers
         {
             var query = new T();
             
-            var properties = typeof(T).GetProperties();
+            var properties = ReflectionCache.GetProperties(typeof(T));
             foreach (var propertyInfo in properties)
             {
                 if (!context.Request.Query.ContainsKey(propertyInfo.Name))
@@ -43,10 +43,7 @@ namespace SlothfulCrud.Providers
                 return null;
             }
 
-            var parseMethod = targetType
-                .GetMethods()
-                .FirstOrDefault(x => x.Name == "Parse" && x.GetParameters().Length == 1
-                                                         && x.GetParameters()[0].ParameterType == typeof(string));
+            var parseMethod = ReflectionCache.GetParseMethod(targetType);
 
             return parseMethod switch
             {

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -53,12 +53,12 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         public IEndpointConventionBuilder MapTypedGet<TKeyType, TResultType>(Type entityType)
         {
             var exposeAll = EndpointsConfiguration.Get.ExposeAllNestedProperties;
-            var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", (TKeyType id) =>
+            var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/{id}", async (TKeyType id) =>
                 {
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service =
                         SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    var item = service.Get(id);
+                    var item = await service.GetAsync(id);
                     var resultDto = DynamicType.MapToDto(item, entityType, typeof(TResultType), exposeAll, EndpointsConfiguration.Entity.KeyProperty);
                     return resultDto;
                 })

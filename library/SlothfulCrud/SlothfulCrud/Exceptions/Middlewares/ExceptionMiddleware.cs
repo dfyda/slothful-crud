@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using SlothfulCrud.Exceptions.Handlers;
 
@@ -6,6 +6,11 @@ namespace SlothfulCrud.Exceptions.Middlewares
 {
     internal class ExceptionMiddleware
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new()
+        {
+            WriteIndented = false
+        };
+        
         private readonly RequestDelegate _next;
         private readonly IExceptionHandler _exceptionHandler;
 
@@ -36,12 +41,12 @@ namespace SlothfulCrud.Exceptions.Middlewares
             return CompleteAsync(context, response);
         }
 
-        private Task CompleteAsync(HttpContext context, SlothProblemDetails problemDetails)
+        private static Task CompleteAsync(HttpContext context, SlothProblemDetails problemDetails)
         {
             context.Response.ContentType = "application/problem+json";
             context.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
 
-            return context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails));
+            return context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails, SerializerOptions));
         }
     }
 }

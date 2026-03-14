@@ -1,4 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Providers;
@@ -29,10 +28,10 @@ namespace SlothfulCrud.Services.Endpoints
                 throw new ConfigurationException($"Parameter '{nameof(keyProperty)}' cannot be null.");
             }
             
-            if (type.GetProperty(EntityConfiguration.KeyProperty) is null)
+            if (ReflectionCache.GetProperty(type, EntityConfiguration.KeyProperty) is null)
             {
                 throw new ConfigurationException($"Entity '{typeof(TEntity)}' must have a property named '{EntityConfiguration.KeyProperty}'");
-            };
+            }
 
             if (keyProperty.GetType() != EntityConfiguration.KeyPropertyType)
             {

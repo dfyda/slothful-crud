@@ -1,5 +1,5 @@
-﻿using System.Dynamic;
-using System.Reflection;
+using System.Dynamic;
+using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Extensions
 {
@@ -12,9 +12,9 @@ namespace SlothfulCrud.Extensions
                 return expandoObject.ToDictionary(kv => kv.Key, kv => kv.Value);
             }
 
-            Type type = obj.GetType();
-            PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            var propertyValues = new Dictionary<string, object>();
+            var type = obj.GetType();
+            var properties = ReflectionCache.GetProperties(type);
+            var propertyValues = new Dictionary<string, object>(properties.Length);
 
             foreach (var property in properties)
             {
@@ -26,11 +26,12 @@ namespace SlothfulCrud.Extensions
         
         public static object GetKeyPropertyValue(this object obj, string keyProperty)
         {
-            var properties = obj.GetProperties();
-            var keyPropertyValue = properties.FirstOrDefault(x => x.Key == keyProperty)
-                .OrFail($"KeyPropertyNotFound", $"Key property '{keyProperty}' not found on type '{obj.GetType().Name}'.");
-            
-            return keyPropertyValue.Value;
+            var property = ReflectionCache.GetProperty(obj.GetType(), keyProperty);
+            if (property is null)
+            {
+                throw new KeyNotFoundException($"Key property '{keyProperty}' not found on type '{obj.GetType().Name}'.");
+            }
+            return property.GetValue(obj);
         }
     }
 }

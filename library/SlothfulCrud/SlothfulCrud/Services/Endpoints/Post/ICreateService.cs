@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 
@@ -8,6 +8,6 @@ namespace SlothfulCrud.Services.Endpoints.Post
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        object Create(object keyProperty, dynamic command, IServiceScope serviceScope);
+        Task<object> CreateAsync(object keyProperty, dynamic command, IServiceScope serviceScope);
     }
 }

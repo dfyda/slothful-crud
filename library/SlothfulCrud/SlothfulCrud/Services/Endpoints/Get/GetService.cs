@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
@@ -16,18 +16,20 @@ namespace SlothfulCrud.Services.Endpoints.Get
             DbContext = dbContext;
         }
         
-        public TEntity Get(object keyProperty)
+        public async Task<TEntity> GetAsync(object keyProperty)
         {
             CheckEntityKey(typeof(TEntity), keyProperty);
 
-            return GetEntity(keyProperty);
+            return await GetEntityAsync(keyProperty);
         }
 
-        private TEntity GetEntity(object id)
+        private async Task<TEntity> GetEntityAsync(object id)
         {
-            return DbContext.Set<TEntity>()
+            var entity = await DbContext.Set<TEntity>()
                 .IncludeAllFirstLevelDependencies()
-                .FirstOrDefault(x => EF.Property<object>(x, EntityConfiguration.KeyProperty).Equals(id))
+                .FirstOrDefaultAsync(x => EF.Property<object>(x, EntityConfiguration.KeyProperty).Equals(id));
+            
+            return entity
                 .OrFail($"{typeof(TEntity)}NotFound", $"{typeof(TEntity)} with {EntityConfiguration.KeyProperty}: '{id}' not found.");
         }
     }

@@ -73,7 +73,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Get_ShouldReturnSloth_WhenEntityExists()
+        public async Task Get_ShouldReturnSloth_WhenEntityExists()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -83,7 +83,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.SaveChanges();
 
             // Act
-            var result = GetSlothService().Get(entity.Id);
+            var result = await GetSlothService().GetAsync(entity.Id);
 
             // Assert
             Assert.NotNull(result);
@@ -93,7 +93,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Get_ShouldReturnWildKoala_WhenEntityExists()
+        public async Task Get_ShouldReturnWildKoala_WhenEntityExists()
         {
             // Arrange
             var cuisine = new Sloth(Guid.NewGuid(), CuisineSlothName, CuisineAge);
@@ -107,7 +107,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.SaveChanges();
 
             // Act
-            var result = GetWildKoalaService().Get(entity.Id);
+            var result = await GetWildKoalaService().GetAsync(entity.Id);
 
             // Assert
             Assert.NotNull(result);
@@ -119,18 +119,18 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Get_ShouldThrowNotFoundException_WhenEntityDoesNotExist()
+        public async Task Get_ShouldThrowNotFoundException_WhenEntityDoesNotExist()
         {
             // Arrange
             var nonExistentId = Guid.NewGuid();
 
             // Act + Assert
-            Assert.Throws<NotFoundException>(() => GetSlothService().Get(nonExistentId));
-            Assert.Throws<NotFoundException>(() => GetWildKoalaService().Get(nonExistentId));
+            await Assert.ThrowsAsync<NotFoundException>(() => GetSlothService().GetAsync(nonExistentId));
+            await Assert.ThrowsAsync<NotFoundException>(() => GetWildKoalaService().GetAsync(nonExistentId));
         }
 
         [Fact]
-        public void Get_ShouldIncludeDependencies_WhenEntityIsWildKoala()
+        public async Task Get_ShouldIncludeDependencies_WhenEntityIsWildKoala()
         {
             // Arrange
             var cuisine = new Sloth(Guid.NewGuid(), CuisineSlothName, CuisineAge);
@@ -144,7 +144,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.SaveChanges();
 
             // Act
-            var result = GetWildKoalaService().Get(entity.Id);
+            var result = await GetWildKoalaService().GetAsync(entity.Id);
 
             // Assert
             Assert.NotNull(result);
@@ -153,17 +153,17 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Get_ShouldThrowConfigurationException_WhenIdTypeIsInvalid()
+        public async Task Get_ShouldThrowConfigurationException_WhenIdTypeIsInvalid()
         {
             // Arrange
             var invalidId = InvalidIdValue;
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetSlothService().Get(invalidId));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetSlothService().GetAsync(invalidId));
         }
 
         [Fact]
-        public void Get_ShouldThrowConfigurationException_WhenEntityConfigurationIsMissing()
+        public async Task Get_ShouldThrowConfigurationException_WhenEntityConfigurationIsMissing()
         {
             // Arrange
             var nonConfiguredService =
@@ -172,18 +172,18 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var entityId = Guid.NewGuid();
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => nonConfiguredService.Get(entityId));
+            await Assert.ThrowsAsync<ConfigurationException>(() => nonConfiguredService.GetAsync(entityId));
         }
 
         [Fact]
-        public void Get_ShouldThrowConfigurationException_WhenIdIsNull()
+        public async Task Get_ShouldThrowConfigurationException_WhenIdIsNull()
         {
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetSlothService().Get(null));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetSlothService().GetAsync(null));
         }
 
         [Fact]
-        public void Get_ShouldReturnEntity_WhenNonDefaultKeyPropertyAndTypeAreConfigured()
+        public async Task Get_ShouldReturnEntity_WhenNonDefaultKeyPropertyAndTypeAreConfigured()
         {
             // Arrange
             var firstEntity = new Sloth(Guid.NewGuid(), FirstEntityName, SlothAge);
@@ -198,7 +198,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(configuration);
 
             // Act
-            var result = GetSlothService().Get(SecondSlothAge);
+            var result = await GetSlothService().GetAsync(SecondSlothAge);
 
             // Assert
             Assert.NotNull(result);
@@ -208,7 +208,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Get_ShouldThrowConfigurationException_WhenConfiguredKeyPropertyDoesNotExist()
+        public async Task Get_ShouldThrowConfigurationException_WhenConfiguredKeyPropertyDoesNotExist()
         {
             // Arrange
             var configuration = new EntityConfiguration();
@@ -218,7 +218,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(configuration);
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetSlothService().Get(Guid.NewGuid()));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetSlothService().GetAsync(Guid.NewGuid()));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Services.Endpoints.Delete;
@@ -37,34 +37,34 @@ namespace SlothfulCrud.Services
             _browseSelectableService = browseSelectableService;
         }
         
-        public TEntity Get(object id)
+        public Task<TEntity> GetAsync(object id)
         {
-            return _getService.Get(id);
+            return _getService.GetAsync(id);
         }
         
-        public void Delete(object id)
+        public Task DeleteAsync(object id)
         {
-            _deleteService.Delete(id);
+            return _deleteService.DeleteAsync(id);
         }
 
-        public object Create(object id, dynamic command, IServiceScope serviceScope)
+        public Task<object> CreateAsync(object id, dynamic command, IServiceScope serviceScope)
         {
-            return _createService.Create(id, command, serviceScope);
+            return _createService.CreateAsync(id, command, serviceScope);
         }
 
-        public void Update(object id, dynamic command, IServiceScope serviceScope)
+        public Task UpdateAsync(object id, dynamic command, IServiceScope serviceScope)
         {
-            _updateService.Update(id, command, serviceScope);
+            return _updateService.UpdateAsync(id, command, serviceScope);
         }
 
-        public PagedResults<TEntity> Browse(ushort page, dynamic query)
+        public Task<PagedResults<TEntity>> BrowseAsync(ushort page, dynamic query)
         {
-            return _browseService.Browse(page, query);
+            return _browseService.BrowseAsync(page, query);
         }
 
-        public PagedResults<BaseEntityDto> BrowseSelectable(ushort page, dynamic query)
+        public Task<PagedResults<BaseEntityDto>> BrowseSelectableAsync(ushort page, dynamic query)
         {
-            return _browseSelectableService.Browse(page, query);
+            return _browseSelectableService.BrowseAsync(page, query);
         }
     }
 }

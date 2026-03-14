@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+using System.Reflection;
+using SlothfulCrud.Providers;
 
 namespace SlothfulCrud.Builders.Endpoints.Behaviors.Constructor
 {
@@ -6,8 +7,7 @@ namespace SlothfulCrud.Builders.Endpoints.Behaviors.Constructor
     {
         public ConstructorInfo GetConstructorInfo(Type entityType)
         {
-            return entityType.GetConstructors()
-                .FirstOrDefault(x => x.GetParameters().Length > 0);
+            return ReflectionCache.GetFirstParameterizedConstructor(entityType);
         }
     }
 }

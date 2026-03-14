@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Types;
 
@@ -8,6 +8,6 @@ namespace SlothfulCrud.Services.Endpoints.Get
         where TEntity : class, ISlothfulEntity, new() 
         where TContext : DbContext
     {
-        PagedResults<TEntity> Browse(ushort page, dynamic query);
+        Task<PagedResults<TEntity>> BrowseAsync(ushort page, dynamic query);
     }
 }

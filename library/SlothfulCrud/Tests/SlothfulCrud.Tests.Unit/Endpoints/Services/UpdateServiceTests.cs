@@ -137,7 +137,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Update_ShouldModifySloth_WhenCommandIsValid()
+        public async Task Update_ShouldModifySloth_WhenCommandIsValid()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -149,10 +149,10 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
 
-            _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+            _slothGetServiceMock.Setup(s => s.GetAsync(entityId)).ReturnsAsync(entity);
 
             // Act
-            GetSlothService().Update(entityId, command, _serviceScopeMock.Object);
+            await GetSlothService().UpdateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             var updatedEntity = _dbContext.Sloths.Find(entityId);
@@ -162,7 +162,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Update_ShouldValidateEntity_WhenValidationEnabled()
+        public async Task Update_ShouldValidateEntity_WhenValidationEnabled()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -176,17 +176,17 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
 
-            _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+            _slothGetServiceMock.Setup(s => s.GetAsync(entityId)).ReturnsAsync(entity);
 
             // Act
-            GetSlothService().Update(entityId, command, _serviceScopeMock.Object);
+            await GetSlothService().UpdateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             _slothValidatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Once);
         }
 
         [Fact]
-        public void Update_ShouldModifyWildKoala_WhenCommandIsValid()
+        public async Task Update_ShouldModifyWildKoala_WhenCommandIsValid()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -204,10 +204,10 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Koalas.Add(entity);
             _dbContext.SaveChanges();
 
-            _wildKoalaGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+            _wildKoalaGetServiceMock.Setup(s => s.GetAsync(entityId)).ReturnsAsync(entity);
 
             // Act
-            GetWildKoalaService().Update(entityId, command, _serviceScopeMock.Object);
+            await GetWildKoalaService().UpdateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             var updatedEntity = _dbContext.Koalas.Find(entityId);
@@ -220,7 +220,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Update_ShouldValidateWildKoala_WhenValidationEnabled()
+        public async Task Update_ShouldValidateWildKoala_WhenValidationEnabled()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -238,17 +238,17 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Koalas.Add(entity);
             _dbContext.SaveChanges();
 
-            _wildKoalaGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+            _wildKoalaGetServiceMock.Setup(s => s.GetAsync(entityId)).ReturnsAsync(entity);
 
             // Act
-            GetWildKoalaService().Update(entityId, command, _serviceScopeMock.Object);
+            await GetWildKoalaService().UpdateAsync(entityId, command, _serviceScopeMock.Object);
 
             // Assert
             _wildKoalaValidatorMock.Verify(v => v.Validate(It.IsAny<IValidationContext>()), Times.Once);
         }
 
         [Fact]
-        public void Update_ShouldThrowConfigurationException_WhenIdTypeIsInvalid()
+        public async Task Update_ShouldThrowConfigurationException_WhenIdTypeIsInvalid()
         {
             // Arrange
             var invalidId = InvalidIdValue;
@@ -260,12 +260,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(configuration);
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() =>
-                GetSlothService().Update(invalidId, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ConfigurationException>(() =>
+                GetSlothService().UpdateAsync(invalidId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Update_ShouldThrowConfigurationException_WhenEntityConfigurationIsMissing()
+        public async Task Update_ShouldThrowConfigurationException_WhenEntityConfigurationIsMissing()
         {
             // Arrange
             var nonConfiguredService = new UpdateService<Sloth, SlothfulDbContext>(_dbContext,
@@ -274,12 +274,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var command = CreateSlothUpdateCommand();
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() =>
-                nonConfiguredService.Update(entityId, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ConfigurationException>(() =>
+                nonConfiguredService.UpdateAsync(entityId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Update_ShouldThrowConfigurationException_WhenIdIsNull()
+        public async Task Update_ShouldThrowConfigurationException_WhenIdIsNull()
         {
             // Arrange
             var command = CreateSlothUpdateCommand();
@@ -290,11 +290,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(configuration);
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetSlothService().Update(null, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetSlothService().UpdateAsync(null, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Update_ShouldThrowConfigurationException_WhenUpdateMethodIsMissing()
+        public async Task Update_ShouldThrowConfigurationException_WhenUpdateMethodIsMissing()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -309,15 +309,15 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
 
-            _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+            _slothGetServiceMock.Setup(s => s.GetAsync(entityId)).ReturnsAsync(entity);
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() =>
-                GetSlothService().Update(entityId, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ConfigurationException>(() =>
+                GetSlothService().UpdateAsync(entityId, command, _serviceScopeMock.Object));
         }
 
         [Fact]
-        public void Update_ShouldThrowValidationException_WhenValidationFails()
+        public async Task Update_ShouldThrowValidationException_WhenValidationFails()
         {
             // Arrange
             var entityId = Guid.NewGuid();
@@ -332,11 +332,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             _dbContext.Sloths.Add(entity);
             _dbContext.SaveChanges();
 
-            _slothGetServiceMock.Setup(s => s.Get(entityId)).Returns(entity);
+            _slothGetServiceMock.Setup(s => s.GetAsync(entityId)).ReturnsAsync(entity);
 
             // Act + Assert
-            Assert.Throws<ValidationException>(() =>
-                GetSlothService().Update(entityId, command, _serviceScopeMock.Object));
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                GetSlothService().UpdateAsync(entityId, command, _serviceScopeMock.Object));
         }
     }
 }

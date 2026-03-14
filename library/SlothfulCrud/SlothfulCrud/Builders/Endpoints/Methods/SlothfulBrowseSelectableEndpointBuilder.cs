@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -67,12 +67,12 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         public void MapTypedGet<T>(Type entityType, Type returnType) where T : new()
         {
             var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/selectable-list/{page}", 
-                    (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
+                    async (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
                     {
                         query = QueryObjectProvider.PrepareQueryObject<T>(context);
                         using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                         var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                        return service.BrowseSelectable(page, query);
+                        return await service.BrowseSelectableAsync(page, query);
                     })
                 .WithName($"BrowseSelectable{entityType.Name}s")
                 .Produces(200, returnType)

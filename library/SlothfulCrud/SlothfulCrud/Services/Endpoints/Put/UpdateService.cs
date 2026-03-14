@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Domain;
@@ -26,7 +26,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
             _getService = getService;
         }
         
-        public void Update(object keyProperty, dynamic command, IServiceScope serviceScope)
+        public async Task UpdateAsync(object keyProperty, dynamic command, IServiceScope serviceScope)
         {
             CheckEntityKey(typeof(TEntity), keyProperty);
             
@@ -36,7 +36,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
                 throw new ConfigurationException($"Entity '{typeof(TEntity).Name}' must have a method named 'Update'.");
             }
             
-            var item = _getService.Get(keyProperty);
+            var item = await _getService.GetAsync(keyProperty);
             
             ModifyEntity(command, updateMethod, item);
 
@@ -45,7 +45,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
                 SlothfulTypesProvider.GetConcreteValidator<TEntity>(serviceScope).ValidateAndThrow(item);
             }
             
-            DbContext.SaveChanges();
+            await DbContext.SaveChangesAsync();
         }
 
         private void ModifyEntity(dynamic command, MethodInfo updateMethod, TEntity item)
@@ -60,7 +60,7 @@ namespace SlothfulCrud.Services.Endpoints.Put
         private MethodInfo GetModifyMethod()
         {
             var methodName = EntityConfiguration.UpdateMethod;
-            return typeof(TEntity).GetMethod(methodName);
+            return ReflectionCache.GetMethod(typeof(TEntity), methodName);
         }
     }
 }

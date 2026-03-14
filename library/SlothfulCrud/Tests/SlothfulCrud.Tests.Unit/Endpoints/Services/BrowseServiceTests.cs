@@ -106,7 +106,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldReturnPagedResults_WhenEntitiesExist()
+        public async Task Browse_ShouldReturnPagedResults_WhenEntitiesExist()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -121,17 +121,17 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery();
 
             // Act
-            var result = GetSlothService().Browse(FirstPage, query);
+            var result = await GetSlothService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(DefaultRows, result.Rows);
-            Assert.Contains(entities[0], result.Data);
-            Assert.Contains(entities[1], result.Data);
+            Assert.Contains(result.Data, x => x.Id == entities[0].Id);
+            Assert.Contains(result.Data, x => x.Id == entities[1].Id);
         }
 
         [Fact]
-        public void Browse_ShouldFilterByStringField_WhenFilterValueProvided()
+        public async Task Browse_ShouldFilterByStringField_WhenFilterValueProvided()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -147,7 +147,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             query.Name = Sloth1Name;
 
             // Act
-            var result = GetSlothService().Browse(FirstPage, query);
+            var result = await GetSlothService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -156,7 +156,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldSortByNameAscending_WhenSortDirectionIsAsc()
+        public async Task Browse_ShouldSortByNameAscending_WhenSortDirectionIsAsc()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -171,7 +171,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery();
 
             // Act
-            var result = GetSlothService().Browse(FirstPage, query);
+            var result = await GetSlothService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -180,7 +180,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldSortByNameDescending_WhenSortDirectionIsDesc()
+        public async Task Browse_ShouldSortByNameDescending_WhenSortDirectionIsDesc()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -195,7 +195,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(sortDirection: SortDirectionDesc);
 
             // Act
-            var result = GetSlothService().Browse(FirstPage, query);
+            var result = await GetSlothService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -204,7 +204,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldThrowConfigurationException_WhenSortFieldNotFound()
+        public async Task Browse_ShouldThrowConfigurationException_WhenSortFieldNotFound()
         {
             // Arrange
             var query = new BrowseQuery
@@ -215,11 +215,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetSlothService().Browse(FirstPage, query));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetSlothService().BrowseAsync(FirstPage, query));
         }
 
         [Fact]
-        public void Browse_ShouldReturnDataWithoutSorting_WhenSortByIsNull()
+        public async Task Browse_ShouldReturnDataWithoutSorting_WhenSortByIsNull()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -239,7 +239,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetSlothService().Browse(FirstPage, query);
+            var result = await GetSlothService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -247,7 +247,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldReturnPageSlice_WhenPaginationParametersAreProvided()
+        public async Task Browse_ShouldReturnPageSlice_WhenPaginationParametersAreProvided()
         {
             // Arrange
             for (int i = 1; i <= 9; i++)
@@ -265,7 +265,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetSlothService().Browse(FifthPage, query);
+            var result = await GetSlothService().BrowseAsync(FifthPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -275,7 +275,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldReturnTotalCount_WhenEntitiesExist()
+        public async Task Browse_ShouldReturnTotalCount_WhenEntitiesExist()
         {
             // Arrange
             for (int i = 1; i <= 15; i++)
@@ -293,7 +293,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetSlothService().Browse(FirstPage, query);
+            var result = await GetSlothService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -301,7 +301,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldReturnEmptyResult_WhenNoEntitiesExist()
+        public async Task Browse_ShouldReturnEmptyResult_WhenNoEntitiesExist()
         {
             // Arrange
             var query = new BrowseQuery
@@ -312,7 +312,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetSlothService().Browse(FirstPage, query);
+            var result = await GetSlothService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -321,7 +321,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldFilterByCreatedAtFrom_WhenDateLowerBoundProvided()
+        public async Task Browse_ShouldFilterByCreatedAtFrom_WhenDateLowerBoundProvided()
         {
             // Arrange
             var cuisine1 = new Sloth(Guid.NewGuid(), Cuisine1Name, 3);
@@ -348,7 +348,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetWildKoalaService().Browse(FirstPage, query);
+            var result = await GetWildKoalaService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -357,7 +357,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldSortWildKoalaByNameAscending_WhenSortDirectionIsAsc()
+        public async Task Browse_ShouldSortWildKoalaByNameAscending_WhenSortDirectionIsAsc()
         {
             // Arrange
             var cuisine1 = new Sloth(Guid.NewGuid(), Cuisine1Name, 3);
@@ -380,7 +380,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetWildKoalaService().Browse(FirstPage, query);
+            var result = await GetWildKoalaService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -389,7 +389,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldFilterWildKoalaByName_WhenFilterValueProvided()
+        public async Task Browse_ShouldFilterWildKoalaByName_WhenFilterValueProvided()
         {
             // Arrange
             var cuisine1 = new Sloth(Guid.NewGuid(), Cuisine1Name, 3);
@@ -413,7 +413,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetWildKoalaService().Browse(FirstPage, query);
+            var result = await GetWildKoalaService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -422,7 +422,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldSortWildKoalaByNameDescending_WhenSortDirectionIsDesc()
+        public async Task Browse_ShouldSortWildKoalaByNameDescending_WhenSortDirectionIsDesc()
         {
             // Arrange
             var cuisine1 = new Sloth(Guid.NewGuid(), Cuisine1Name, 3);
@@ -445,7 +445,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetWildKoalaService().Browse(FirstPage, query);
+            var result = await GetWildKoalaService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -454,7 +454,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldThrowConfigurationException_WhenSortDirectionIsInvalid()
+        public async Task Browse_ShouldThrowConfigurationException_WhenSortDirectionIsInvalid()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -474,18 +474,18 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetSlothService().Browse(FirstPage, query));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetSlothService().BrowseAsync(FirstPage, query));
         }
 
         [Fact]
-        public void Browse_ShouldThrowArgumentNullException_WhenQueryIsNull()
+        public async Task Browse_ShouldThrowArgumentNullException_WhenQueryIsNull()
         {
             // Act + Assert
-            Assert.Throws<ArgumentNullException>(() => GetSlothService().Browse(FirstPage, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => GetSlothService().BrowseAsync(FirstPage, null));
         }
 
         [Fact]
-        public void Browse_ShouldThrowConfigurationException_WhenSortPropertyIsNotFound()
+        public async Task Browse_ShouldThrowConfigurationException_WhenSortPropertyIsNotFound()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -505,11 +505,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act + Assert
-            Assert.Throws<ConfigurationException>(() => GetSlothService().Browse(FirstPage, query));
+            await Assert.ThrowsAsync<ConfigurationException>(() => GetSlothService().BrowseAsync(FirstPage, query));
         }
 
         [Fact]
-        public void Browse_ShouldFilterByCreatedAtTo_WhenDateUpperBoundProvided()
+        public async Task Browse_ShouldFilterByCreatedAtTo_WhenDateUpperBoundProvided()
         {
             // Arrange
             var cuisine = new Sloth(Guid.NewGuid(), CuisineName, 3);
@@ -534,7 +534,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetWildKoalaService().Browse(FirstPage, query);
+            var result = await GetWildKoalaService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -543,7 +543,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldFilterByCreatedAtRange_WhenBothBoundsProvided()
+        public async Task Browse_ShouldFilterByCreatedAtRange_WhenBothBoundsProvided()
         {
             // Arrange
             var cuisine = new Sloth(Guid.NewGuid(), CuisineName, 3);
@@ -571,7 +571,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetWildKoalaService().Browse(FirstPage, query);
+            var result = await GetWildKoalaService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -580,7 +580,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldReturnEmptyData_WhenRowsIsZero()
+        public async Task Browse_ShouldReturnEmptyData_WhenRowsIsZero()
         {
             // Arrange
             _dbContext.Sloths.Add(new Sloth(Guid.NewGuid(), Sloth1Name, 5));
@@ -594,7 +594,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetSlothService().Browse(FirstPage, query);
+            var result = await GetSlothService().BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -603,7 +603,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void Browse_ShouldNotSkipResults_WhenPageIsZero()
+        public async Task Browse_ShouldNotSkipResults_WhenPageIsZero()
         {
             // Arrange
             _dbContext.Sloths.AddRange(
@@ -619,7 +619,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             };
 
             // Act
-            var result = GetSlothService().Browse(ZeroPage, query);
+            var result = await GetSlothService().BrowseAsync(ZeroPage, query);
 
             // Assert
             Assert.NotNull(result);

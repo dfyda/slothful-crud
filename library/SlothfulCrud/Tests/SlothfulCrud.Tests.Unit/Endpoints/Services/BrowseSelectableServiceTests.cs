@@ -78,7 +78,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldReturnPagedResults_WhenEntitiesExist()
+        public async Task BrowseSelectable_ShouldReturnPagedResults_WhenEntitiesExist()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -90,7 +90,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery();
 
             // Act
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -102,7 +102,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldFilterBySearchPhrase_WhenSearchProvided()
+        public async Task BrowseSelectable_ShouldFilterBySearchPhrase_WhenSearchProvided()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -114,7 +114,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(search: Sloth1Name);
 
             // Act
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -123,7 +123,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldSortByNameAscending_WhenSortDirectionIsAsc()
+        public async Task BrowseSelectable_ShouldSortByNameAscending_WhenSortDirectionIsAsc()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -135,7 +135,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(sortDirection: SortDirectionAsc);
 
             // Act
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -144,7 +144,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldSortByNameDescending_WhenSortDirectionIsDesc()
+        public async Task BrowseSelectable_ShouldSortByNameDescending_WhenSortDirectionIsDesc()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -156,7 +156,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(sortDirection: SortDirectionDesc);
 
             // Act
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -165,13 +165,13 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldReturnEmptyResult_WhenNoEntitiesExist()
+        public async Task BrowseSelectable_ShouldReturnEmptyResult_WhenNoEntitiesExist()
         {
             // Arrange
             var query = CreateQuery();
 
             // Act
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -180,7 +180,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldReturnDataWithoutSorting_WhenSortByIsNull()
+        public async Task BrowseSelectable_ShouldReturnDataWithoutSorting_WhenSortByIsNull()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -192,7 +192,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(sortBy: null);
 
             // Act
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -200,7 +200,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldSkipAndTakeCorrectNumberOfRows()
+        public async Task BrowseSelectable_ShouldSkipAndTakeCorrectNumberOfRows()
         {
             for (int i = 1; i <= 20; i++)
             {
@@ -216,7 +216,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = SortDirectionAsc
             };
 
-            var result = _service.Browse(ThirdPage, query);
+            var result = await _service.BrowseAsync(ThirdPage, query);
 
             Assert.NotNull(result);
             Assert.Equal(PaginationRows, result.Rows);
@@ -225,7 +225,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldReturnTotalCount()
+        public async Task BrowseSelectable_ShouldReturnTotalCount()
         {
             for (int i = 1; i <= 15; i++)
             {
@@ -241,14 +241,14 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = SortDirectionAsc
             };
 
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             Assert.NotNull(result);
             Assert.Equal(15, result.Total);
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldReturnBaseEntityDtoWithCorrectProperties()
+        public async Task BrowseSelectable_ShouldReturnBaseEntityDtoWithCorrectProperties()
         {
             var entities = new List<Sloth>
             {
@@ -266,7 +266,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 SortDirection = SortDirectionAsc
             };
 
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             Assert.NotNull(result);
             Assert.Contains(entities[0].Id, result.Data.Select(x => x.Id));
@@ -276,14 +276,14 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldThrowArgumentNullException_WhenQueryIsNull()
+        public async Task BrowseSelectable_ShouldThrowArgumentNullException_WhenQueryIsNull()
         {
             // Act + Assert
-            Assert.Throws<ArgumentNullException>(() => _service.Browse(FirstPage, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _service.BrowseAsync(FirstPage, null));
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldFilterAndSort_WhenSearchAndSortingAreProvided()
+        public async Task BrowseSelectable_ShouldFilterAndSort_WhenSearchAndSortingAreProvided()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -297,7 +297,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(search: SearchSlothPrefix);
 
             // Act
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -307,7 +307,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldReturnSecondPage_WhenComplexQueryIsProvided()
+        public async Task BrowseSelectable_ShouldReturnSecondPage_WhenComplexQueryIsProvided()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -321,7 +321,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(rows: OneRow, search: SearchSlothPrefix);
 
             // Act
-            var result = _service.Browse(SecondPage, query);
+            var result = await _service.BrowseAsync(SecondPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -330,7 +330,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldSortByNestedProperty_WhenSortByTargetsNavigationProperty()
+        public async Task BrowseSelectable_ShouldSortByNestedProperty_WhenSortByTargetsNavigationProperty()
         {
             // Arrange
             var cuisine = new Sloth(Guid.NewGuid(), "CuisineSloth", 3);
@@ -363,7 +363,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(sortBy: NeighbourSortProperty, sortDirection: SortDirectionDesc);
 
             // Act
-            var result = service.Browse(FirstPage, query);
+            var result = await service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -373,7 +373,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldThrowInvalidOperationException_WhenFilterPropertyIsInvalid()
+        public async Task BrowseSelectable_ShouldThrowInvalidOperationException_WhenFilterPropertyIsInvalid()
         {
             // Arrange
             var entityConfiguration = new EntityConfiguration();
@@ -387,11 +387,11 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(search: SearchSlothPrefix);
 
             // Act + Assert
-            Assert.Throws<InvalidOperationException>(() => service.Browse(FirstPage, query));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.BrowseAsync(FirstPage, query));
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldReturnEmptyData_WhenRowsIsZero()
+        public async Task BrowseSelectable_ShouldReturnEmptyData_WhenRowsIsZero()
         {
             // Arrange
             _dbContext.Sloths.Add(new Sloth(Guid.NewGuid(), Sloth1Name, 5));
@@ -400,7 +400,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(rows: ZeroRows);
 
             // Act
-            var result = _service.Browse(FirstPage, query);
+            var result = await _service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -409,7 +409,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldNotSkipResults_WhenPageIsZero()
+        public async Task BrowseSelectable_ShouldNotSkipResults_WhenPageIsZero()
         {
             // Arrange
             _dbContext.Sloths.AddRange(
@@ -420,7 +420,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery(rows: OneRow);
 
             // Act
-            var result = _service.Browse(ZeroPage, query);
+            var result = await _service.BrowseAsync(ZeroPage, query);
 
             // Assert
             Assert.NotNull(result);
@@ -429,7 +429,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         }
 
         [Fact]
-        public void BrowseSelectable_ShouldUseConfiguredNonDefaultKeyProperty_ForBaseEntityDtoId()
+        public async Task BrowseSelectable_ShouldUseConfiguredNonDefaultKeyProperty_ForBaseEntityDtoId()
         {
             // Arrange
             var entities = new List<Sloth>
@@ -450,7 +450,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             var query = CreateQuery();
 
             // Act
-            var result = service.Browse(FirstPage, query);
+            var result = await service.BrowseAsync(FirstPage, query);
 
             // Assert
             Assert.Contains(5, result.Data.Select(x => x.Id));

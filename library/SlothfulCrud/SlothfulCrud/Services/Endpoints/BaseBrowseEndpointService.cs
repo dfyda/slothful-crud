@@ -34,7 +34,8 @@ namespace SlothfulCrud.Services.Endpoints
 
         protected void CheckSortByParameters(dynamic query)
         {
-            if (typeof(TEntity).GetProperties().All(x => x.Name != query.SortBy.ToString()))
+            var properties = ReflectionCache.GetProperties(typeof(TEntity));
+            if (properties.All(x => x.Name != query.SortBy.ToString()))
             {
                 throw new ConfigurationException($"Property '{query.SortBy}' not found on type '{typeof(TEntity).Name}'.");
             }
@@ -57,7 +58,7 @@ namespace SlothfulCrud.Services.Endpoints
             CheckSortByParameters(query);
                 
             var sortBy = (string)query.SortBy;
-            var sortProperty = typeof(TEntity).GetProperties().First(x => x.Name == sortBy);
+            var sortProperty = ReflectionCache.GetProperties(typeof(TEntity)).First(x => x.Name == sortBy);
             if (sortProperty.PropertyType.IsClass && sortProperty.PropertyType != typeof(string))
             {
                 var nestedSortProperty = GetEntitySortProperty(sortProperty.PropertyType);

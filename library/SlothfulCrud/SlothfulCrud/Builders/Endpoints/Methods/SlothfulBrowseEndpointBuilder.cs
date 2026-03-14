@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -83,12 +83,13 @@ namespace SlothfulCrud.Builders.Endpoints.Methods
         {
             var exposeAll = EndpointsConfiguration.Browse.ExposeAllNestedProperties;
             var endpoint = BuilderParams.WebApplication.MapGet(BuilderParams.ApiSegmentProvider.GetApiSegment(entityType.Name) + "/list/{page}", 
-                    (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
+                    async (HttpContext context, [FromRoute] ushort page, [FromQuery] T query) =>
                 {
                     query = QueryObjectProvider.PrepareQueryObject<T>(context);
                     using var serviceScope = BuilderParams.WebApplication.Services.CreateScope();
                     var service = SlothfulTypesProvider.GetConcreteOperationService(entityType, BuilderParams.DbContextType, serviceScope);
-                    return DynamicType.MapToPagedResultsDto(service.Browse(page, query), entityType, GetResultDto(entityType), exposeAll, EndpointsConfiguration.Entity.KeyProperty);
+                    var result = await service.BrowseAsync(page, query);
+                    return DynamicType.MapToPagedResultsDto(result, entityType, GetResultDto(entityType), exposeAll, EndpointsConfiguration.Entity.KeyProperty);
                 })
                 .WithName($"Browse{entityType.Name}s")
                 .Produces(200, returnType)
