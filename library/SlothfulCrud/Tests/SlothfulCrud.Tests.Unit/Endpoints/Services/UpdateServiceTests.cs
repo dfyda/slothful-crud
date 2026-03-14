@@ -123,7 +123,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             return new UpdateService<Sloth, SlothfulDbContext>(
                 _dbContext,
                 _slothGetServiceMock.Object,
-                _configurationProviderMock.Object
+                _configurationProviderMock.Object,
+                new SlothfulOptions()
             );
         }
         
@@ -132,7 +133,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             return new UpdateService<WildKoala, SlothfulDbContext>(
                 _dbContext,
                 _wildKoalaGetServiceMock.Object,
-                _configurationProviderMock.Object
+                _configurationProviderMock.Object,
+                new SlothfulOptions()
             );
         }
 
@@ -269,7 +271,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             // Arrange
             var nonConfiguredService = new UpdateService<Sloth, SlothfulDbContext>(_dbContext,
-                _slothGetServiceMock.Object, new Mock<IEntityConfigurationProvider>().Object);
+                _slothGetServiceMock.Object, new Mock<IEntityConfigurationProvider>().Object, new SlothfulOptions());
             var entityId = Guid.NewGuid();
             var command = CreateSlothUpdateCommand();
 

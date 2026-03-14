@@ -36,25 +36,28 @@ using SlothfulCrud.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add SlothfulCrud to the DI container
-builder.Services.AddSlothfulCrud<SlothfulDbContext>();
+builder.Services.AddSlothfulCrud<SlothfulDbContext, Program>();
 
 var app = builder.Build();
 ```
-In the above code, `SlothfulDbContext` is your database context class that should inherit from `DbContext` and be defined in your project.
+In the above code, `SlothfulDbContext` is your database context class that should inherit from `DbContext` and be defined in your project. `Program` serves as an assembly marker — you can use any type from the assembly containing your entities.
 
 ##### Step 2: Configure the Application
 Next, configure the application to use Slothful CRUD by calling the `UseSlothfulCrud` extension method:
 
 ```csharp
 // Configure the application to use SlothfulCrud
-app.UseSlothfulCrud<SlothfulDbContext>();
+app.UseSlothfulCrud<SlothfulDbContext, Program>();
 
 app.Run();
 ```
 
 {: .important }
-Use the generic overload `UseSlothfulCrud<TDbContext>()` to register generated endpoints.  
+Use the generic overload `UseSlothfulCrud<TDbContext, TAssemblyMarker>()` to register generated endpoints.  
 The non-generic overload `UseSlothfulCrud()` does not register endpoints.
+
+{: .note }
+The legacy single-generic overloads `AddSlothfulCrud<TDbContext>()` and `UseSlothfulCrud<TDbContext>()` are deprecated. They rely on `Assembly.GetEntryAssembly()` which may not work correctly in test or hosted scenarios. Use the two-generic overloads with an assembly marker instead.
 
 ### Define `DbContext`
 Ensure you have defined your database context `DbContext` like this:

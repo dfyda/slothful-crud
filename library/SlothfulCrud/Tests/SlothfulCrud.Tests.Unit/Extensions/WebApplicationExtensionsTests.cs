@@ -61,6 +61,52 @@ namespace SlothfulCrud.Tests.Unit.Extensions
         }
 
         [Fact]
+        public void UseSlothfulCrudWithMarker_ShouldPassMarkerAssemblyToManager()
+        {
+            // Arrange
+            var capturingManager = new CapturingCrudManager();
+            var app = CreateTestApplication(capturingManager);
+
+            // Act
+            app.UseSlothfulCrud<FakeDbContext, FakeDbContext>();
+
+            // Assert
+            Assert.True(capturingManager.WasCalled);
+            Assert.Equal(typeof(FakeDbContext), capturingManager.CapturedDbContextType);
+            Assert.Equal(typeof(FakeDbContext).Assembly, capturingManager.CapturedAssembly);
+        }
+
+        [Fact]
+        public void UseSlothfulCrudWithMarker_ShouldRetrieveOptionsFromDI()
+        {
+            // Arrange
+            var builder = WebApplication.CreateBuilder();
+            builder.WebHost.UseTestServer();
+            builder.Services.AddLogging();
+            builder.Services.AddScoped<ISlothfulCrudManager, PassthroughCrudManager>();
+            builder.Services.AddTransient<IExceptionHandler, ExceptionHandler>();
+            builder.Services.AddSingleton(new SlothfulCrud.Types.Configurations.SlothfulOptions
+            {
+                UseSlothfulProblemHandling = true
+            });
+            var app = builder.Build();
+
+            // Act + Assert (no exception = options resolved from DI)
+            app.UseSlothfulCrud<FakeDbContext, FakeDbContext>();
+        }
+
+        [Fact]
+        public void UseSlothfulCrudLegacy_ShouldHaveObsoleteAttribute()
+        {
+            var method = typeof(WebApplicationExtensions)
+                .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .Single(m => m.Name == "UseSlothfulCrud" && m.GetGenericArguments().Length == 1
+                             && m.GetParameters().Length == 2);
+
+            Assert.True(method.IsDefined(typeof(ObsoleteAttribute), false));
+        }
+
+        [Fact]
         public async Task UseSlothfulCrud_ShouldReturnProblemDetails_WhenProblemHandlingIsEnabled()
         {
             // Arrange

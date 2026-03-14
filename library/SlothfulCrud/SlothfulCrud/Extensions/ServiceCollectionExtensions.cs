@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SlothfulCrud.Builders.Endpoints.Behaviors.Constructor;
@@ -10,15 +10,38 @@ using SlothfulCrud.Services.Endpoints.Delete;
 using SlothfulCrud.Services.Endpoints.Get;
 using SlothfulCrud.Services.Endpoints.Post;
 using SlothfulCrud.Services.Endpoints.Put;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Extensions
 {
     public static class ServiceCollectionExtensions
     {
+        [Obsolete("Use AddSlothfulCrud<TDbContext, TAssemblyMarker>() instead. This overload relies on Assembly.GetEntryAssembly() which may not work correctly in test or hosted scenarios.")]
         public static IServiceCollection AddSlothfulCrud<TDbContext>(this IServiceCollection serviceCollection)
             where TDbContext : DbContext
         {
-            var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(Assembly.GetEntryAssembly());
+            return serviceCollection.AddSlothfulCrudCore<TDbContext>(Assembly.GetEntryAssembly());
+        }
+
+        public static IServiceCollection AddSlothfulCrud<TDbContext, TAssemblyMarker>(
+            this IServiceCollection serviceCollection,
+            Action<SlothfulOptions> configureOptions = null)
+            where TDbContext : DbContext
+        {
+            return serviceCollection.AddSlothfulCrudCore<TDbContext>(typeof(TAssemblyMarker).Assembly, configureOptions);
+        }
+
+        private static IServiceCollection AddSlothfulCrudCore<TDbContext>(
+            this IServiceCollection serviceCollection,
+            Assembly assembly,
+            Action<SlothfulOptions> configureOptions = null)
+            where TDbContext : DbContext
+        {
+            var options = new SlothfulOptions();
+            configureOptions?.Invoke(options);
+            serviceCollection.AddSingleton(options);
+
+            var entityTypes = SlothfulTypesProvider.GetSlothfulEntityTypes(assembly);
             foreach (var entityType in entityTypes)
             {
                 var services = GetDynamicServicesCollection<TDbContext>(entityType);

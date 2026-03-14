@@ -24,7 +24,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddCookie();
 builder.Services.AddValidatorsFromAssemblyContaining<SlothValidator>();
-builder.Services.AddSlothfulCrud<SlothfulDbContext>();
+builder.Services.AddSlothfulCrud<SlothfulDbContext, Program>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,7 +34,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseSlothfulCrud<SlothfulDbContext>();
+app.UseSlothfulCrud<SlothfulDbContext, Program>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 

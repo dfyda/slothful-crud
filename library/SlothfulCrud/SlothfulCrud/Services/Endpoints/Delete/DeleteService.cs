@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services.Endpoints.Get;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints.Delete
 {
@@ -15,7 +16,8 @@ namespace SlothfulCrud.Services.Endpoints.Delete
         public DeleteService(
             TContext dbContext,
             IGetService<TEntity, TContext> getService,
-            IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
+            IEntityConfigurationProvider configurationProvider,
+            SlothfulOptions options) : base(configurationProvider, options)
         {
             DbContext = dbContext;
             _getService = getService;

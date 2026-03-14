@@ -47,7 +47,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(entityConfiguration);
 
             _service = new BrowseSelectableService<Sloth, SlothfulDbContext>(_dbContext,
-                configurationProviderMock.Object);
+                configurationProviderMock.Object, new SlothfulOptions());
         }
 
         public void Dispose()
@@ -358,7 +358,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
                 .Returns(new EntityConfiguration());
 
             var service =
-                new BrowseSelectableService<WildKoala, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+                new BrowseSelectableService<WildKoala, SlothfulDbContext>(_dbContext, configurationProviderMock.Object, new SlothfulOptions());
 
             var query = CreateQuery(sortBy: NeighbourSortProperty, sortDirection: SortDirectionDesc);
 
@@ -383,7 +383,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(entityConfiguration);
 
-            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object, new SlothfulOptions());
             var query = CreateQuery(search: SearchSlothPrefix);
 
             // Act + Assert
@@ -446,7 +446,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
                 .Returns(entityConfiguration);
 
-            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object);
+            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(_dbContext, configurationProviderMock.Object, new SlothfulOptions());
             var query = CreateQuery();
 
             // Act
@@ -455,6 +455,74 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Assert
             Assert.Contains(5, result.Data.Select(x => x.Id));
             Assert.Contains(6, result.Data.Select(x => x.Id));
+        }
+
+        [Fact]
+        public async Task BrowseSelectable_ShouldReturnResults_WhenQueryCustomizerIsNull()
+        {
+            // Arrange
+            SeedSloths([new Sloth(Guid.NewGuid(), Sloth1Name, 5)]);
+
+            var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(new EntityConfiguration());
+
+            var options = new SlothfulOptions { QueryCustomizer = null };
+            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(
+                _dbContext, configurationProviderMock.Object, options);
+            var query = CreateQuery();
+
+            // Act
+            var result = await service.BrowseAsync(FirstPage, query);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Data);
+        }
+
+        [Fact]
+        public async Task BrowseSelectable_ShouldReturnResults_WhenQueryCustomizerIsNoOp()
+        {
+            // Arrange
+            SeedSloths([new Sloth(Guid.NewGuid(), Sloth1Name, 5)]);
+
+            var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(new EntityConfiguration());
+
+            var options = new SlothfulOptions { QueryCustomizer = q => q };
+            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(
+                _dbContext, configurationProviderMock.Object, options);
+            var query = CreateQuery();
+
+            // Act
+            var result = await service.BrowseAsync(FirstPage, query);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Data);
+        }
+
+        [Fact]
+        public async Task BrowseSelectable_ShouldThrowInvalidOperationException_WhenQueryCustomizerReturnsInvalidType()
+        {
+            // Arrange
+            SeedSloths([new Sloth(Guid.NewGuid(), Sloth1Name, 5)]);
+
+            var configurationProviderMock = new Mock<IEntityConfigurationProvider>();
+            configurationProviderMock.Setup(cp => cp.GetConfiguration(typeof(Sloth)))
+                .Returns(new EntityConfiguration());
+
+            var options = new SlothfulOptions
+            {
+                QueryCustomizer = q => new List<string>().AsQueryable()
+            };
+            var service = new BrowseSelectableService<Sloth, SlothfulDbContext>(
+                _dbContext, configurationProviderMock.Object, options);
+            var query = CreateQuery();
+
+            // Act + Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.BrowseAsync(FirstPage, query));
         }
     }
 }

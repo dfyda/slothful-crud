@@ -24,7 +24,7 @@ Calling `SetKeyProperty` also invokes `SetKeyPropertyType` to ensure consistency
 
 ### How configuration is discovered
 
-Entity configurations are discovered automatically from the entry assembly when `UseSlothfulCrud<TDbContext>()` is executed.
+Entity configurations are discovered automatically from the assembly marker when `UseSlothfulCrud<TDbContext, TAssemblyMarker>()` is executed.
 
 The following rules apply:
 

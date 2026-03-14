@@ -6,6 +6,7 @@ using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Services.Endpoints.Get;
+using SlothfulCrud.Types.Configurations;
 using FluentValidation;
 
 namespace SlothfulCrud.Services.Endpoints.Put
@@ -20,7 +21,8 @@ namespace SlothfulCrud.Services.Endpoints.Put
         public UpdateService(
             TContext dbContext,
             IGetService<TEntity, TContext> getService,
-            IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
+            IEntityConfigurationProvider configurationProvider,
+            SlothfulOptions options) : base(configurationProvider, options)
         {
             DbContext = dbContext;
             _getService = getService;

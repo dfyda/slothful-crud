@@ -53,7 +53,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         private DeleteService<Sloth, SlothfulDbContext> GetService()
         {
             return new DeleteService<Sloth, SlothfulDbContext>(_dbContext, _getServiceMock.Object,
-                _configurationProviderMock.Object);
+                _configurationProviderMock.Object, new SlothfulOptions());
         }
 
         private Sloth SeedSloth(Guid entityId)

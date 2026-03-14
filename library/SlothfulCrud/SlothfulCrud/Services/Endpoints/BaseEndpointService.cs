@@ -9,13 +9,31 @@ namespace SlothfulCrud.Services.Endpoints
         where TEntity : class, ISlothfulEntity, new()
     {
         protected readonly EntityConfiguration EntityConfiguration;
+        protected readonly SlothfulOptions Options;
 
         protected BaseEndpointService(
-            IEntityConfigurationProvider configurationProvider)
+            IEntityConfigurationProvider configurationProvider,
+            SlothfulOptions options)
         {
             EntityConfiguration = configurationProvider.GetConfiguration(typeof(TEntity));
+            Options = options;
         }
         
+        protected IQueryable<T> ApplyQueryCustomizer<T>(IQueryable<T> query)
+        {
+            if (Options?.QueryCustomizer is not null)
+            {
+                var customized = Options.QueryCustomizer(query);
+                if (customized is not IQueryable<T> typed)
+                {
+                    throw new InvalidOperationException(
+                        $"QueryCustomizer must return IQueryable<{typeof(T).Name}>, but returned {customized?.GetType().Name ?? "null"}.");
+                }
+                return typed;
+            }
+            return query;
+        }
+
         protected void CheckEntityKey(Type type, object keyProperty)
         {
             if (EntityConfiguration is null)

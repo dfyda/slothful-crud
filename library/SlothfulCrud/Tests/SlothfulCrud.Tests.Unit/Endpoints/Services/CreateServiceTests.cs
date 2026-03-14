@@ -68,7 +68,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             return new CreateService<Sloth, SlothfulDbContext>(
                 _dbContext,
                 _createConstructorBehaviorMock.Object,
-                _configurationProviderMock.Object
+                _configurationProviderMock.Object,
+                new SlothfulOptions()
             );
         }
 

@@ -28,7 +28,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddValidatorsFromAssemblyContaining<SlothValidator>();
 
-builder.Services.AddSlothfulCrud<SlothfulDbContext>();
+builder.Services.AddSlothfulCrud<SlothfulDbContext, Program>();
 builder.Services.AddScoped<ICreateConstructorBehavior, CustomCreateConstructorBehavior>();
 
 var app = builder.Build();
@@ -40,7 +40,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseSlothfulCrud<SlothfulDbContext>();
+app.UseSlothfulCrud<SlothfulDbContext, Program>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 

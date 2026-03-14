@@ -80,7 +80,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             return new BrowseService<Sloth, SlothfulDbContext>(
                 _dbContext,
-                _configurationProviderMock.Object
+                _configurationProviderMock.Object,
+                new SlothfulOptions()
             );
         }
         
@@ -88,7 +89,8 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         {
             return new BrowseService<WildKoala, SlothfulDbContext>(
                 _dbContext,
-                _configurationProviderMock.Object
+                _configurationProviderMock.Object,
+                new SlothfulOptions()
             );
         }
 
@@ -625,6 +627,65 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             Assert.NotNull(result);
             Assert.Single(result.Data);
             Assert.Equal(Sloth1Name, result.Data.First().Name);
+        }
+
+        [Fact]
+        public async Task Browse_ShouldReturnResults_WhenQueryCustomizerIsNull()
+        {
+            // Arrange
+            _dbContext.Sloths.Add(new Sloth(Guid.NewGuid(), Sloth1Name, 5));
+            _dbContext.SaveChanges();
+
+            var options = new SlothfulOptions { QueryCustomizer = null };
+            var service = new BrowseService<Sloth, SlothfulDbContext>(
+                _dbContext, _configurationProviderMock.Object, options);
+            var query = CreateQuery();
+
+            // Act
+            var result = await service.BrowseAsync(FirstPage, query);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Data);
+        }
+
+        [Fact]
+        public async Task Browse_ShouldReturnResults_WhenQueryCustomizerIsNoOp()
+        {
+            // Arrange
+            _dbContext.Sloths.Add(new Sloth(Guid.NewGuid(), Sloth1Name, 5));
+            _dbContext.SaveChanges();
+
+            var options = new SlothfulOptions { QueryCustomizer = q => q };
+            var service = new BrowseService<Sloth, SlothfulDbContext>(
+                _dbContext, _configurationProviderMock.Object, options);
+            var query = CreateQuery();
+
+            // Act
+            var result = await service.BrowseAsync(FirstPage, query);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Data);
+        }
+
+        [Fact]
+        public async Task Browse_ShouldThrowInvalidOperationException_WhenQueryCustomizerReturnsInvalidType()
+        {
+            // Arrange
+            _dbContext.Sloths.Add(new Sloth(Guid.NewGuid(), Sloth1Name, 5));
+            _dbContext.SaveChanges();
+
+            var options = new SlothfulOptions
+            {
+                QueryCustomizer = q => new List<string>().AsQueryable()
+            };
+            var service = new BrowseService<Sloth, SlothfulDbContext>(
+                _dbContext, _configurationProviderMock.Object, options);
+            var query = CreateQuery();
+
+            // Act + Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.BrowseAsync(FirstPage, query));
         }
     }
 }

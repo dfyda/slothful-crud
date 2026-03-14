@@ -3,6 +3,7 @@ using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints
 {
@@ -13,7 +14,8 @@ namespace SlothfulCrud.Services.Endpoints
         private readonly IEntityConfigurationProvider _configurationProvider;
         
         protected BaseBrowseEndpointService(
-            IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
+            IEntityConfigurationProvider configurationProvider,
+            SlothfulOptions options) : base(configurationProvider, options)
         {
             _configurationProvider = configurationProvider;
         }

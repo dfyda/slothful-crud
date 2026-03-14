@@ -63,13 +63,12 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
         
         private GetService<Sloth, SlothfulDbContext> GetSlothService()
         {
-            return new GetService<Sloth, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object);
+            return new GetService<Sloth, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object, new SlothfulOptions());
         }
         
         private GetService<WildKoala, SlothfulDbContext> GetWildKoalaService()
         {
-            return 
-                new GetService<WildKoala, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object);
+            return new GetService<WildKoala, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object, new SlothfulOptions());
         }
 
         [Fact]
@@ -168,7 +167,7 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
             // Arrange
             var nonConfiguredService =
                 new GetService<WildKoala, SlothfulDbContext>(_dbContext,
-                    new Mock<IEntityConfigurationProvider>().Object);
+                    new Mock<IEntityConfigurationProvider>().Object, new SlothfulOptions());
             var entityId = Guid.NewGuid();
 
             // Act + Assert
@@ -219,6 +218,62 @@ namespace SlothfulCrud.Tests.Unit.Endpoints.Services
 
             // Act + Assert
             await Assert.ThrowsAsync<ConfigurationException>(() => GetSlothService().GetAsync(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task Get_ShouldReturnEntity_WhenQueryCustomizerIsNull()
+        {
+            // Arrange
+            var entity = new Sloth(Guid.NewGuid(), TestName, SlothAge);
+            _dbContext.Sloths.Add(entity);
+            _dbContext.SaveChanges();
+
+            var options = new SlothfulOptions { QueryCustomizer = null };
+            var service = new GetService<Sloth, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object, options);
+
+            // Act
+            var result = await service.GetAsync(entity.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(entity.Id, result.Id);
+        }
+
+        [Fact]
+        public async Task Get_ShouldReturnEntity_WhenQueryCustomizerIsNoOp()
+        {
+            // Arrange
+            var entity = new Sloth(Guid.NewGuid(), TestName, SlothAge);
+            _dbContext.Sloths.Add(entity);
+            _dbContext.SaveChanges();
+
+            var options = new SlothfulOptions { QueryCustomizer = q => q };
+            var service = new GetService<Sloth, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object, options);
+
+            // Act
+            var result = await service.GetAsync(entity.Id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(entity.Id, result.Id);
+        }
+
+        [Fact]
+        public async Task Get_ShouldThrowInvalidOperationException_WhenQueryCustomizerReturnsInvalidType()
+        {
+            // Arrange
+            var entity = new Sloth(Guid.NewGuid(), TestName, SlothAge);
+            _dbContext.Sloths.Add(entity);
+            _dbContext.SaveChanges();
+
+            var options = new SlothfulOptions
+            {
+                QueryCustomizer = q => new List<string>().AsQueryable()
+            };
+            var service = new GetService<Sloth, SlothfulDbContext>(_dbContext, _configurationProviderMock.Object, options);
+
+            // Act + Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetAsync(entity.Id));
         }
     }
 }

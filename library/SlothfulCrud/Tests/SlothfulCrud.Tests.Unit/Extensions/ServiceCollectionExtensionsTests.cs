@@ -11,7 +11,9 @@ using SlothfulCrud.Services.Endpoints.Delete;
 using SlothfulCrud.Services.Endpoints.Get;
 using SlothfulCrud.Services.Endpoints.Post;
 using SlothfulCrud.Services.Endpoints.Put;
+using SlothfulCrud.Tests.Api.Domain;
 using SlothfulCrud.Tests.Api.EF;
+using SlothfulCrud.Types.Configurations;
 using System.Reflection;
 
 namespace SlothfulCrud.Tests.Unit.Extensions
@@ -22,6 +24,8 @@ namespace SlothfulCrud.Tests.Unit.Extensions
         private const string DynamicProvidersCollectionMethodName = "GetDynamicProvidersCollection";
         private const string InMemoryDatabaseNamePrefix = "ServiceCollectionExtensionsTests";
         private const string TestDisplayName = "Test";
+        private const string LegacyAddMethodName = "AddSlothfulCrud";
+        private const string ObsoleteAttributeName = "ObsoleteAttribute";
 
         [Fact]
         public void AddSlothfulCrud_ShouldRegisterInfrastructureServices()
@@ -40,6 +44,71 @@ namespace SlothfulCrud.Tests.Unit.Extensions
             AssertContainsService<IEntityConfigurationProvider, EntityConfigurationProvider>(services, ServiceLifetime.Singleton);
             AssertContainsService<IExceptionHandler, ExceptionHandler>(services, ServiceLifetime.Transient);
             AssertContainsService<ICreateConstructorBehavior, BaseCreateConstructorBehavior>(services, ServiceLifetime.Scoped);
+        }
+
+        [Fact]
+        public void AddSlothfulCrudWithMarker_ShouldRegisterInfrastructureServices()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContext<SlothfulDbContext>(options => options.UseInMemoryDatabase($"{InMemoryDatabaseNamePrefix}_{Guid.NewGuid()}"));
+
+            // Act
+            services.AddSlothfulCrud<SlothfulDbContext, Sloth>();
+
+            // Assert
+            AssertContainsService<ISlothfulCrudManager, SlothfulCrudManager>(services, ServiceLifetime.Scoped);
+            AssertContainsService<IApiSegmentProvider, ApiSegmentProvider>(services, ServiceLifetime.Scoped);
+            AssertContainsService<IEntityConfigurationProvider, EntityConfigurationProvider>(services, ServiceLifetime.Singleton);
+            AssertContainsService<IExceptionHandler, ExceptionHandler>(services, ServiceLifetime.Transient);
+            AssertContainsService<ICreateConstructorBehavior, BaseCreateConstructorBehavior>(services, ServiceLifetime.Scoped);
+        }
+
+        [Fact]
+        public void AddSlothfulCrudWithMarker_ShouldRegisterSlothfulOptionsAsSingleton()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContext<SlothfulDbContext>(options => options.UseInMemoryDatabase($"{InMemoryDatabaseNamePrefix}_{Guid.NewGuid()}"));
+
+            // Act
+            services.AddSlothfulCrud<SlothfulDbContext, Sloth>();
+
+            // Assert
+            var descriptor = Assert.Single(services, d => d.ServiceType == typeof(SlothfulOptions));
+            Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime);
+        }
+
+        [Fact]
+        public void AddSlothfulCrudWithMarker_ShouldInvokeConfigureOptionsCallback()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContext<SlothfulDbContext>(options => options.UseInMemoryDatabase($"{InMemoryDatabaseNamePrefix}_{Guid.NewGuid()}"));
+
+            // Act
+            services.AddSlothfulCrud<SlothfulDbContext, Sloth>(opts =>
+            {
+                opts.UseSlothfulProblemHandling = true;
+            });
+
+            // Assert
+            var provider = services.BuildServiceProvider();
+            var registeredOptions = provider.GetRequiredService<SlothfulOptions>();
+            Assert.True(registeredOptions.UseSlothfulProblemHandling);
+        }
+
+        [Fact]
+        public void AddSlothfulCrudLegacy_ShouldHaveObsoleteAttribute()
+        {
+            var method = typeof(ServiceCollectionExtensions)
+                .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .Single(m => m.Name == LegacyAddMethodName && m.GetGenericArguments().Length == 1);
+
+            Assert.True(method.IsDefined(typeof(ObsoleteAttribute), false));
         }
 
         [Fact]

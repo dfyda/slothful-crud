@@ -28,13 +28,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<SlothfulDbContext>(options =>
     options.UseInMemoryDatabase("AppDb"));
-builder.Services.AddSlothfulCrud<SlothfulDbContext>();
+builder.Services.AddSlothfulCrud<SlothfulDbContext, Program>();
 
 var app = builder.Build();
-app.UseSlothfulCrud<SlothfulDbContext>();
+app.UseSlothfulCrud<SlothfulDbContext, Program>();
 
 app.Run();
 ```
+
+The `Program` type parameter serves as an assembly marker for entity discovery. You can use any type from the assembly containing your entities.
 
 3. Implement `ISlothfulEntity` on your domain type:
 
@@ -91,6 +93,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<YourValidator>();
 - Create constructor selection (`ICreateConstructorBehavior`)
 - Entity and endpoint configuration (`ISlothEntityConfiguration<T>`)
 - Problem handling (`UseSlothfulProblemHandling`)
+- Query customization (`QueryCustomizer` in `SlothfulOptions`)
 
 See details in docs:
 

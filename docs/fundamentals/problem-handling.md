@@ -14,7 +14,7 @@ Slothful CRUD provides robust problem handling to manage exceptions and errors i
 To enable problem handling in your application, you need to configure it in your `Program.cs` file:
 
 ```csharp
-app.UseSlothfulCrud<SlothfulDbContext>(options => options.UseSlothfulProblemHandling = true);
+app.UseSlothfulCrud<SlothfulDbContext, Program>(options => options.UseSlothfulProblemHandling = true);
 ```
 
 This setting enables the middleware that catches exceptions and processes them through a centralized handler.

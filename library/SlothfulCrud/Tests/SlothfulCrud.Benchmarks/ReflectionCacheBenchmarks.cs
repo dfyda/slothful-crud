@@ -80,5 +80,44 @@ namespace SlothfulCrud.Benchmarks
 
             return dict;
         }
+
+        [Benchmark]
+        public PropertyInfo DirectGetSingleProperty()
+        {
+            return _slothType.GetProperty("Name");
+        }
+
+        [Benchmark]
+        public PropertyInfo CachedGetSingleProperty()
+        {
+            return ReflectionCache.GetProperty(_slothType, "Name");
+        }
+
+        [Benchmark]
+        public PropertyInfo[] DirectGetNavigationProperties()
+        {
+            return _slothType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.PropertyType.IsClass && p.PropertyType != typeof(string))
+                .ToArray();
+        }
+
+        [Benchmark]
+        public PropertyInfo[] CachedGetNavigationProperties()
+        {
+            return ReflectionCache.GetNavigationProperties(_slothType);
+        }
+
+        [Benchmark]
+        public MethodInfo DirectGetQueryableMethod()
+        {
+            return typeof(Queryable).GetMethods()
+                .First(m => m.Name == "OrderBy" && m.GetParameters().Length == 2);
+        }
+
+        [Benchmark]
+        public MethodInfo CachedGetQueryableMethod()
+        {
+            return ReflectionCache.GetQueryableMethod("OrderBy", 2);
+        }
     }
 }

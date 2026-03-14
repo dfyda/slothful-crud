@@ -25,7 +25,7 @@ builder.Services.AddDbContext<SlothfulDbContext>(options =>
     options.UseInMemoryDatabase(databaseName: "InMemoryDatabase"));
 
 builder.Services.AddValidatorsFromAssemblyContaining<SlothValidator>();
-builder.Services.AddSlothfulCrud<SlothfulDbContext>();
+builder.Services.AddSlothfulCrud<SlothfulDbContext, Program>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -43,9 +43,11 @@ app.MapGet("/", () => "SlothfulCrud.Tests.Api")
 app.MapGet("/db/test", (SlothfulDbContext context) => context.Koalas.ToList())
     .WithName("GetKoalas");
 
-app.UseSlothfulCrud<SlothfulDbContext>(options => options.UseSlothfulProblemHandling = true);
+app.UseSlothfulCrud<SlothfulDbContext, Program>(options => options.UseSlothfulProblemHandling = true);
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.Run();
+
+public partial class Program { }
 

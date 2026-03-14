@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SlothfulCrud.Domain;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints.Get
 {
@@ -11,7 +12,10 @@ namespace SlothfulCrud.Services.Endpoints.Get
     {
         private TContext DbContext { get; }
         
-        public GetService(TContext dbContext, IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
+        public GetService(
+            TContext dbContext,
+            IEntityConfigurationProvider configurationProvider,
+            SlothfulOptions options) : base(configurationProvider, options)
         {
             DbContext = dbContext;
         }
@@ -25,8 +29,11 @@ namespace SlothfulCrud.Services.Endpoints.Get
 
         private async Task<TEntity> GetEntityAsync(object id)
         {
-            var entity = await DbContext.Set<TEntity>()
-                .IncludeAllFirstLevelDependencies()
+            var query = DbContext.Set<TEntity>()
+                .IncludeAllFirstLevelDependencies();
+            query = ApplyQueryCustomizer(query);
+
+            var entity = await query
                 .FirstOrDefaultAsync(x => EF.Property<object>(x, EntityConfiguration.KeyProperty).Equals(id));
             
             return entity

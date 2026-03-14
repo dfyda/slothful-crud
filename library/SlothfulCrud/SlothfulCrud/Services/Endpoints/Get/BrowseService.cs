@@ -3,6 +3,7 @@ using SlothfulCrud.Domain;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
+using SlothfulCrud.Types.Configurations;
 using System.Reflection;
 
 namespace SlothfulCrud.Services.Endpoints.Get
@@ -13,7 +14,10 @@ namespace SlothfulCrud.Services.Endpoints.Get
     {
         private TContext DbContext { get; }
         
-        public BrowseService(TContext dbContext, IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
+        public BrowseService(
+            TContext dbContext,
+            IEntityConfigurationProvider configurationProvider,
+            SlothfulOptions options) : base(configurationProvider, options)
         {
             DbContext = dbContext;
         }
@@ -29,6 +33,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
                 .AsNoTracking()
                 .AsQueryable()
                 .IncludeAllFirstLevelDependencies();
+            baseQuery = ApplyQueryCustomizer(baseQuery);
             var properties = ReflectionCache.GetProperties(query.GetType());
 
             var resultQuery = FilterQuery(query, properties, baseQuery) as IQueryable<TEntity>;

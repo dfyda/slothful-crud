@@ -3,6 +3,7 @@ using SlothfulCrud.Domain;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
 using SlothfulCrud.Types;
+using SlothfulCrud.Types.Configurations;
 using SlothfulCrud.Types.Dto;
 
 namespace SlothfulCrud.Services.Endpoints.Get
@@ -13,7 +14,10 @@ namespace SlothfulCrud.Services.Endpoints.Get
     {
         private TContext DbContext { get; }
         
-        public BrowseSelectableService(TContext dbContext, IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
+        public BrowseSelectableService(
+            TContext dbContext,
+            IEntityConfigurationProvider configurationProvider,
+            SlothfulOptions options) : base(configurationProvider, options)
         {
             DbContext = dbContext;
         }
@@ -26,6 +30,7 @@ namespace SlothfulCrud.Services.Endpoints.Get
             }
             
             var baseQuery = DbContext.Set<TEntity>().AsNoTracking().AsQueryable();
+            baseQuery = ApplyQueryCustomizer(baseQuery);
 
             var resultQuery = FilterQuery(query.Search, baseQuery) as IQueryable<TEntity>;
             resultQuery = SortQuery(query, resultQuery);

@@ -7,6 +7,7 @@ using SlothfulCrud.Domain;
 using SlothfulCrud.Exceptions;
 using SlothfulCrud.Extensions;
 using SlothfulCrud.Providers;
+using SlothfulCrud.Types.Configurations;
 
 namespace SlothfulCrud.Services.Endpoints.Post
 {
@@ -20,7 +21,8 @@ namespace SlothfulCrud.Services.Endpoints.Post
         public CreateService(
             TContext dbContext,
             ICreateConstructorBehavior createConstructorBehavior,
-            IEntityConfigurationProvider configurationProvider) : base(configurationProvider)
+            IEntityConfigurationProvider configurationProvider,
+            SlothfulOptions options) : base(configurationProvider, options)
         {
             DbContext = dbContext;
             _createConstructorBehavior = createConstructorBehavior;
